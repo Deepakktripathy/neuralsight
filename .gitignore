@@ -1,0 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# IDE / OS
+.DS_Store
+
+#Screenshots
+docs/
+public/
+src/assets/images/
+src/v2/assets/images/

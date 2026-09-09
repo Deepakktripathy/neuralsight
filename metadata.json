@@ -1,0 +1,6 @@
+{
+  "name": "NeuralSight",
+  "description": "Interactive Deep Learning & Neural Architecture Visualizer",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
