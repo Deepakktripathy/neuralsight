@@ -1,6 +1,6 @@
 import React from 'react';
 import { Architecture, Mode, UseCase, LossFunction, Optimizer, Hyperparameters, DataSource } from '../types';
-import { Settings2, Activity, Layers, Play, Database, BrainCircuit, BoxSelect, UploadCloud, FileJson, File as FileIcon, X } from 'lucide-react';
+import { Settings2, Activity, Layers, Play, Database, BrainCircuit, BoxSelect, UploadCloud, FileJson, File as FileIcon, X, Sliders } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useRef } from 'react';
 import { InfoTooltip } from './InfoTooltip';
@@ -355,6 +355,266 @@ export const Sidebar: React.FC<SidebarProps> = ({ className,
                 </div>
               </div>
             </>
+          )}
+
+          {/* Architecture Structural Knobs (Dynamic per model architecture) */}
+          {architecture !== 'Custom Model' && architecture !== 'GAN' && (
+            <div className="space-y-3 mt-4 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5" /> Model Topology
+                </label>
+              </div>
+
+              {/* Transformer: Attention Heads */}
+              {architecture === 'Transformer' && (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                      Attention Heads
+                      <InfoTooltip content="Determines how many independent subspaces the model projects into to attend to information simultaneously." />
+                    </label>
+                    <span className="text-[10px] text-indigo-400 font-mono">{hyperparams.attentionHeads || 2} Heads</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1">
+                    {([1, 2, 4] as const).map((h) => (
+                      <button
+                        key={h}
+                        onClick={() => setHyperparams({ ...hyperparams, attentionHeads: h })}
+                        className={cn(
+                          "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                          (hyperparams.attentionHeads || 2) === h
+                            ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                            : "border-slate-700 text-slate-400 hover:border-slate-500"
+                        )}
+                      >
+                        {h} {h === 1 ? 'Head' : 'Heads'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* CNN: Conv Layers & Pooling */}
+              {architecture === 'CNN' && (
+                <div className="space-y-2.5">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Conv Depth
+                        <InfoTooltip content="Number of sequential convolution layers. Deeper stacks extract increasingly complex semantic abstractions." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">{hyperparams.convLayers || 2} Layers</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([1, 2, 3] as const).map((l) => (
+                        <button
+                          key={l}
+                          onClick={() => setHyperparams({ ...hyperparams, convLayers: l, layers: l + 2 })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            (hyperparams.convLayers || 2) === l
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {l} Conv
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                      Pooling Operation
+                      <InfoTooltip content="Max pooling isolates the strongest detected signal. Average pooling smooths activations across local spatial neighborhoods." />
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(['Max', 'Average'] as const).map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => setHyperparams({ ...hyperparams, poolingType: p })}
+                          className={cn(
+                            "py-1 text-[10px] font-medium rounded border transition-colors text-center",
+                            (hyperparams.poolingType || 'Max') === p
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {p} Pooling
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* RNN: Cell Type & Unroll Steps */}
+              {architecture === 'RNN' && (
+                <div className="space-y-2.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                      Cell Architecture
+                      <InfoTooltip content="Vanilla RNN passes a single recurrent hidden state. LSTM adds internal cell state and gates (forget, input, output) to conquer vanishing gradients." />
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {(['Vanilla RNN', 'LSTM', 'GRU'] as const).map((cell) => (
+                        <button
+                          key={cell}
+                          onClick={() => setHyperparams({ ...hyperparams, rnnCellType: cell })}
+                          className={cn(
+                            "py-1 text-[10px] font-medium rounded border transition-colors text-center",
+                            (hyperparams.rnnCellType || 'LSTM') === cell
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {cell === 'Vanilla RNN' ? 'RNN' : cell}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Unrolled Steps
+                        <InfoTooltip content="Number of temporal sequence steps unrolled across time for Backpropagation Through Time (BPTT)." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">{hyperparams.rnnUnrollSteps || 5} Steps</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([3, 5, 8] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setHyperparams({ ...hyperparams, rnnUnrollSteps: s })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            (hyperparams.rnnUnrollSteps || 5) === s
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {s} Steps
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DQN: Exploration Schedule & Discount Factor */}
+              {architecture === 'DQN' && (
+                <div className="space-y-2.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                      Exploration Schedule (ε)
+                      <InfoTooltip content="Controls the balance between exploring random actions versus exploiting the highest-valued Q-action." />
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {(['Fast (Greedy)', 'Standard', 'High Exploration'] as const).map((sched) => (
+                        <button
+                          key={sched}
+                          onClick={() => setHyperparams({ ...hyperparams, dqnExplorationSchedule: sched })}
+                          className={cn(
+                            "py-1 text-[9px] font-medium rounded border transition-colors text-center truncate px-0.5",
+                            (hyperparams.dqnExplorationSchedule || 'Standard') === sched
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                          title={sched}
+                        >
+                          {sched.split(' ')[0]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Discount Factor (γ)
+                        <InfoTooltip content="Determines how heavily future rewards are weighted compared to immediate payoffs. High γ values encourage long-term planning." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">{hyperparams.dqnDiscountFactor ?? 0.90}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([0.50, 0.90, 0.99] as const).map((gamma) => (
+                        <button
+                          key={gamma}
+                          onClick={() => setHyperparams({ ...hyperparams, dqnDiscountFactor: gamma })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            (hyperparams.dqnDiscountFactor ?? 0.90) === gamma
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {gamma.toFixed(2)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Standard NN: Hidden Layers & Neurons */}
+              {architecture === 'Standard NN' && (
+                <div className="space-y-2.5">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Hidden Layers
+                        <InfoTooltip content="Number of intermediate fully-connected layers. Extra layers allow learning hierarchically complex non-linear decision boundaries." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">{Math.max(1, (hyperparams.layers || 4) - 2)} Layers</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([1, 2, 3] as const).map((l) => (
+                        <button
+                          key={l}
+                          onClick={() => setHyperparams({ ...hyperparams, layers: l + 2 })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            Math.max(1, (hyperparams.layers || 4) - 2) === l
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {l} {l === 1 ? 'Layer' : 'Layers'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Neurons / Layer
+                        <InfoTooltip content="Width of each hidden layer. More neurons increase model expressive capacity and risk of overfitting." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">{hyperparams.mlpNeuronsPerLayer || 8} Nodes</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([4, 8, 16] as const).map((n) => (
+                        <button
+                          key={n}
+                          onClick={() => setHyperparams({ ...hyperparams, mlpNeuronsPerLayer: n })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            (hyperparams.mlpNeuronsPerLayer || 8) === n
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {n} Nodes
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </section>
 

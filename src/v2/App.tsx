@@ -109,7 +109,15 @@ export default function App() {
       epochs: 10,
       layers: 4,
       lossFunction: loss as any,
-      optimizer: opt as any
+      optimizer: opt as any,
+      attentionHeads: 2,
+      convLayers: 2,
+      poolingType: 'Max',
+      rnnCellType: 'LSTM',
+      rnnUnrollSteps: 5,
+      dqnExplorationSchedule: 'Standard',
+      dqnDiscountFactor: 0.90,
+      mlpNeuronsPerLayer: 8
     };
   });
 
@@ -554,8 +562,8 @@ export default function App() {
                 </button>
               ) : (
                 <div
-                  className="bg-slate-900/95 backdrop-blur-md border border-indigo-500/60 p-2 pr-3 rounded-full shadow-2xl flex items-center gap-3 transition-opacity duration-200 hover:opacity-20 cursor-default"
-                  title="Hover to see through; click minimize to collapse"
+                  className="bg-slate-900/95 backdrop-blur-md border border-indigo-500/60 p-2 pr-3 rounded-full shadow-2xl flex items-center gap-3 transition-opacity duration-200 hover:opacity-60 cursor-default"
+                  title="Hover to soften; click minimize to collapse"
                 >
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] leading-none font-mono text-indigo-300 bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1.5 rounded-full flex items-center justify-center">

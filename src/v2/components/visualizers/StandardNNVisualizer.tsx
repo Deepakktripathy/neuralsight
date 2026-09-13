@@ -16,6 +16,7 @@ interface StandardNNVisualizerProps {
 export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource }) => {
   const [inspectedNode, setInspectedNode] = useState<{lIdx: number, nIdx: number, act: number, bias: number} | null>(null);
   const numHiddenLayers = Math.max(1, hyperparams.layers - 2);
+  const neuronsPerLayer = Math.min(10, hyperparams.mlpNeuronsPerLayer || 8); // Render-safe node cap for UI aesthetics
   
   const layers = useMemo(() => {
     const l = [];
@@ -25,14 +26,14 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
     
     // Hidden layers
     for (let i = 0; i < numHiddenLayers; i++) {
-      l.push({ id: `hidden-${i}`, size: 6, label: `Hidden Layer ${i + 1}` });
+      l.push({ id: `hidden-${i}`, size: neuronsPerLayer, label: `Hidden Layer ${i + 1}` });
     }
     
     // Output layer
     const outputSize = useCase === 'Classification' ? 3 : 1;
     l.push({ id: 'output', size: outputSize, label: 'Output' });
     return l;
-  }, [numHiddenLayers, useCase, dataSource]);
+  }, [numHiddenLayers, neuronsPerLayer, useCase, dataSource]);
 
   const getActivation = (layerIdx: number, nodeIdx: number) => {
     let act = 0;

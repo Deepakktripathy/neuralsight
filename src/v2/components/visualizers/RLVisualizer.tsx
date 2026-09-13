@@ -39,13 +39,21 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
 
   const isPoorExploration = mode === 'Train' && hyperparams.failureMode === 'Poor Exploration';
 
-  // Exploration rate epsilon: decays from 1.0 to 0.05 during training
+  // Exploration schedule dynamically derived from hyperparams.dqnExplorationSchedule
+  const explorationSchedule = hyperparams.dqnExplorationSchedule || 'Standard';
+  const discountFactor = hyperparams.dqnDiscountFactor ?? 0.90;
+
+  // Exploration rate epsilon: decays during training according to schedule
   const epsilon = useMemo(() => {
     if (mode === 'Inference') return 0.0; // pure greedy exploitation in inference
     if (isPoorExploration) return 0.0; // failure mode: no exploration
-    const decay = Math.max(0.05, 1.0 - (step / 120));
+    
+    // Schedule decay rate
+    const decayDivisor = explorationSchedule === 'Fast (Greedy)' ? 40 : (explorationSchedule === 'High Exploration' ? 240 : 120);
+    const minEpsilon = explorationSchedule === 'High Exploration' ? 0.20 : 0.05;
+    const decay = Math.max(minEpsilon, 1.0 - (step / decayDivisor));
     return decay;
-  }, [mode, isPoorExploration, step]);
+  }, [mode, isPoorExploration, step, explorationSchedule]);
 
   // Environment-specific state and dynamics
   const envType = dataSource?.includes('CartPole')
@@ -283,6 +291,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
                   isPoorExploration={isPoorExploration}
                   onSelectCell={(x, y) => setSelectedCell({ x, y })}
                   selectedCell={selectedCell}
+                  gamma={discountFactor}
                 />
               )}
             </div>
@@ -328,7 +337,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
         nextStateDesc={nextStateDesc}
         qValues={qValues}
         nextMaxQ={0.88}
-        gamma={0.95}
+        gamma={discountFactor}
         alpha={hyperparams.learningRate || 0.01}
         failureMode={hyperparams.failureMode}
       />

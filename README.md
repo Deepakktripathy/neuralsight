@@ -175,6 +175,8 @@ In Inference Mode, drag continuous sliders across the Gaussian latent manifold $
 
 ### Hyperparameter & Diagnostics Sidebar
 
+#### 1. Core Training Dynamics
+
 | Control | Description | Effect on Simulation |
 | :--- | :--- | :--- |
 | **Learning Rate ($\eta$)** | Step size for gradient descent (e.g., 0.001 to 0.1). | Higher values cause rapid, oscillating convergence; low values cause slow, steady learning. |
@@ -184,7 +186,23 @@ In Inference Mode, drag continuous sliders across the Gaussian latent manifold $
 | **Failure Mode Sandbox** | Simulates real-world training bugs on demand: |
 | ↳ *Mode Collapse* | Generator collapses into outputting a single repetitive sample. | Visual output freezes; batch diversity drops to 0.0. |
 | ↳ *Vanishing Gradients* | Discriminator or downstream layers saturate; gradients vanish. | Generator weight updates freeze; images stay as static noise. |
+| ↳ *Exploding Gradients* | Gradient multiplications overflow numeric range. | Activations and weights produce `NaN` values. |
 | ↳ *Overfitting* | Model memorizes training set without generalizing. | Training loss drops to near-zero while validation loss spikes. |
+
+#### 2. Model Topology & Structural Knobs (Dynamic per Architecture)
+
+When switching between neural network architectures, the sidebar dynamically adapts with architecture-specific topological controls that directly alter the underlying mathematical models and visual layouts:
+
+| Architecture | Structural Control | Options | Real Mathematical & Visual Impact |
+| :--- | :--- | :--- | :--- |
+| **Transformer** | **Attention Heads** | `1`, `2`, `4` Heads | Governs the number of independent projection subspaces ($W^Q_i, W^K_i, W^V_i$). 1 head shows a unified attention map; 4 heads splits attention into 4 specialized linguistic roles (Syntactic, Sentiment, Positional, Coreference) with a live multi-head switcher. |
+| **CNN** | **Conv Depth** | `1`, `2`, `3` Layers | Rebuilds the forward feature extraction pipeline. Adding convolutional stages updates the 3D tensor hierarchy, receptive field depth, and intermediate channel representations. |
+| **CNN** | **Pooling Operation** | `Max`, `Average` | Changes the spatial downsampling math: **Max Pooling** selects the peak activation $\max(x_{ij})$ to preserve sharp edges; **Average Pooling** computes the mean $\frac{1}{|R|}\sum x_{ij}$ to produce smoothed regional features. |
+| **RNN** | **Cell Architecture** | `Vanilla RNN`, `LSTM`, `GRU` | Selects the gating equations for recurrent memory updates (simple tanh recurrent update vs. additive constant error carousels with input, forget, and output gates). |
+| **RNN** | **Unrolled Steps** | `3`, `5`, `8` Steps | Controls the Backpropagation Through Time (BPTT) timeline. Expanding to 8 steps clearly reveals exponential gradient decay ($\le 0.25^T$) in the vanishing gradient failure mode. |
+| **DQN (RL)** | **Exploration Schedule** | `Standard`, `Fast (Greedy)`, `High Exploration` | Controls the $\epsilon$-decay rate in $\epsilon$-greedy action selection ($P(\text{random}) = \epsilon$ vs. $P(\arg\max Q) = 1-\epsilon$). Fast decays in ~40 steps; High Exploration keeps $\epsilon \ge 0.20$ to avoid local minima. |
+| **DQN (RL)** | **Discount Factor ($\gamma$)** | `0.50`, `0.90`, `0.99` | Plugs directly into the **Bellman Optimality Target**: $y = r + \gamma \max_{a'} Q(s', a')$. High $\gamma=0.99$ propagates long-term state values across distant tiles; low $\gamma=0.50$ produces steep, myopic dropoffs. |
+| **Standard NN** | **Hidden Layers & Width** | `1-3` Layers, `4, 8, 16` Neurons | Dynamically adjusts dense weight matrices $W \in \mathbb{R}^{d_{l} \times d_{l-1}}$, drawing updated SVG synaptic connection lines and matrix products. |
 
 ---
 

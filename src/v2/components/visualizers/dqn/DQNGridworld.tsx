@@ -12,6 +12,7 @@ interface DQNGridworldProps {
   isPoorExploration: boolean;
   onSelectCell?: (x: number, y: number) => void;
   selectedCell?: { x: number; y: number } | null;
+  gamma?: number;
 }
 
 export const DQNGridworld: React.FC<DQNGridworldProps> = ({
@@ -23,7 +24,8 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
   selectedAction,
   isPoorExploration,
   onSelectCell,
-  selectedCell
+  selectedCell,
+  gamma = 0.90
 }) => {
   const [displayMode, setDisplayMode] = useState<'policy' | 'heatmap'>('policy');
 
@@ -50,9 +52,10 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
       return 0.0;
     }
 
-    // Normal Q-learning: values propagate backwards with discount factor ~0.9
-    const baseVal = Math.pow(0.88, manhattanDist);
-    return Math.max(0.05, Math.min(0.95, baseVal));
+    // Normal Q-learning: values propagate backwards with discount factor gamma
+    const effectiveGamma = Math.min(0.98, Math.max(0.4, gamma));
+    const baseVal = Math.pow(effectiveGamma, manhattanDist);
+    return Math.max(0.02, Math.min(0.99, baseVal));
   };
 
   // Best policy direction from each cell
