@@ -39,24 +39,26 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
   }, [datasetKey]);
 
   // Generate CNN structure based on hyperparams
-  const layersCount = Math.max(3, hyperparams.layers); // At least Input, Conv, Output
+  const convLayersCount = hyperparams.convLayers || 2;
+  const poolingType = hyperparams.poolingType || 'Max';
   
   const layers = useMemo(() => {
     const l = [];
     // Input layer (simulating a 2D image)
     l.push({ id: 'input', type: '2d', size: 5, label: 'Input Tensor' });
     
-    // Hidden layers
-    for (let i = 1; i < layersCount - 1; i++) {
-      const type = i % 2 === 1 ? 'conv' : 'pool';
-      const size = type === 'conv' ? 4 : 3;
-      l.push({ id: `layer-${i}`, type, size, label: type === 'conv' ? 'Conv Layer' : 'Pooling' });
+    // Hidden layers: alternating Conv and Pooling according to convLayersCount
+    for (let i = 1; i <= convLayersCount; i++) {
+      l.push({ id: `conv-${i}`, type: 'conv', size: Math.max(3, 5 - i), label: `Conv Layer ${i}` });
+      if (i < convLayersCount || convLayersCount === 1) {
+        l.push({ id: `pool-${i}`, type: 'pool', size: Math.max(2, 4 - i), label: `${poolingType} Pooling` });
+      }
     }
     
     // Output layer
     l.push({ id: 'output', type: '1d', size: classLabels.length, label: 'Output Predictions' });
     return l;
-  }, [layersCount, classLabels]);
+  }, [convLayersCount, poolingType, classLabels]);
 
   // Derive activation values based on current step, mode, and selected sample
   const getActivation = (layerIdx: number, nodeIdx: number) => {

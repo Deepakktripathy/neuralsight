@@ -21,6 +21,15 @@ export interface Hyperparameters {
   lossFunction: LossFunction;
   optimizer: Optimizer;
   failureMode?: FailureMode;
+  // Architecture-specific structural knobs
+  attentionHeads?: 1 | 2 | 4;
+  convLayers?: 1 | 2 | 3;
+  poolingType?: 'Max' | 'Average';
+  rnnCellType?: 'Vanilla RNN' | 'LSTM' | 'GRU';
+  rnnUnrollSteps?: 3 | 5 | 8;
+  dqnExplorationSchedule?: 'Fast (Greedy)' | 'Standard' | 'High Exploration';
+  dqnDiscountFactor?: 0.50 | 0.90 | 0.99;
+  mlpNeuronsPerLayer?: 4 | 8 | 16;
 }
 
 export interface SimulationState {

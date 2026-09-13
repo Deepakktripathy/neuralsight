@@ -166,6 +166,7 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
                 step={step}
                 failureMode={hyperparams.failureMode}
                 dataSource={dataSource}
+                attentionHeads={hyperparams.attentionHeads || 2}
               />
             </motion.div>
           ) : (

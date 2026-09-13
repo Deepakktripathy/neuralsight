@@ -45,12 +45,18 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
 
   const isGeneratingCycle = mode === 'Inference' && dataSource === 'Text Prompt';
   
-  const tokens = useMemo(() => {
+  const targetTokens = useMemo(() => {
     if (isGeneratingCycle && activePrompt) {
       return [...baseTokens, activePrompt.next];
     }
     return baseTokens;
   }, [baseTokens, isGeneratingCycle, activePrompt]);
+
+  // Constrain sequence length to selected unroll steps
+  const maxSteps = hyperparams.rnnUnrollSteps || 5;
+  const tokens = useMemo(() => {
+    return targetTokens.slice(0, maxSteps);
+  }, [targetTokens, maxSteps]);
 
   const numTokens = tokens.length;
   

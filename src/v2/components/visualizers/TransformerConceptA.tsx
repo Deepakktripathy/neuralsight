@@ -9,6 +9,7 @@ interface TransformerConceptAProps {
   step: number;
   failureMode?: FailureMode;
   dataSource?: string;
+  attentionHeads?: 1 | 2 | 4;
 }
 
 type HeadType = 'syntactic' | 'sentiment' | 'positional' | 'longrange';
@@ -19,12 +20,31 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
   mode,
   step,
   failureMode,
-  dataSource
+  dataSource,
+  attentionHeads = 2
 }) => {
   const [activeHead, setActiveHead] = useState<HeadType>('sentiment');
   const [activeTab, setActiveTab] = useState<ActiveTab>('heatmap');
   const [hoveredCell, setHoveredCell] = useState<{ qIdx: number; kIdx: number } | null>(null);
   const [selectedTokenIdx, setSelectedTokenIdx] = useState<number>(0);
+
+  // Available heads filtered by user hyperparameter choice
+  const availableHeads = useMemo(() => {
+    const all = [
+      { id: 'sentiment' as HeadType, label: 'Head 1: Sentiment / Salience' },
+      { id: 'syntactic' as HeadType, label: 'Head 2: Syntactic (Next-Word)' },
+      { id: 'positional' as HeadType, label: 'Head 3: Positional (Self)' },
+      { id: 'longrange' as HeadType, label: 'Head 4: Long-Range / Coreference' },
+    ];
+    return all.slice(0, attentionHeads);
+  }, [attentionHeads]);
+
+  // Keep activeHead within available bounds
+  React.useEffect(() => {
+    if (!availableHeads.some(h => h.id === activeHead)) {
+      setActiveHead(availableHeads[0].id);
+    }
+  }, [availableHeads, activeHead]);
 
   const N = tokens.length;
   const d_k = 4; // Embedding dimension for visualization
@@ -201,46 +221,19 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setActiveHead('sentiment')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeHead === 'sentiment'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Head 1: Sentiment / Salience
-          </button>
-          <button
-            onClick={() => setActiveHead('syntactic')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeHead === 'syntactic'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Head 2: Syntactic (Next-Word)
-          </button>
-          <button
-            onClick={() => setActiveHead('positional')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeHead === 'positional'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Head 3: Positional (Self)
-          </button>
-          <button
-            onClick={() => setActiveHead('longrange')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeHead === 'longrange'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Head 4: Long-Range / Coreference
-          </button>
+          {availableHeads.map((head) => (
+            <button
+              key={head.id}
+              onClick={() => setActiveHead(head.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                activeHead === head.id
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                  : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {head.label}
+            </button>
+          ))}
         </div>
       </div>
 
