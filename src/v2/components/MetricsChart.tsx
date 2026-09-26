@@ -60,15 +60,16 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
             <XAxis dataKey="step" stroke="#64748b" fontSize={10} tickLine={false} />
             <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '12px', color: '#f8fafc' }}
-              itemStyle={{ color: '#818cf8' }}
+              contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '11px', color: '#f8fafc', padding: '6px 10px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+              itemStyle={{ color: '#818cf8', padding: '1px 0' }}
               formatter={(value: number, name: string) => {
                 if (isGAN && (name.includes('Score') || name.includes('Accuracy'))) {
                   return `${(value * 100).toFixed(1)}%`;
                 }
                 return value.toFixed(4);
               }}
-              allowEscapeViewBox={{ x: true, y: true }}
+              allowEscapeViewBox={{ x: false, y: false }}
+              position={{ y: -10 }}
             />
             <Line 
               type="monotone" 

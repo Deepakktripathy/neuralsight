@@ -532,7 +532,7 @@ export default function App() {
 
         {/* Main Canvas */}
         <div className="flex-1 relative flex min-h-0 min-w-0">
-          <div className="flex-1 relative min-w-0 overflow-auto pb-28">
+          <div className="flex-1 relative min-w-0 overflow-y-auto">
              <SandboxDiagnosticsPanel failureMode={hyperparams.failureMode} architecture={architecture} />
              {renderVisualizer()}
           </div>
@@ -704,7 +704,7 @@ export default function App() {
 
         {/* Bottom Panel: Metrics & Controls */}
         {architecture !== 'Custom Model' && (
-        <div className="h-auto md:h-28 flex flex-col md:flex-row bg-slate-900 border-t border-slate-800 z-20 shrink-0">
+        <div className="h-auto md:h-32 flex flex-col md:flex-row bg-slate-900 border-t border-slate-800 z-20 shrink-0">
           <div className="w-full md:w-[40%] md:min-w-[300px] border-b md:border-b-0 md:border-r border-slate-800 flex flex-col">
             <PlaybackControls 
               isPlaying={isPlaying}
@@ -717,7 +717,7 @@ export default function App() {
               onExportResults={handleExportResults}
             />
           </div>
-          <div className="hidden md:flex flex-1 p-3 min-w-0 flex-col">
+          <div className="hidden md:flex flex-1 px-3 py-2 min-w-0 flex-col overflow-visible">
              <MetricsChart data={metricsData} isOverfitting={hyperparams.failureMode === 'Overfitting'} architecture={architecture} />
           </div>
         </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, RotateCcw, Scan, Sparkles, Layers } from 'lucide-react';
+import { Play, RotateCcw, Scan, Sparkles, Layers, ArrowRight } from 'lucide-react';
 import { DataSource } from '../../types';
+import { InfoTooltip } from '../InfoTooltip';
 
 export interface CNNSampleImage {
   id: string;
@@ -421,7 +422,7 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
             {/* Laser scanning line */}
             {isScanning && (
               <motion.div 
-                className="absolute top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,1)] z-20"
+                className="absolute top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,1)] z-20 pointer-events-none"
                 style={{ left: `${scanProgress * 100}%` }}
               />
             )}
@@ -437,7 +438,7 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
             {/* Highlight corresponding pixel cell on hover */}
             {hoveredCellIdx !== null && (
               <div 
-                className="absolute border-2 border-indigo-400 bg-indigo-500/40 pointer-events-none z-30 transition-all"
+                className="absolute border-2 border-indigo-400 bg-indigo-500/40 pointer-events-none z-30 transition-all shadow-[0_0_8px_rgba(99,102,241,0.8)]"
                 style={{
                   left: `${(hoveredCellIdx % 6) * (100 / 6)}%`,
                   top: `${Math.floor(hoveredCellIdx / 6) * (100 / 6)}%`,
@@ -446,6 +447,19 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
                 }}
               />
             )}
+
+            {/* Interactive 6x6 pixel grid overlay for bidirectional hover: hovering image cell highlights 2D tensor grid */}
+            <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 z-25">
+              {Array.from({ length: 36 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  onMouseEnter={() => onHoverCell(idx)}
+                  onMouseLeave={() => onHoverCell(null)}
+                  className="cursor-crosshair w-full h-full transition-colors hover:bg-indigo-400/20"
+                  title={`Pixel [${Math.floor(idx / 6)}, ${idx % 6}]: ${selectedSample.grid[idx]?.toFixed(2) ?? '0.00'}`}
+                />
+              ))}
+            </div>
           </div>
 
           <span className="text-[10px] text-slate-400 leading-tight max-w-[180px]">
@@ -453,23 +467,41 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
           </span>
         </div>
 
-        {/* Transition Bridge: Laser Dissolve / Swallowed Particle Beam (2 cols) */}
-        <div className="md:col-span-2 flex flex-col items-center justify-center gap-1 text-center py-2">
-          <span className="text-[9px] font-mono text-cyan-400 font-semibold tracking-wider uppercase">
-            Quantization
-          </span>
-          <div className="w-full flex items-center justify-center relative my-1">
-            <div className="h-0.5 w-full bg-gradient-to-r from-slate-700 via-cyan-500 to-indigo-500 rounded-full" />
-            <motion.div 
-              className="absolute w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,1)]"
-              animate={{ x: [-20, 20, -20] }}
-              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-            />
+        {/* Transition Bridge: Optical Photons -> Quantized Float32 Tensor Stream */}
+        <div className="md:col-span-2 flex flex-col items-center justify-center gap-1.5 text-center py-2 px-1">
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-mono text-cyan-400 font-semibold tracking-wider uppercase">
+              Quantization
+            </span>
+            <InfoTooltip content="Quantization (Analog-to-Digital Conversion): Maps continuous physical light/photon intensities from the optical sensor into discrete, normalized floating-point numbers between 0.00 (black) and 1.00 (peak white) so the convolutional neural network can compute tensor math." />
           </div>
-          <span className="text-[9px] text-slate-400 leading-tight">
-            Photons $\to$ Grayscale <br />
-            $I \in [0.00, 1.00]$
-          </span>
+          
+          {/* Directional Data Stream Pipeline (Image -> Tensor) */}
+          <div className="w-full flex items-center justify-center relative my-1.5 overflow-hidden h-5">
+            <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500/40 via-cyan-500/80 to-indigo-500/90 rounded-full" />
+            {/* Pulsing directional particles flowing from left to right */}
+            <motion.div 
+              className="absolute w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)]"
+              animate={{ x: [-35, 35], opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+            />
+            <motion.div 
+              className="absolute w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(99,102,241,1)]"
+              animate={{ x: [-35, 35], opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: 0.8 }}
+            />
+            <ArrowRight className="absolute right-0 w-3 h-3 text-indigo-400 pointer-events-none" />
+          </div>
+
+          {/* Formatted Mathematical & Scientific Normalization Badges */}
+          <div className="flex flex-col items-center gap-1 text-[10px] font-mono leading-tight">
+            <span className="text-slate-300 font-medium flex items-center gap-1">
+              Photons <span className="text-cyan-400 font-bold">→</span> Grayscale
+            </span>
+            <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 text-cyan-300 font-semibold text-[9.5px]">
+              Intensity <span className="text-slate-400 font-normal">I ∈</span> [0.00, 1.00]
+            </span>
+          </div>
         </div>
 
         {/* Step 2: 2D Numerical Tensor Grid (4 cols) */}

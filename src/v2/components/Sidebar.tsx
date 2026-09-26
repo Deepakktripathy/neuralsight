@@ -170,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className,
           
           {architecture === 'Custom Model' && (
             <div className="space-y-2 pt-2">
-              <label className="block text-[11px] font-medium text-slate-300">Upload Architecture JSON</label>
+              <label className="block text-[11px] font-medium text-slate-300">Upload Architecture</label>
               {!customModelFile ? (
                 <div 
                   className={cn(
@@ -184,9 +184,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className,
                   onClick={() => modelInputRef.current?.click()}
                 >
                   <UploadCloud className="w-6 h-6 text-slate-400 mb-2" />
-                  <p className="text-xs font-medium text-slate-300">Drag JSON here or click to browse</p>
-                  <p className="text-[10px] text-slate-500 mt-1">Exported from Custom Model builder</p>
-                  <input type="file" ref={modelInputRef} className="hidden" accept=".json" onChange={handleModelFileInput} />
+                  <p className="text-xs font-medium text-slate-300">Drag ONNX or JSON here</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Supports .onnx and .json</p>
+                  <input type="file" ref={modelInputRef} className="hidden" accept=".onnx,.json" onChange={handleModelFileInput} />
                 </div>
               ) : (
                 <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-2.5">
@@ -442,6 +442,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ className,
                           )}
                         >
                           {p} Pooling
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                        Stride (S)
+                        <InfoTooltip content="The step size the convolution filter shifts across the input grid. Stride 1 produces a 4×4 feature map; higher strides (2 or 3) downsample the spatial resolution to 2×2." />
+                      </label>
+                      <span className="text-[10px] text-indigo-400 font-mono">Stride {hyperparams.stride || 1}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {([1, 2, 3] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setHyperparams({ ...hyperparams, stride: s })}
+                          className={cn(
+                            "py-1 text-[10px] font-mono rounded border transition-colors text-center",
+                            (hyperparams.stride || 1) === s
+                              ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
+                              : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          )}
+                        >
+                          {s} {s === 1 ? 'px' : 'px'}
                         </button>
                       ))}
                     </div>
