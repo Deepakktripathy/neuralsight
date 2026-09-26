@@ -12,6 +12,58 @@ interface LayerTooltipProps {
 
 export const LayerTooltip: React.FC<LayerTooltipProps> = ({ label, description, position = 'center', align = 'top' }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoverCoords, setHoverCoords] = useState<{ top: number; left: number; placement: 'top' | 'bottom' }>({
+    top: 0,
+    left: 0,
+    placement: 'top',
+  });
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  const updatePosition = () => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const tooltipWidth = 260;
+    const tooltipHeight = 90;
+    const padding = 12;
+
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    if (left < padding) {
+      left = padding;
+    } else if (left + tooltipWidth > window.innerWidth - padding) {
+      left = window.innerWidth - tooltipWidth - padding;
+    }
+
+    let top = rect.top - 8;
+    let placement: 'top' | 'bottom' = 'top';
+
+    if (rect.top - tooltipHeight < padding) {
+      placement = 'bottom';
+      top = rect.bottom + 8;
+    }
+
+    setHoverCoords({ top, left, placement });
+  };
+
+  const handleMouseEnter = () => {
+    updatePosition();
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
+  useEffect(() => {
+    if (!isHovered) return;
+    const handleScrollOrResize = () => updatePosition();
+    window.addEventListener('resize', handleScrollOrResize, { passive: true });
+    window.addEventListener('scroll', handleScrollOrResize, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('resize', handleScrollOrResize);
+      window.removeEventListener('scroll', handleScrollOrResize, { capture: true });
+    };
+  }, [isHovered]);
 
   useEffect(() => {
     if (!isFocused) return;
@@ -60,29 +112,49 @@ export const LayerTooltip: React.FC<LayerTooltipProps> = ({ label, description, 
     </AnimatePresence>
   );
 
+  const hoverTooltip = isHovered && !isFocused && description && typeof document !== 'undefined' ? (
+    createPortal(
+      <div
+        style={{
+          position: 'fixed',
+          top: hoverCoords.top,
+          left: hoverCoords.left,
+          transform: hoverCoords.placement === 'top' ? 'translateY(-100%)' : 'none',
+          zIndex: 99999,
+          pointerEvents: 'none',
+          width: '260px',
+          maxWidth: 'calc(100vw - 24px)',
+        }}
+        className="p-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-lg shadow-2xl text-left transition-opacity duration-150 ring-1 ring-white/10"
+      >
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 mb-1">
+          {label}
+        </div>
+        <p className="text-[11px] text-slate-300 leading-relaxed m-0 whitespace-normal break-words">
+          {description}
+        </p>
+      </div>,
+      document.body
+    )
+  ) : null;
+
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => description && setIsFocused(true)}
-        className="relative flex items-center justify-center gap-1.5 group hover:z-50 cursor-pointer transition-transform hover:scale-105 bg-transparent border-none p-0 m-0 font-inherit"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="relative flex items-center justify-center gap-1.5 cursor-pointer transition-transform hover:scale-105 bg-transparent border-none p-0 m-0 font-inherit"
       >
-        <span className="text-[11px] text-slate-500 group-hover:text-slate-300 whitespace-nowrap transition-colors">
+        <span className="text-[11px] text-slate-500 hover:text-slate-300 whitespace-nowrap transition-colors">
           {label}
         </span>
-        <Info className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors" />
-        
-        <div className={`absolute w-56 max-w-[85vw] p-3 bg-slate-900 border border-slate-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 translate-y-1 group-hover:translate-y-0 text-left z-50 ${
-          align === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} ${position === 'left' ? 'left-0' :
-          position === 'right' ? 'right-0' :
-          'left-1/2 -translate-x-1/2'
-        }`}>
-          <p className="text-[11px] text-slate-300 leading-relaxed m-0 whitespace-normal break-words">
-            {description}
-          </p>
-        </div>
+        <Info className="w-3.5 h-3.5 text-slate-600 hover:text-indigo-400 transition-colors" />
       </button>
       {typeof document !== 'undefined' ? createPortal(modal, document.body) : modal}
+      {hoverTooltip}
     </>
   );
 };

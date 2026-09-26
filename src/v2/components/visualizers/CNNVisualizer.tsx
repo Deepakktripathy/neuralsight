@@ -96,7 +96,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-start p-4 overflow-y-auto relative bg-slate-950 gap-6">
+    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 relative bg-slate-950 gap-6 pb-28">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
 
@@ -118,6 +118,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
           dataSource={dataSource} 
           sampleGrid={selectedSample.grid}
           sampleName={selectedSample.name}
+          stride={hyperparams.stride || 1}
         />
       </div>
 

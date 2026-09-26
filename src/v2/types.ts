@@ -25,6 +25,7 @@ export interface Hyperparameters {
   attentionHeads?: 1 | 2 | 4;
   convLayers?: 1 | 2 | 3;
   poolingType?: 'Max' | 'Average';
+  stride?: 1 | 2 | 3;
   rnnCellType?: 'Vanilla RNN' | 'LSTM' | 'GRU';
   rnnUnrollSteps?: 3 | 5 | 8;
   dqnExplorationSchedule?: 'Fast (Greedy)' | 'Standard' | 'High Exploration';
