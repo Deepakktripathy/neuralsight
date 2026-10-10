@@ -79,43 +79,43 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
         
         {/* Concept Switcher Segmented Control */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
-              Select Educational Concept to Compare:
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
+              View:
             </span>
             <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
               <button
                 onClick={() => setSelectedConcept('concept_a')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedConcept === 'concept_a'
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>Concept 1: Q, K, V & Attention Heatmap</span>
+                <span>Q-K-V & Heatmap</span>
               </button>
 
               <button
                 onClick={() => setSelectedConcept('concept_b')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedConcept === 'concept_b'
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>Concept 2: Full Architecture Flow</span>
+                <span>Full Architecture</span>
               </button>
             </div>
           </div>
 
           <button
             onClick={() => setShowGuideModal(true)}
-            className="sm:self-end px-3 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-2 text-xs font-semibold transition-all shadow-sm"
+            className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 text-xs font-semibold transition-all shadow-sm"
           >
             <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-            <span>📖 Guide & Walkthrough</span>
+            <span>Guide</span>
           </button>
         </div>
 

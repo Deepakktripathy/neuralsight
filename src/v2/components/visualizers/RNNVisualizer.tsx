@@ -136,8 +136,8 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
         
         {/* Left: View Mode Segmented Control (Unrolled vs Folded) */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
-            Architecture View:
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
+            View:
           </span>
 
           <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1 shadow-inner">
@@ -150,7 +150,7 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
               }`}
             >
               <AlignLeft className="w-3.5 h-3.5" />
-              <span>Unrolled Sequence (t = 0...T)</span>
+              <span>Unrolled (t=0..T)</span>
             </button>
 
             <button
@@ -162,7 +162,7 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
               }`}
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>Folded Cell (Recurrent Loop)</span>
+              <span>Folded Cell</span>
             </button>
           </div>
         </div>
@@ -195,32 +195,11 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
             }`}
           >
             <ArrowRightLeft className="w-3.5 h-3.5 text-amber-400" />
-            <span>Why Transformers Won</span>
+            <span>RNN vs Transformer</span>
           </button>
         </div>
 
       </div>
-
-      {/* Active Failure Mode Alert Banner */}
-      {(isVanishing || isExploding) && (
-        <div className="w-full max-w-5xl bg-rose-950/40 border border-rose-500/50 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg z-10 animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-rose-300 uppercase font-mono tracking-wide">
-                {isVanishing ? 'Failure Mode: Vanishing Gradients (Catastrophic Forgetting)' : 'Failure Mode: Exploding Gradients'}
-              </span>
-              <p className="text-xs text-slate-300">
-                {isVanishing 
-                  ? 'Notice how earlier tokens fade away. Because derivative of tanh is ≤ 0.25, backpropagating gradients decay exponentially to 0.'
-                  : 'Gradients multiplied repeatedly across recurrent steps grow unboundedly, overflowing floating point precision into NaN.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Viewport Content */}
       <div className="w-full flex justify-center z-10">

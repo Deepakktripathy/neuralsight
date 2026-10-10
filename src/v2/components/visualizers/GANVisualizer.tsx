@@ -117,13 +117,13 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
       
       {/* Top Header & Context Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800/80">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <div className="px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono text-xs flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="font-semibold">Generative Adversarial Network</span>
+            <span className="font-semibold">GAN</span>
           </div>
           <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-            Minimax: <span className="text-slate-300">Generator G vs Discriminator D</span>
+            Minimax: <span className="text-slate-300">G(z) vs D(x)</span>
           </span>
         </div>
 
@@ -157,40 +157,11 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
               onClick={handleRandomizeLatent}
               className="px-2.5 py-1 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600 hover:text-white transition-colors text-xs font-medium flex items-center gap-1.5 shadow-sm"
             >
-              <Shuffle className="w-3.5 h-3.5" /> Randomize Latent Seed
+              <Shuffle className="w-3.5 h-3.5" /> Randomize Seed
             </button>
           )}
         </div>
       </div>
-
-      {/* Mode Collapse / Failure Warning Banner */}
-      {isModeCollapse && (
-        <div className="mb-4 p-2.5 bg-rose-950/40 border border-rose-500/50 rounded-xl flex items-center justify-between gap-3 text-xs text-rose-200 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>
-              <strong>Mode Collapse Triggered:</strong> Generator found a local shortcut that fools D and now produces the exact same image regardless of z.
-            </span>
-          </div>
-          <div className="font-mono text-[11px] bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/40 text-rose-300 shrink-0">
-            Diversity: {gameStats.diversityScore}%
-          </div>
-        </div>
-      )}
-
-      {isDiscOverpowered && (
-        <div className="mb-4 p-2.5 bg-amber-950/40 border border-amber-500/50 rounded-xl flex items-center justify-between gap-3 text-xs text-amber-200 animate-in fade-in duration-200">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
-              <strong>Discriminator Overpowering:</strong> D learns too rapidly (D(x) ≈ 1.0, D(G(z)) ≈ 0.0). The sigmoid saturates and Generator receives zero gradient signal (∇_θG L ≈ 0).
-            </span>
-          </div>
-          <div className="font-mono text-[11px] bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40 text-amber-300 shrink-0">
-            ∇_G ≈ {gameStats.gradientGNorm}
-          </div>
-        </div>
-      )}
 
       {/* Main Adversarial Pipeline Grid */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch min-h-[440px]">
