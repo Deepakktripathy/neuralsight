@@ -198,8 +198,8 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
         
         {/* Left: View Tabs */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold mr-1">
-            DQN Perspective:
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold mr-1 hidden sm:inline">
+            View:
           </span>
 
           <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1 shadow-inner">
@@ -212,7 +212,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
               }`}
             >
               <Gamepad2 className="w-3.5 h-3.5" />
-              <span>Live Environment & Policy</span>
+              <span>Environment & Policy</span>
             </button>
 
             <button
@@ -224,7 +224,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
               }`}
             >
               <Database className="w-3.5 h-3.5" />
-              <span>Inner Mechanics (Replay & Target Net)</span>
+              <span>Replay & Target Net</span>
             </button>
           </div>
         </div>
@@ -236,30 +236,11 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all shadow-sm"
           >
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Bellman Equation Breakdown</span>
+            <span>Bellman Math</span>
           </button>
         </div>
 
       </div>
-
-      {/* Failure Mode Alert (Poor Exploration) */}
-      {isPoorExploration && (
-        <div className="w-full max-w-5xl bg-rose-950/40 border border-rose-500/50 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg z-10 animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-rose-300 uppercase font-mono tracking-wide">
-                Failure Mode: Poor Exploration (Local Minimum Trap)
-              </span>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Notice how the agent is stuck in an endless loop near the start. Because exploration rate <span className="font-mono text-rose-400">ε = 0</span>, the agent strictly exploits its initial random beliefs and never discovers the positive +1.0 reward at the goal.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main View Area */}
       <div className="w-full max-w-5xl flex justify-center z-10">

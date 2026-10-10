@@ -34,8 +34,8 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({ failureMode, architec
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
                 {content.explanation}
               </p>
-              <div className="mt-3 p-2.5 bg-slate-950/80 rounded-md border border-slate-800">
-                <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block mb-1">What to watch for:</span>
+              <div className="mt-2.5 p-2 bg-slate-950/80 rounded-md border border-slate-800">
+                <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block mb-0.5">Watch for:</span>
                 <p className="text-xs text-slate-400">{content.watch}</p>
               </div>
             </div>
@@ -51,44 +51,44 @@ function getDiagnosticsContent(failureMode: FailureMode, architecture: Architect
     case 'Vanishing Gradients':
       return {
         icon: <ZapOff className="w-5 h-5" />,
-        explanation: "The error signal gets exponentially smaller as it travels backward. The early layers never learn, freezing their weights.",
-        watch: "Watch the red backprop pulses fade and shrink in the early layers (left side). The live gradient probes will drop to near zero."
+        explanation: "Gradients shrink exponentially backward, freezing early layers.",
+        watch: "Red backprop pulses fade on the left; early gradients drop near 0."
       };
     case 'Exploding Gradients':
       return {
         icon: <Activity className="w-5 h-5" />,
-        explanation: "The error signal multiplies out of control, causing massive, chaotic updates that often result in numerical instability (NaN).",
-        watch: "Watch the backprop pulses become violently bright and the network connections glitch to solid white. The live probes will explode to NaN."
+        explanation: "Gradients multiply uncontrollably, overflowing weights to NaN.",
+        watch: "Pulses flash bright white and probes spike to NaN."
       };
     case 'Overfitting':
       return {
         icon: <ActivitySquare className="w-5 h-5" />,
-        explanation: "The model is memorizing the exact training data, including the noise, instead of learning the general trend.",
-        watch: "Keep your eyes on the graph below. Watch for the moment the Validation Loss (orange) starts climbing up while the Train Loss (blue) keeps dropping."
+        explanation: "Model memorizes training noise instead of general patterns.",
+        watch: "Validation Loss (orange) climbs while Train Loss (blue) drops."
       };
     case 'Attention Collapse':
       return {
         icon: <AlertTriangle className="w-5 h-5" />,
-        explanation: "The self-attention mechanism fails to isolate important context, instead 'blurring' its focus equally across every single word.",
-        watch: "Watch the attention connection lines between tokens. Instead of forming sharp, distinct relationships, they all become a uniform grey blur."
+        explanation: "Self-attention blurs equally across all tokens, losing context focus.",
+        watch: "Attention lines turn into a uniform grey web."
       };
     case 'Mode Collapse':
       return {
         icon: <AlertTriangle className="w-5 h-5" />,
-        explanation: "The Generator discovers it can fool the Discriminator by producing the exact same image repeatedly, ignoring the random noise input.",
-        watch: "Watch the Fake Data / Generator Output nodes. Instead of flickering with diverse patterns, they will freeze into a single, repeating shape."
+        explanation: "Generator repeats a single output image regardless of noise z.",
+        watch: "Generator outputs freeze into one repeating pattern."
       };
     case 'Discriminator Overpowering':
       return {
         icon: <AlertTriangle className="w-5 h-5" />,
-        explanation: "The Discriminator becomes so effective too quickly that it rejects all generated samples with near 100% certainty. The Generator receives zero usable gradient signal and ceases to learn.",
-        watch: "Watch the Discriminator accuracy climb to near 100% while the Generator output remains stuck as noisy static. Gradients entering the Generator collapse to zero."
+        explanation: "Discriminator rejects all fakes with ~100% certainty, starving G of gradients.",
+        watch: "D accuracy hits ~100% while G gradients collapse to 0."
       };
     case 'Poor Exploration':
       return {
         icon: <AlertTriangle className="w-5 h-5" />,
-        explanation: "The agent gets stuck repeating the exact same sub-optimal action because it stopped trying random new things too early.",
-        watch: "Watch the agent's path get stuck in a tight loop on the canvas. It has found a local minimum and refuses to leave."
+        explanation: "Agent repeats one suboptimal action after stopping random exploration too early.",
+        watch: "Agent path loops endlessly near the start."
       };
     default:
       return null;
