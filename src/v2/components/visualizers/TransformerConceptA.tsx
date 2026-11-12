@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Eye, Info, Layers, Compass, HelpCircle } from 'lucide-react';
+import { Sparkles, Eye, Info, Layers, Compass, HelpCircle, AlertTriangle } from 'lucide-react';
 import { Mode, FailureMode } from '../../types';
 
 interface TransformerConceptAProps {
@@ -184,18 +184,19 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
   return (
     <div className="w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 backdrop-blur-md shadow-2xl flex flex-col gap-5">
       
-      {/* Concept A Header */}
+      {/* Concept A Header (AUDIT-10: Zero-Pill Discipline for Stage Headers & Static Metadata) */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
             <Compass className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-bold text-white tracking-wide">
-                Concept A: Query, Key, Value & Attention Heatmap
+                01. Query, Key, Value & Attention Heatmap
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono">
+              <span className="text-slate-600 font-mono text-xs">·</span>
+              <span className="text-indigo-300 text-xs font-mono font-medium">
                 {'Softmax(QKᵀ / √d_k) V'}
               </span>
             </div>
@@ -205,10 +206,11 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
           </div>
         </div>
 
-        {/* Failure Mode Warning */}
+        {/* Failure Mode Warning (Unboxed Inline Alert) */}
         {failureMode === 'Attention Collapse' && mode === 'Train' && (
-          <span className="px-2.5 py-1 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-mono font-bold animate-pulse">
-            ⚠️ Attention Collapse: Flat 1/N Weights
+          <span className="text-rose-400 text-xs font-mono font-medium flex items-center gap-1.5 animate-pulse">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Attention Collapse: Flat 1/N Weights
           </span>
         )}
       </div>
@@ -289,13 +291,16 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
           {/* N x N Matrix Grid (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-center bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner">
             <div className="flex items-center justify-between w-full mb-3">
-              <span className="text-xs font-semibold text-slate-300 flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-300 flex items-center gap-2 font-mono">
                 <span>{'Self-Attention Matrix A (N × N)'}</span>
                 {mode === 'Train' && (
-                  <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Learning (Step {step})</span>
-                  </span>
+                  <>
+                    <span className="text-slate-600">·</span>
+                    <span className="text-[11px] font-mono text-indigo-300 flex items-center gap-1.5 font-normal">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Learning (Step {step})</span>
+                    </span>
+                  </>
                 )}
               </span>
               <span className="text-[10px] font-mono text-slate-500">

@@ -48,10 +48,15 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
 
       <div className="flex-1 min-h-0 relative">
         {isOverfitting && data.length > 10 && (
-          <div className="absolute top-2 right-6 z-10 bg-slate-900/90 border border-rose-500/50 p-2 rounded-lg pointer-events-none shadow-lg">
-            <span className="text-[9px] font-bold text-rose-400 font-monospace block mb-1">MEMORIZATION DETECTED</span>
-            <span className="text-[10px] text-slate-300">Train Loss: <span className="text-indigo-400 font-mono">{data[data.length-1].loss.toFixed(4)}</span></span><br/>
-            <span className="text-[10px] text-slate-300">Val Loss: <span className="text-rose-400 font-mono">{(data[data.length-1].valLoss || 0).toFixed(4)}</span></span>
+          <div className="absolute top-2 right-4 z-10 bg-slate-950/80 border border-slate-800/80 px-2.5 py-1.5 rounded-lg pointer-events-none shadow-md backdrop-blur-xs">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+              <span className="text-[9px] font-bold text-rose-400 uppercase tracking-wide">Memorization</span>
+            </div>
+            <div className="text-[10px] text-slate-400 flex items-center gap-2">
+              <span>Train: <strong className="text-indigo-300 font-mono">{data[data.length-1].loss.toFixed(3)}</strong></span>
+              <span>Val: <strong className="text-rose-400 font-mono">{(data[data.length-1].valLoss || 0).toFixed(3)}</strong></span>
+            </div>
           </div>
         )}
         <ResponsiveContainer width="100%" height="100%">

@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { PlaybackControls } from './components/PlaybackControls';
-import { SandboxDiagnosticsPanel } from './components/SandboxDiagnosticsPanel';
 import { MetricsChart } from './components/MetricsChart';
+import { MetricsHUD } from './components/MetricsHUD';
 import { CNNVisualizer } from './components/visualizers/CNNVisualizer';
 import { TransformerVisualizer } from './components/visualizers/TransformerVisualizer';
 import { RLVisualizer } from './components/visualizers/RLVisualizer';
@@ -16,23 +16,15 @@ import {
   HelpCircle,
   Menu,
   Code2,
-  Share2,
   Check,
   Eye,
-  ChevronDown,
-  ChevronUp,
   BookOpen,
-  LayoutGrid,
-  SlidersHorizontal,
-  Compass,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { DatasetPreviewModal } from './components/DatasetPreviewModal';
 import { CodeExportModal } from './components/CodeExportModal';
 import { WelcomeTour } from './components/WelcomeTour';
-import { ARCHITECTURE_TOURS } from './lib/tours';
-import { TourQuiz } from './components/TourQuiz';
-import { ArchitectureTour } from './components/ArchitectureTour';
 import { GlossaryPanel } from './components/GlossaryPanel';
 import { SpotlightTour, TourStep } from './components/SpotlightTour';
 import { ArchitectureSelectionHub } from './components/ArchitectureSelectionHub';
@@ -120,9 +112,8 @@ export default function App() {
     return true;
   });
 
-  const [mode, setMode] = useState<Mode>(() => {
-    return getInitialParam('mode', 'Train') as Mode;
-  });
+
+  const [mode, setMode] = useState<Mode>('Train');
 
   const [useCase, setUseCase] = useState<UseCase>(() => {
     return getInitialParam('task', 'Classification') as UseCase;
@@ -160,7 +151,6 @@ export default function App() {
   });
 
   const [showCodeExport, setShowCodeExport] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [previewDataSource, setPreviewDataSource] = useState<DataSource | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -171,20 +161,12 @@ export default function App() {
     { step: number; loss: number; accuracy: number; valLoss?: number; valAccuracy?: number }[]
   >([]);
 
-  const [isGuidedTour, setIsGuidedTour] = useState(false);
-  const preTourSpeed = React.useRef(speed);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
-  const [activeArchTour, setActiveArchTour] = useState<Architecture | null>(null);
   const [activeSpotlightArch, setActiveSpotlightArch] = useState<Architecture | null>(null);
-  const [isStatusPillMinimized, setIsStatusPillMinimized] = useState(false);
 
   const closeSpotlight = useCallback(() => {
     setActiveSpotlightArch(null);
-  }, []);
-
-  const closeArchitectureTour = useCallback(() => {
-    setActiveArchTour(null);
   }, []);
 
   const closeWelcome = () => {
@@ -218,36 +200,9 @@ export default function App() {
     setViewStage('configure');
   };
 
-  const toggleGuidedTour = () => {
-    setIsGuidedTour((prev) => {
-      const next = !prev;
-      if (next) {
-        preTourSpeed.current = speed;
-        setSpeed(3000);
-        if (!isPlaying) setIsPlaying(true);
-      } else {
-        setSpeed(preTourSpeed.current);
-      }
-      return next;
-    });
-  };
-
   // Simulation loop
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
-
-    const tourData = ARCHITECTURE_TOURS[architecture] || ARCHITECTURE_TOURS['Standard NN'];
-    if (
-      isPlaying &&
-      isGuidedTour &&
-      mode === 'Train' &&
-      step > 0 &&
-      step % tourData.phases.length === 0 &&
-      !window.localStorage.getItem(`quiz_${architecture}`)
-    ) {
-      setIsPlaying(false);
-      return;
-    }
 
     if (isPlaying) {
       interval = setInterval(() => {
@@ -264,7 +219,7 @@ export default function App() {
       }, speed);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speed, mode, hyperparams.epochs, isGuidedTour, architecture, step]);
+  }, [isPlaying, speed, mode, hyperparams.epochs]);
 
   // Metrics update
   React.useEffect(() => {
@@ -409,6 +364,8 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
+            isPlaying={isPlaying}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Transformer':
@@ -418,6 +375,7 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'DQN':
@@ -428,6 +386,7 @@ export default function App() {
             mode={mode}
             dataSource={dataSource}
             isSpotlightOpen={activeSpotlightArch !== null}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Standard NN':
@@ -438,6 +397,7 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'GAN':
@@ -448,6 +408,7 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'RNN':
@@ -457,6 +418,7 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
+            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Custom Model':
@@ -578,67 +540,38 @@ export default function App() {
             setIsPlaying(false);
             setViewStage('configure');
           }}
+          onOpenGlossary={() => setShowGlossary(true)}
         />
       </div>
 
       <div className="flex-1 flex flex-col relative min-h-0 min-w-0 bg-slate-950">
         {/* Studio Top Header Bar */}
         <header className="h-14 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 flex items-center justify-between shrink-0 z-30">
-          {/* Left Navigation & Context Breadcrumbs */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Left: Sidebar Expand Toggle & Active Architecture Model Indicator */}
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             {!isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
                 className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-colors shadow-sm shrink-0 cursor-pointer"
-                title="Open Inspector Sidebar"
+                title="Expand Stages & Inspector Sidebar"
+                aria-label="Expand Stages & Inspector Sidebar"
               >
-                <Menu className="w-4 h-4" />
+                <PanelLeftOpen className="w-4 h-4 text-indigo-400" />
               </button>
             )}
 
-            <button
-              onClick={() => {
-                setIsPlaying(false);
-                setViewStage('select-arch');
-              }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-white border border-slate-700/70 transition-all cursor-pointer shrink-0"
-              title="Back to Architecture Cards"
-            >
-              <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="hidden sm:inline">Models</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setIsPlaying(false);
-                setViewStage('configure');
-              }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-white border border-slate-700/70 transition-all cursor-pointer shrink-0"
-              title="Configure Use Case, Dataset & Hyperparameters"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="hidden sm:inline">Setup</span>
-            </button>
-
-            <div className="h-4 w-px bg-slate-800 hidden sm:block" />
-
-            <div className="flex items-center gap-2 min-w-0 text-xs">
-              <span className="font-bold text-white tracking-tight truncate">
-                {architecture}
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-400 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="text-white font-semibold tracking-tight text-sm shrink-0">
+                {ARCHITECTURE_METADATA[architecture]?.title || architecture}
               </span>
-              <span className="text-slate-600 hidden md:inline" aria-hidden="true">
-                ·
-              </span>
-              <span className="text-slate-400 hidden md:inline truncate">
-                {useCase}
-              </span>
-              {dataSource && (
+              {ARCHITECTURE_METADATA[architecture]?.fullName && (
                 <>
-                  <span className="text-slate-600 hidden lg:inline" aria-hidden="true">
+                  <span className="text-slate-600 hidden sm:inline" aria-hidden="true">
                     ·
                   </span>
-                  <span className="text-indigo-400 font-mono hidden lg:inline truncate">
-                    {dataSource}
+                  <span className="text-slate-400 hidden sm:inline truncate">
+                    {ARCHITECTURE_METADATA[architecture].fullName}
                   </span>
                 </>
               )}
@@ -656,19 +589,6 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setShowGlossary(!showGlossary)}
-              className={cn(
-                "p-2 rounded-xl transition-colors cursor-pointer",
-                showGlossary
-                  ? "text-indigo-400 bg-indigo-500/15"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              )}
-              title="Open Deep Learning Glossary"
-            >
-              <BookOpen className="w-4 h-4" />
-            </button>
-
-            <button
               onClick={() => setShowCodeExport(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-700 hover:text-white transition-all border border-slate-700/80 shadow-sm cursor-pointer whitespace-nowrap"
               title="Export PyTorch / Keras / ONNX Code"
@@ -677,68 +597,9 @@ export default function App() {
               <span className="hidden sm:inline">Code</span>
             </button>
 
-            <button
-              onClick={() => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('arch', architecture);
-                url.searchParams.set('mode', mode);
-                url.searchParams.set('task', useCase);
-                url.searchParams.set('dataset', dataSource);
-                url.searchParams.set('lr', hyperparams.learningRate.toString());
-                url.searchParams.set('bs', (hyperparams.batchSize || 32).toString());
-                url.searchParams.set('opt', hyperparams.optimizer || 'Adam');
-                url.searchParams.set('loss', hyperparams.lossFunction || 'Cross-Entropy');
-                window.history.replaceState({}, '', url.toString());
-                const shareUrl = new URL('https://neuralsights.ai.studio/');
-                url.searchParams.forEach((val, key) => {
-                  shareUrl.searchParams.set(key, val);
-                });
-                navigator.clipboard?.writeText(shareUrl.toString());
-                setCopiedLink(true);
-                setTimeout(() => setCopiedLink(false), 2000);
-              }}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border shadow-sm cursor-pointer whitespace-nowrap",
-                copiedLink
-                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/50"
-                  : "text-slate-300 bg-slate-800/90 hover:bg-slate-700 hover:text-white border-slate-700/80"
-              )}
-              title="Copy shareable link with current architecture & hyperparameters"
-            >
-              {copiedLink ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <Share2 className="w-3.5 h-3.5 text-indigo-400" />
-              )}
-              <span className="hidden sm:inline">{copiedLink ? 'Copied!' : 'Share'}</span>
-            </button>
-
             {architecture !== 'Custom Model' && (
               <>
                 <div className="h-5 w-px bg-slate-800 mx-0.5 hidden sm:block" />
-
-                <button
-                  onClick={toggleGuidedTour}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
-                    isGuidedTour
-                      ? "bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-md"
-                      : "bg-slate-800/90 text-slate-300 border-slate-700/80 hover:bg-slate-700"
-                  )}
-                  title="Toggle Guided Tour Mode (Slows down and explains phases)"
-                >
-                  <Compass className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="hidden md:inline">Tour</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveArchTour(architecture)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition-all border border-slate-700/80 cursor-pointer whitespace-nowrap"
-                  title="Detailed Architecture & Mathematical Guide"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="hidden md:inline">Info</span>
-                </button>
 
                 {TOUR_STEPS[architecture] && (
                   <button
@@ -747,9 +608,23 @@ export default function App() {
                     title="Interactive step-by-step canvas spotlight highlights"
                   >
                     <Eye className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="hidden lg:inline">Spotlight</span>
+                    <span className="hidden sm:inline">Spotlight</span>
                   </button>
                 )}
+
+                <button
+                  onClick={() => setShowGlossary(true)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
+                    showGlossary
+                      ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-950/40"
+                      : "bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700/90 border-slate-700/80"
+                  )}
+                  title="Open Unified Training Documentation, TLDR Notes & Glossary"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Docs & Guide</span>
+                </button>
               </>
             )}
           </div>
@@ -758,241 +633,41 @@ export default function App() {
         {/* Main Interactive Canvas with Subtle Dot-Grid Surface */}
         <div className="flex-1 relative flex min-h-0 min-w-0 bg-dot-grid-subtle">
           <div className="flex-1 relative min-w-0 overflow-y-auto">
-            <SandboxDiagnosticsPanel
-              failureMode={hyperparams.failureMode}
-              architecture={architecture}
-            />
             {renderVisualizer()}
           </div>
-
-          {/* Step-by-Step Status Bar */}
-          {!(isGuidedTour && mode === 'Train') && architecture !== 'Custom Model' && (
-            <div
-              id="step-status-pill"
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 max-w-[92%]"
-            >
-              {isStatusPillMinimized ? (
-                <button
-                  onClick={() => setIsStatusPillMinimized(false)}
-                  className="bg-slate-900/95 hover:bg-slate-800 backdrop-blur-md border border-slate-700/80 px-3.5 py-1.5 rounded-2xl shadow-2xl flex items-center gap-2.5 cursor-pointer transition-all hover:-translate-y-0.5"
-                  title="Click to expand step status details"
-                >
-                  <span className="text-[11px] font-mono text-indigo-300 font-semibold">
-                    {mode === 'Train'
-                      ? `EPOCH ${Math.min(Math.floor(step / 50) + 1, hyperparams.epochs || 100)}/${hyperparams.epochs || 100}`
-                      : `STEP ${step.toString().padStart(4, '0')}`}
-                  </span>
-                  <span className="text-slate-600" aria-hidden="true">·</span>
-                  <span className="text-xs text-slate-300 font-medium font-mono">
-                    {architecture === 'GAN'
-                      ? step % 2 === 0
-                        ? 'D_STEP'
-                        : 'G_STEP'
-                      : step % 10 < 5
-                      ? 'FORWARD'
-                      : 'BACKPROP'}
-                  </span>
-                  <ChevronUp className="w-3.5 h-3.5 text-indigo-400" />
-                </button>
-              ) : (
-                <div
-                  className="bg-slate-900/95 backdrop-blur-md border border-slate-700/90 px-4 py-2 rounded-2xl shadow-2xl flex items-center gap-3 transition-opacity duration-200 hover:opacity-80 cursor-default"
-                  title="Click chevron to minimize"
-                >
-                  <div className="flex items-center gap-2 shrink-0 text-[11px] font-mono">
-                    <span className="text-indigo-300 font-semibold">
-                      {mode === 'Train'
-                        ? `EPOCH ${Math.min(Math.floor(step / 50) + 1, hyperparams.epochs || 100)}/${hyperparams.epochs || 100}`
-                        : `STEP ${step.toString().padStart(4, '0')}`}
-                    </span>
-
-                    {mode === 'Train' && step > 0 && (
-                      <>
-                        <span className="text-slate-600" aria-hidden="true">·</span>
-                        <span
-                          className={cn(
-                            "font-semibold",
-                            architecture === 'GAN'
-                              ? step % 2 === 0
-                                ? "text-emerald-400"
-                                : "text-indigo-400"
-                              : step % 10 < 5
-                              ? "text-indigo-400"
-                              : "text-rose-400"
-                          )}
-                        >
-                          {architecture === 'GAN'
-                            ? step % 2 === 0
-                              ? 'UPDATE D'
-                              : 'UPDATE G'
-                            : step % 10 < 5
-                            ? 'FORWARD'
-                            : 'BACKPROP'}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  <span className="text-slate-700" aria-hidden="true">|</span>
-
-                  <p className="text-xs leading-none m-0 text-slate-200 font-medium whitespace-nowrap flex items-center">
-                    {(() => {
-                      if (step === 0)
-                        return `Ready for ${mode === 'Train' ? 'training' : 'inference'}.`;
-
-                      const currentMetrics = metricsData[metricsData.length - 1];
-                      if (!currentMetrics) return 'Updating state...';
-
-                      if (mode === 'Inference') {
-                        if (architecture === 'GAN')
-                          return `Sampling z ~ N(0, I) → G(z).`;
-                        if (architecture === 'Transformer' || architecture === 'RNN')
-                          return `Predicting next token...`;
-                        if (architecture === 'CNN')
-                          return `Scanning spatial kernels...`;
-                        return `Running forward pass.`;
-                      }
-
-                      if (architecture === 'GAN') {
-                        if (step % 4 === 0) return `Generating fake sample G(z)...`;
-                        if (step % 4 === 1) return `Scoring fake sample D(G(z))...`;
-                        if (step % 4 === 2) return `Scoring real sample D(x)...`;
-                        return `Updating Generator weights...`;
-                      }
-
-                      const isForwardPass = step % 10 < 5;
-                      if (isForwardPass) {
-                        if (architecture === 'CNN')
-                          return `Extracting spatial features...`;
-                        if (architecture === 'Transformer')
-                          return `Computing multi-head attention...`;
-                        if (architecture === 'RNN')
-                          return `Updating recurrent hidden state...`;
-                        return `Computing layer activations...`;
-                      } else {
-                        if (architecture === 'CNN')
-                          return `Updating conv filter weights...`;
-                        return `Backpropagating error gradients...`;
-                      }
-                    })()}
-                  </p>
-
-                  <button
-                    onClick={() => setIsStatusPillMinimized(true)}
-                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors ml-1 shrink-0 cursor-pointer"
-                    title="Minimize status bar"
-                    aria-label="Minimize status bar"
-                  >
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Guided Tour Overlay */}
-        {isGuidedTour && mode === 'Train' && (
-          <>
-            <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] transition-all duration-700 pointer-events-none z-20" />
 
-            {(() => {
-              const tourData =
-                ARCHITECTURE_TOURS[architecture] || ARCHITECTURE_TOURS['Standard NN'];
-              const isQuizTime =
-                step > 0 &&
-                step % tourData.phases.length === 0 &&
-                !isPlaying &&
-                !window.localStorage.getItem(`quiz_${architecture}`);
 
-              if (isQuizTime) {
-                return (
-                  <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-                    <div className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 max-w-md w-full">
-                      <TourQuiz
-                        {...tourData.quiz}
-                        onContinue={() => {
-                          window.localStorage.setItem(`quiz_${architecture}`, '1');
-                          setIsPlaying(true);
-                          setStep((s) => s + 1);
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              }
-
-              const tourPhase = step % tourData.phases.length;
-              const phaseData = tourData.phases[tourPhase];
-              const colorConfig = {
-                indigo: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-                emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-                rose: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-                amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-                purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-              }[phaseData.color];
-
-              return (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto max-w-md w-full px-4">
-                  <div className="bg-slate-900/95 border border-slate-700/90 p-3.5 sm:p-4 rounded-2xl shadow-2xl backdrop-blur-md relative animate-in fade-in slide-in-from-top-2 duration-300">
-                    <button
-                      onClick={toggleGuidedTour}
-                      className="absolute top-2.5 right-2.5 p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
-                      aria-label="Close guided tour"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 font-bold border text-sm mt-0.5 ${colorConfig}`}
-                      >
-                        {tourPhase + 1}
-                      </div>
-                      <div className="flex-1 pr-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono text-slate-400">
-                            Phase {tourPhase + 1} of {tourData.phases.length}
-                          </span>
-                          <span className="text-[10px] font-mono text-indigo-400 font-semibold">
-                            · {phaseData.title}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-300 leading-relaxed mt-1">
-                          {phaseData.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-          </>
-        )}
-
-        {/* Bottom Panel: Playback Controls & Live Metrics Chart */}
+        {/* Bottom Panel: Compact Playback Controls & Floating Metrics HUD (AUDIT-11) */}
         {architecture !== 'Custom Model' && (
-          <div className="h-auto md:h-32 flex flex-col md:flex-row bg-slate-900/95 border-t border-slate-800/80 z-20 shrink-0 shadow-[0_-8px_30px_-10px_rgba(2,6,23,0.8)]">
-            <div className="w-full md:w-[40%] md:min-w-[300px] border-b md:border-b-0 md:border-r border-slate-800/80 flex flex-col">
-              <PlaybackControls
-                isPlaying={isPlaying}
-                togglePlay={() => setIsPlaying(!isPlaying)}
-                stepForward={() => setStep((s) => s + 1)}
-                stepBackward={() => setStep((s) => Math.max(0, s - 1))}
-                reset={resetSimulation}
-                speed={speed}
-                setSpeed={setSpeed}
-                onExportResults={handleExportResults}
-              />
+          <>
+            <MetricsHUD
+              data={metricsData}
+              isOverfitting={hyperparams.failureMode === 'Overfitting'}
+              failureMode={hyperparams.failureMode}
+              architecture={architecture}
+              step={step}
+              mode={mode}
+              epochs={hyperparams.epochs}
+              onOpenGlossary={() => setShowGlossary(true)}
+            />
+
+            <div className="h-16 flex items-center justify-center bg-slate-900/95 border-t border-slate-800/80 z-20 shrink-0 shadow-[0_-4px_25px_rgba(2,6,23,0.7)] px-4">
+              <div className="w-full max-w-xl">
+                <PlaybackControls
+                  isPlaying={isPlaying}
+                  togglePlay={() => setIsPlaying(!isPlaying)}
+                  stepForward={() => setStep((s) => s + 1)}
+                  stepBackward={() => setStep((s) => Math.max(0, s - 1))}
+                  reset={resetSimulation}
+                  speed={speed}
+                  setSpeed={setSpeed}
+                  onExportResults={handleExportResults}
+                />
+              </div>
             </div>
-            <div className="hidden md:flex flex-1 px-3 py-2 min-w-0 flex-col overflow-visible">
-              <MetricsChart
-                data={metricsData}
-                isOverfitting={hyperparams.failureMode === 'Overfitting'}
-                architecture={architecture}
-              />
-            </div>
-          </div>
+          </>
         )}
       </div>
 
@@ -1004,13 +679,6 @@ export default function App() {
         onComplete={closeSpotlight}
       />
       {showWelcome && <WelcomeTour onClose={closeWelcome} architecture={architecture} />}
-      {activeArchTour && !showWelcome && (
-        <ArchitectureTour
-          architecture={activeArchTour}
-          onClose={closeArchitectureTour}
-          onStartSpotlight={() => setActiveSpotlightArch(activeArchTour)}
-        />
-      )}
     </div>
   );
 }

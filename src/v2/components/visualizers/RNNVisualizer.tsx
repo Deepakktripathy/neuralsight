@@ -13,6 +13,7 @@ interface RNNVisualizerProps {
   step: number;
   mode: Mode;
   dataSource: DataSource;
+  onOpenGlossary?: () => void;
 }
 
 type RNNViewMode = 'unrolled' | 'folded';
@@ -21,7 +22,8 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
   hyperparams, 
   step, 
   mode, 
-  dataSource 
+  dataSource,
+  onOpenGlossary,
 }) => {
   const [viewMode, setViewMode] = useState<RNNViewMode>('unrolled');
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
@@ -129,7 +131,6 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_65%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-15 pointer-events-none" />
 
       {/* Top Header Controls: View Switcher & Dataset Config */}
       <div className="w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-2xl p-4 backdrop-blur-md shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 z-20">

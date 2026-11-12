@@ -3,8 +3,8 @@ import { motion } from 'motion/react';
 import { Hyperparameters, Mode, UseCase, DataSource } from '../../types';
 import { LayerTooltip } from '../LayerTooltip';
 import { getArchitectureTooltip } from '../../utils/tooltips';
-import { CNNLiveConvolution } from './CNNLiveConvolution';
-import { CNNImageDigitizer, CNN_SAMPLES_BY_DATASET, CNNSampleImage } from './CNNImageDigitizer';
+import { CNNUnifiedConvolution } from './CNNUnifiedConvolution';
+import { CNN_SAMPLES_BY_DATASET, CNNSampleImage } from './CNNImageDigitizer';
 
 interface CNNVisualizerProps {
   hyperparams: Hyperparameters;
@@ -12,9 +12,19 @@ interface CNNVisualizerProps {
   mode: Mode;
   useCase: UseCase;
   dataSource?: DataSource;
+  isPlaying?: boolean;
+  onOpenGlossary?: () => void;
 }
 
-export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource }) => {
+export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
+  hyperparams,
+  step,
+  mode,
+  useCase,
+  dataSource,
+  isPlaying = false,
+  onOpenGlossary,
+}) => {
   const datasetKey = useMemo(() => {
     if (dataSource?.includes('CIFAR')) return 'cifar';
     if (dataSource?.includes('Medical')) return 'xray';
@@ -24,6 +34,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
   const defaultSamples = CNN_SAMPLES_BY_DATASET[datasetKey] || CNN_SAMPLES_BY_DATASET.mnist;
   const [selectedSample, setSelectedSample] = useState<CNNSampleImage>(defaultSamples[0]);
   const [hoveredCellIdx, setHoveredCellIdx] = useState<number | null>(null);
+  const [isStage1Scanning, setIsStage1Scanning] = useState(false);
 
   // Update selected sample when dataset changes
   useEffect(() => {
@@ -97,41 +108,36 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
 
   return (
     <div className="w-full min-h-full flex flex-col items-center justify-start p-4 relative bg-slate-950 gap-6 pb-28">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
-
-      {/* Stage 1: Real Image Ingestion & Digitization Pipeline */}
+      {/* Unified Stage 1: Optical Scan, Single 6×6 Tensor & 3×3 Live Convolution Arithmetic (AUDIT-01 & AUDIT-03) */}
       <div className="w-full flex justify-center relative z-20">
-        <CNNImageDigitizer
+        <CNNUnifiedConvolution
           dataSource={dataSource}
           selectedSample={selectedSample}
           onSelectSample={setSelectedSample}
           hoveredCellIdx={hoveredCellIdx}
           onHoverCell={setHoveredCellIdx}
-        />
-      </div>
-
-      {/* Stage 2: Sliding 3x3 Convolution Math on Digits */}
-      <div className="w-full flex justify-center relative z-20">
-        <CNNLiveConvolution 
-          step={step} 
-          dataSource={dataSource} 
-          sampleGrid={selectedSample.grid}
-          sampleName={selectedSample.name}
+          isPlaying={isPlaying}
+          step={step}
           stride={hyperparams.stride || 1}
+          onScanStateChange={setIsStage1Scanning}
+          onOpenGlossary={onOpenGlossary}
         />
       </div>
 
-      {/* Stage 3: Neural Network Propagation Pipeline */}
+      {/* Stage 2: Deep Feature Hierarchy & Classification */}
       <div className="w-full max-w-5xl bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm relative z-20 mb-8">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-200">
-              Stage 3: Deep Feature Hierarchy & Classification
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 mb-6 gap-3">
+          <div className="flex items-center gap-2 font-mono">
+            <span className={`w-2 h-2 rounded-full bg-indigo-500 ${isPlaying ? 'animate-pulse' : ''}`} />
+            <span className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+              02. Deep Feature Hierarchy & Classification
+            </span>
+            <span className="text-slate-600">·</span>
+            <span className="text-[11px] text-slate-400">
+              Conv2D → MaxPool → Dense
             </span>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">
+          <span className="text-[11px] font-mono text-slate-400">
             Active Sample: <span className="text-indigo-300 font-semibold">{selectedSample.name}</span>
           </span>
         </div>
@@ -148,7 +154,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
                 
                 {layer.type === '2d' || layer.type === 'conv' || layer.type === 'pool' ? (
                   <div 
-                    className="grid gap-1 p-2 bg-slate-900 rounded-lg border border-slate-800 shadow-lg"
+                    className="grid gap-1 p-1.5 bg-slate-950/80 rounded-xl border border-slate-800/80"
                     style={{ gridTemplateColumns: `repeat(${layer.size}, minmax(0, 1fr))` }}
                     id={
                       layer.type === 'conv' || lIdx === 1
@@ -203,7 +209,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
                       return (
                         <motion.div
                           key={nIdx}
-                          className="w-5 h-5 sm:w-7 sm:h-7 rounded-sm relative group hover:z-50 cursor-crosshair overflow-hidden flex items-center justify-center border border-slate-700/60"
+                          className="w-5 h-5 sm:w-7 sm:h-7 rounded-sm relative group hover:z-50 cursor-crosshair overflow-hidden flex items-center justify-center border border-slate-800/80"
                           animate={{
                             backgroundColor: isNaN ? 'rgba(244, 63, 94, 0.6)' : `rgba(99, 102, 241, ${act * 0.4})`,
                             scale: mode === 'Train' && act > 0.8 ? 1.08 : 1,
@@ -236,7 +242,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
                   </div>
                 ) : (
                   /* Output Layer with Real Class Labels */
-                  <div className="flex flex-col gap-2 p-3 bg-slate-900 rounded-lg border border-slate-800 min-w-[140px]">
+                  <div className="flex flex-col gap-2 p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80 min-w-[140px]">
                     {classLabels.map((lbl, nIdx) => {
                       const act = getActivation(lIdx, nIdx);
                       const isPredicted = act > 0.5;
@@ -268,7 +274,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({ hyperparams, step,
               {lIdx < layers.length - 1 && (
                 <div className="relative flex-1 h-8 flex items-center justify-center mx-2 -z-10">
                   <div className="absolute w-full h-0.5 bg-gradient-to-r from-indigo-500/10 via-indigo-500/50 to-indigo-500/10" />
-                  {mode === 'Train' && (
+                  {mode === 'Train' && isPlaying && (
                     <motion.div 
                       className="absolute w-full h-0.5 bg-gradient-to-l from-rose-500/0 via-rose-500 to-rose-500/0"
                       animate={{

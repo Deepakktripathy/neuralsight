@@ -15,6 +15,7 @@ interface RLVisualizerProps {
   mode: Mode;
   dataSource?: DataSource;
   isSpotlightOpen?: boolean;
+  onOpenGlossary?: () => void;
 }
 
 type DQNViewTab = 'environment' | 'mechanics';
@@ -24,7 +25,8 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
   step,
   mode,
   dataSource = 'Gridworld Maze',
-  isSpotlightOpen = false
+  isSpotlightOpen = false,
+  onOpenGlossary,
 }) => {
   const [activeTab, setActiveTab] = useState<DQNViewTab>('environment');
   const [isMathModalOpen, setIsMathModalOpen] = useState(false);
@@ -191,7 +193,6 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_65%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-15 pointer-events-none" />
 
       {/* Top Header Controls: View Switcher (Environment vs Replay Buffer) */}
       <div className="w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-2xl p-4 backdrop-blur-md shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 z-20">

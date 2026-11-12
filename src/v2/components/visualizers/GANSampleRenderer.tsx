@@ -312,10 +312,10 @@ export const GANSampleRenderer: React.FC<GANSampleRendererProps> = ({
   }[size];
 
   const borderClass = isReal
-    ? 'border-emerald-500/50 shadow-[0_0_15px_rgba(52,211,153,0.15)] ring-1 ring-emerald-500/30'
+    ? 'border-emerald-500/60 shadow-[0_0_12px_rgba(52,211,153,0.12)]'
     : failureMode === 'Mode Collapse'
-    ? 'border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.2)] ring-1 ring-rose-500/40'
-    : 'border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)] ring-1 ring-indigo-500/30';
+    ? 'border-rose-500/70 shadow-[0_0_12px_rgba(244,63,94,0.15)]'
+    : 'border-indigo-500/60 shadow-[0_0_12px_rgba(99,102,241,0.15)]';
 
   return (
     <div className={`flex flex-col items-center gap-1.5 ${className}`}>

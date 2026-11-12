@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Play, Pause, RotateCcw, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { InfoTooltip } from '../InfoTooltip';
 
 interface CNNLiveConvolutionProps {
   step: number;
@@ -9,6 +8,7 @@ interface CNNLiveConvolutionProps {
   sampleGrid?: number[];
   sampleName?: string;
   stride?: 1 | 2 | 3;
+  isGlobalPlaying?: boolean;
 }
 
 export const CNNLiveConvolution: React.FC<CNNLiveConvolutionProps> = ({ 
@@ -16,7 +16,8 @@ export const CNNLiveConvolution: React.FC<CNNLiveConvolutionProps> = ({
   dataSource, 
   sampleGrid, 
   sampleName,
-  stride = 1
+  stride = 1,
+  isGlobalPlaying = false,
 }) => {
   // Input dimensions: 6x6, Kernel: 3x3
   // Compute valid top-left window origins based on stride
@@ -36,16 +37,29 @@ export const CNNLiveConvolution: React.FC<CNNLiveConvolutionProps> = ({
   const totalSteps = outputDim * outputDim; // 16 or 4
 
   // Autonomous sliding window animation state (0 to totalSteps - 1)
+  // Defaults to paused (false) until user starts CNN training Play or clicks Slide
   const [windowStep, setWindowStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(Boolean(isGlobalPlaying));
   const [speed, setSpeed] = useState<number>(750); // ms per step
   const [hoveredFeatureCell, setHoveredFeatureCell] = useState<number | null>(null);
 
-  // Reset windowStep if stride changes and causes out-of-bounds step
+  // Sync sliding window playback with main CNN training Play/Pause button
+  useEffect(() => {
+    setIsPlaying(Boolean(isGlobalPlaying));
+  }, [isGlobalPlaying]);
+
+  // Reset window to top-left when main simulation is reset
+  useEffect(() => {
+    if (globalStep === 0 && !isGlobalPlaying) {
+      setWindowStep(0);
+    }
+  }, [globalStep, isGlobalPlaying]);
+
+  // Reset windowStep if stride or sample changes
   useEffect(() => {
     setWindowStep(0);
     setHoveredFeatureCell(null);
-  }, [stride]);
+  }, [stride, sampleName]);
 
   // Auto-play sliding window across all positions (0..totalSteps - 1)
   useEffect(() => {
@@ -182,16 +196,15 @@ export const CNNLiveConvolution: React.FC<CNNLiveConvolutionProps> = ({
       {/* Header with Title and Interactive Sliding Window Controls */}
       <div className="flex flex-wrap items-center justify-between border-b border-slate-800/90 pb-3 mb-4 gap-3">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
+          <span className={`w-2.5 h-2.5 rounded-full bg-indigo-400 ${isPlaying ? 'animate-pulse' : ''}`} />
           <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide">
             Stage 2: Live 3×3 Convolution Kernel & Sliding Window Math
           </h4>
           <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-semibold">
             Window {activeCycle + 1} / {totalSteps}
           </span>
-          <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-semibold flex items-center gap-1">
+          <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-semibold">
             Stride {stride}px
-            <InfoTooltip content={`With input 6×6, kernel 3×3, and stride ${stride}px, the window advances ${stride} pixels at a time, generating a ${outputDim}×${outputDim} feature map.`} />
           </span>
         </div>
 
@@ -279,7 +292,7 @@ export const CNNLiveConvolution: React.FC<CNNLiveConvolutionProps> = ({
         {/* Source Grid (6x6) with Animated Sliding Receptive Field */}
         <div className="flex flex-col items-center gap-2">
           <span className="text-[11px] font-medium text-indigo-300 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span className={`w-1.5 h-1.5 rounded-full bg-indigo-400 ${isPlaying ? 'animate-pulse' : ''}`} />
             {sampleName ? `${sampleName} (6×6 Grid)` : dataSource ? `${dataSource.split(' ')[0]} (6×6)` : 'Input Image (6×6)'}
           </span>
 

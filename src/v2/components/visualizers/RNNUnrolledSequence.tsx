@@ -50,13 +50,11 @@ export const RNNUnrolledSequence: React.FC<RNNUnrolledSequenceProps> = ({
           </span>
         </div>
 
-        {/* Training Phase Pill */}
-        <div className="flex items-center gap-2">
+        {/* Training Phase & Failure Mode Indicator (AUDIT-10: Zero-Pill Discipline) */}
+        <div className="flex items-center gap-3 font-mono text-xs flex-wrap">
           {mode === 'Train' && (
-            <div className={`px-3 py-1 rounded-full text-xs font-mono font-semibold border flex items-center gap-1.5 ${
-              isBackprop 
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm shadow-rose-500/20' 
-                : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+            <div className={`flex items-center gap-1.5 font-medium ${
+              isBackprop ? 'text-rose-400' : 'text-indigo-300'
             }`}>
               {isBackprop ? (
                 <>
@@ -73,7 +71,8 @@ export const RNNUnrolledSequence: React.FC<RNNUnrolledSequenceProps> = ({
           )}
 
           {(isVanishing || isExploding) && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/60 border border-rose-500/50 text-xs font-mono text-rose-300">
+            <div className="flex items-center gap-1.5 text-rose-400 font-medium">
+              <span className="text-slate-600">·</span>
               <AlertTriangle className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
               <span>{isVanishing ? 'Vanishing Gradients Active' : 'Exploding Gradients Active'}</span>
             </div>

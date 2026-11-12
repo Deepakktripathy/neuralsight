@@ -1,11 +1,14 @@
 # NeuralSight — Interactive Deep Learning Architecture & Dynamics Visualizer
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18+-61dafb.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-3178c6.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19+-61dafb.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646cff.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38bdf8.svg)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An interactive, browser-native exploratory simulator designed to make deep learning architectures, tensor flows, backpropagation gradients, and adversarial game equilibria **tangible, visual, and intuitive**.
+
+The app uses a guided three-stage flow — **01. Architecture Selection → 02. Problem Setup → 03. Interactive Studio** — so you can pick a model family, define the task and dataset, then tune the simulation live without losing the mathematical context.
 
 ---
 
@@ -24,9 +27,11 @@ An interactive, browser-native exploratory simulator designed to make deep learn
    - [6. Standard Multilayer Perceptrons (MLP)](#6-standard-multilayer-perceptrons-mlp)
    - [7. Custom Model Architect](#7-custom-model-architect)
 6. [Interactive Controls & Navigation](#interactive-controls--navigation)
+   - [3-Stage Guided Workflow](#3-stage-guided-workflow)
    - [Top Navigation Bar](#top-navigation-bar)
    - [Hyperparameter & Diagnostics Sidebar](#hyperparameter--diagnostics-sidebar)
-   - [Playback & Micro-Stepping Controller](#playback--micro-stepping-controller)
+   - [Playback & Floating Metrics HUD](#playback--floating-metrics-hud)
+   - [Training Companion & Glossary](#training-companion--glossary)
 7. [How to Read & Interpret Every Graphic](#how-to-read--interpret-every-graphic)
    - [GAN: Scores, Losses & Nash Equilibrium](#gan-scores-losses--nash-equilibrium)
    - [GAN: Batch Diversity & Mode Collapse](#gan-batch-diversity--mode-collapse)
@@ -86,8 +91,8 @@ Fine-tune learning rates, toggle optimizers (Adam, SGD, RMSprop), trigger simula
 
 ![Controls and Diagnostics](docs/screenshots/controls_and_diagnostics.jpg)
 
-### Inference Mode, Latent Manifold Morphing & Diversity Inspection
-In Inference Mode, drag continuous sliders across the Gaussian latent manifold $z \sim \mathcal{N}(0, I)$ to observe smooth feature morphing, or toggle 2×2 batch grids to monitor output entropy.
+### Latent Walk, Manifold Morphing & Diversity Inspection
+Switch the GAN view to **Latent Walk** to interpolate between two latent seeds ($z_A \leftrightarrow z_B$) and watch features morph smoothly across the Gaussian latent manifold $z \sim \mathcal{N}(0, I)$, or use the **Batch Grid** to inspect output diversity and entropy.
 
 ![Latent Morph and Diversity](docs/screenshots/latent_morph_and_diversity.jpg)
 
@@ -104,12 +109,14 @@ In Inference Mode, drag continuous sliders across the Gaussian latent manifold $
   * **Discriminator $D(x)$:** Strided Conv2D layers ($12\times12 \to 6\times6 \to 3\times3$) with Sigmoid classification.
   * **Adversarial Tug-of-War Bar:** Live game balance tracker showing Nash Equilibrium (50% / 50%).
   * **Batch Diversity Grid:** 2×2 multi-seed grid ($z_1, z_2, z_3, z_4$) with entropy indicators.
+  * **Latent Walk:** Smooth interpolation between two latent seeds ($z_A \leftrightarrow z_B$) to explore how individual generator features morph.
 
 ### 2. Convolutional Neural Networks (CNN)
 * **Mathematical Core:** $(I * K)(i, j) = \sum_m \sum_n I(i-m, j-n) K(m, n)$
 * **Visual Components:**
+  * **Unified Optical Scan & Convolution Pipeline:** A single card walks through raw optical scanning, quantization into a 6×6 tensor, a live 3×3 sliding window, and the resulting 4×4 feature map — synchronized with the global Play / Step / Reset transport.
   * **Input Layer:** 2D pixel matrices representing input datasets (MNIST, CIFAR, Fashion).
-  * **Sliding Convolutional Kernels:** Animated filters highlighting local receptive fields.
+  * **Sliding Convolutional Kernels:** Animated filters highlighting local receptive fields and computing live dot products.
   * **Feature Maps:** Intermediate activation channels detecting edges, contours, and high-level textures.
   * **Max Pooling:** Spatial downsampling operations preserving peak activations.
   * **Dense Classification Head:** Flattened feature vectors connected to softmax class probabilities.
@@ -152,28 +159,38 @@ In Inference Mode, drag continuous sliders across the Gaussian latent manifold $
 
 ## Interactive Controls & Navigation
 
+### 3-Stage Guided Workflow
+
+NeuralSight uses progressive disclosure to keep the interface focused at every step:
+
+1. **01. Architecture Selection Hub:** Browse all seven model families in a responsive card grid, each with its domain tag, key mechanism, and suggested use cases. A quick-launch shortcut skips straight into the Studio.
+2. **02. Problem Setup:** Define the task objective and target dataset/distribution, preview dataset samples, and hand off to the Studio's live tuning controls.
+3. **03. Interactive Studio:** The full simulation workspace. A sidebar stage switcher (`01. Models · 02. Setup · 03. Studio`) keeps navigation authoritative, while the header always shows the active architecture acronym and full name.
+
+Shared modals — Dataset Preview, Training Companion, Quick-Start Guide, and Code Export — remain available across stages.
+
 ### Top Navigation Bar
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 🧠 Neural Canvas │ [Model Dropdown] │ [Dataset] │ [Train | Inference] │ Model Info │ Canvas Tour │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🧠 NeuralSight │ 01. Architecture → 02. Setup → 03. Studio │ Code · Tour · Info │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Architecture Selector:** Instantly switches the simulation between GAN, CNN, Transformer, RNN, DQN, Standard NN, or Custom.
-* **Dataset Selector & Preview:** Choose between canonical benchmark datasets (e.g., CelebA Faces, MNIST Digits, Fashion, Synthetic Gaussian Clusters). Clicking **Preview** opens the Dataset Inspector displaying sample distributions.
-* **Mode Toggle (`Train` vs. `Inference`):**
-  * **Train Mode:** Full forward-backward cycle, weight updates, loss calculations, and adversarial score shifts.
-  * **Inference Mode:** Static weights; enables exploratory tools like the **Latent Morph Slider** to explore generative manifolds.
-* **Comparison Mode:** Activates split-screen view to pit two architectures against each other side-by-side on identical tasks.
-* **Model Info (`BookOpen`):** Opens a rich mathematical guide detailing formulas, loss derivations, architectural diagrams, and failure pathologies.
+* **Architecture Selector (Stage 1):** Instantly switches the simulation between GAN, CNN, Transformer, RNN, DQN, Standard NN, or Custom Model.
+* **Problem Setup & Dataset Preview (Stage 2):** Choose between canonical benchmark datasets (e.g., CelebA Faces, MNIST Digits, Fashion, Synthetic Gaussian Clusters). Clicking **Preview** opens the Dataset Inspector displaying sample distributions.
+* **Studio Header (Stage 3):** Displays the active model title and full name, with a sidebar toggle (`PanelLeftOpen`) for desktop and mobile layouts.
+* **Quick-Start Guide (`HelpCircle`):** Opens the guided Welcome Tour covering the core concepts of the current architecture.
 * **Canvas Tour (`Eye`):** Launches an interactive step-by-step spotlight tour that highlights key modules directly on the live canvas.
-* **Glossary (`HelpCircle`):** Slide-out dictionary defining over 40 machine learning concepts, equations, and acronyms.
+* **Docs & Guide (`BookOpen`):** Opens the unified Training Companion with architecture documentation, training TLDR notes, and a searchable glossary.
 * **Code Export (`Code2`):** Generates copy-pasteable, production-ready implementation scripts in PyTorch, TensorFlow, or JAX.
+* **Always-on training:** There is no separate Inference toggle — every simulation runs a full forward/backward cycle with live metrics, failure-mode diagnostics, and weight updates.
 
 ---
 
 ### Hyperparameter & Diagnostics Sidebar
+
+The collapsible Studio sidebar opens with the `01. Models · 02. Setup · 03. Studio` stage switcher and a one-click **`{Architecture} Glossary & TLDR`** launcher, followed by live tuning sections for the active model.
 
 #### 1. Core Training Dynamics
 
@@ -206,15 +223,29 @@ When switching between neural network architectures, the sidebar dynamically ada
 
 ---
 
-### Playback & Micro-Stepping Controller
+### Playback & Floating Metrics HUD
 
 * **Play / Pause (`Space`):** Starts or pauses live continuous training loops.
 * **Step Forward (`Step`):** Advances exactly one micro-step (e.g., single forward pass, single backpropagation update).
+* **Back Step:** Rewinds one recorded micro-step to inspect the previous state.
 * **Reset:** Reinitializes all weights, biases, and latent vectors with fresh random seed distributions.
 * **Speed Scrubber:** Adjusts simulation speed between `0.25x` (slow-motion tensor analysis) and `4.0x` (rapid convergence).
+* **Floating Metrics HUD:** A compact corner card shows live `Loss`, `Accuracy`, `L_G`, `L_D`, and `D(G(z))` values. Expand it with one click to open the full interactive metrics chart without permanently docking vertical space.
 * **Step Status Pill:** Floating pill at the canvas base explaining the exact current operation (e.g., `EPOCH 2/10 • D_STEP • Discriminator evaluating fake batch`).
   * *Minimize button:* Collapses the pill into a compact chip.
   * *Hover transparency:* Hovering over the pill turns it 80% transparent to inspect graphics beneath.
+
+---
+
+### Training Companion & Glossary
+
+The **Docs & Guide** drawer adapts to the active architecture and provides three tabs:
+
+* **Architecture Docs:** Stage-by-stage documentation of the selected model's forward and backward computations.
+* **Training TLDR:** What to expect during training — early phase, convergence, and failure-mode watch-outs.
+* **Glossary:** A searchable dictionary spanning architecture-specific terms and universal training fundamentals (`Core Metrics`, `Optimization`, `Diagnostics`), including inline mathematical formulas.
+
+Launch it from the sidebar's **`{Architecture} Glossary & TLDR`** button, the Studio header **Docs & Guide** button, or the floating Metrics HUD.
 
 ---
 
@@ -287,6 +318,7 @@ Toggle the view above the synthetic sample between **Single Focus** and **Batch 
 
 ### Live Metrics Dashboard & Overfitting Alerts
 
+* **Floating Metrics HUD:** Starts as a compact glassmorphism card in the bottom-right corner; click to expand the full chart and inspect loss/accuracy trajectories over time.
 * **Loss Curve ($\mathcal{L}$):**
   * Standard Supervised Models: Monotonically decreasing curve toward zero.
   * GAN Models: Oscillating curves where $\mathcal{L}_G$ and $\mathcal{L}_D$ fluctuate in dynamic balance around $\ln 2 \approx 0.693$.
@@ -318,8 +350,8 @@ Clicking the **Export Code** (`Code2`) button in the top navigation bar opens an
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/neural-canvas.git
-   cd neural-canvas
+   git clone https://github.com/Deepakktripathy/neuralsight.git
+   cd neuralsight
    ```
 
 2. **Install dependencies:**
@@ -343,12 +375,13 @@ Clicking the **Export Code** (`Code2`) button in the top navigation bar opens an
 
 ## Technology Stack
 
-* **Framework:** [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-* **Build Tool:** [Vite](https://vitejs.dev/)
-* **Styling & UI:** [Tailwind CSS](https://tailwindcss.com/)
+* **Framework:** [React 19](https://react.dev/) + [TypeScript 5.8](https://www.typescriptlang.org/)
+* **Build Tool:** [Vite 6](https://vitejs.dev/)
+* **Styling & UI:** [Tailwind CSS 4](https://tailwindcss.com/)
 * **Vector Icons:** [Lucide React](https://lucide.dev/)
-* **Animation & Transitions:** [Framer Motion](https://motion.dev/)
+* **Animation & Transitions:** [Motion](https://motion.dev/)
 * **Charts & Analytics:** [Recharts](https://recharts.org/)
+* **Graph Layout:** [Dagre](https://github.com/dagrejs/dagre) + [React Flow](https://reactflow.dev/)
 
 ---
 

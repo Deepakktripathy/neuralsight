@@ -16,20 +16,13 @@ import {
   FileJson,
   X,
   Sliders,
-  LayoutGrid,
-  SlidersHorizontal,
   Eye,
   Gauge,
-  Network,
-  Grid,
-  Cpu,
-  Repeat,
-  Layers,
-  Compass,
   ChevronDown,
+  PanelLeftClose,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { InfoTooltip } from './InfoTooltip';
 import { FAILURE_MODES_BY_ARCH } from '../lib/failureModes';
 import { ARCHITECTURE_METADATA } from '../lib/architectureConfig';
 
@@ -52,17 +45,8 @@ interface SidebarProps {
   setCustomModelFile: (f: File | null) => void;
   onOpenArchHub?: () => void;
   onOpenConfigPage?: () => void;
+  onOpenGlossary?: () => void;
 }
-
-const ARCH_ICONS: Record<Architecture, React.ComponentType<{ className?: string }>> = {
-  'Standard NN': Network,
-  'CNN': Grid,
-  'Transformer': Cpu,
-  'RNN': Repeat,
-  'GAN': Layers,
-  'DQN': Compass,
-  'Custom Model': UploadCloud,
-};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   className,
@@ -82,13 +66,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCustomModelFile,
   onOpenArchHub,
   onOpenConfigPage,
+  onOpenGlossary,
 }) => {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const [modelDragActive, setModelDragActive] = useState(false);
   const [openSection, setOpenSection] = useState<'data' | 'hyperparams' | 'topology' | 'failure' | null>('hyperparams');
 
   const meta = ARCHITECTURE_METADATA[architecture];
-  const ArchIcon = ARCH_ICONS[architecture];
 
   const handleModelDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -133,72 +117,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors md:hidden"
-            aria-label="Close sidebar"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
           >
-            <X className="w-4 h-4" />
+            <PanelLeftClose className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Active Architecture Feature Card (replaces the cluttered 7-button list) */}
-      <div className="rounded-2xl bg-slate-950/80 border border-slate-800/90 p-3.5 shadow-lg mb-4 space-y-3">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-            <ArchIcon className="w-4 h-4 text-indigo-400" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] font-medium text-indigo-400">
-              Active Architecture
-            </div>
-            <div className="text-sm font-bold text-white truncate">
-              {meta.title}
-            </div>
-            <div className="text-[11px] text-slate-400 truncate">
-              {meta.fullName}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <button
-            onClick={onOpenArchHub}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-[11px] font-semibold bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition-all duration-150 hover:-translate-y-0.5 cursor-pointer shadow-sm"
-          >
-            <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Switch Model</span>
-          </button>
-          <button
-            onClick={onOpenConfigPage}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-[11px] font-semibold bg-indigo-600/15 hover:bg-indigo-600/25 text-indigo-300 border border-indigo-500/30 transition-all duration-150 hover:-translate-y-0.5 cursor-pointer shadow-sm"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Full Setup</span>
-          </button>
+      {/* Stage Navigation Stepper: [01. Models] [02. Setup] [03. Studio] */}
+      <div className="mb-3.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800/80 grid grid-cols-3 gap-1 text-[11px] font-medium">
+        <button
+          onClick={onOpenArchHub}
+          className="px-1 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer text-center group"
+          title="Go to Stage 1: Architecture Selection Hub"
+        >
+          <span className="text-[9px] font-mono text-slate-500 group-hover:text-indigo-400 leading-none">01</span>
+          <span className="font-semibold truncate">Models</span>
+        </button>
+        <button
+          onClick={onOpenConfigPage}
+          className="px-1 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer text-center group"
+          title="Go to Stage 2: Problem Setup & Dataset Preview"
+        >
+          <span className="text-[9px] font-mono text-slate-500 group-hover:text-indigo-400 leading-none">02</span>
+          <span className="font-semibold truncate">Setup</span>
+        </button>
+        <div
+          className="px-1 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold flex flex-col items-center justify-center gap-0.5 text-center shadow-sm ring-1 ring-indigo-400/40 select-none cursor-default"
+          title="Stage 3: Interactive Simulation Studio (Active)"
+        >
+          <span className="text-[9px] font-mono text-indigo-200 leading-none">03</span>
+          <span className="font-semibold truncate">Studio</span>
         </div>
       </div>
 
-      {/* Mode Switcher (Train vs Inference) */}
-      {architecture !== 'Custom Model' && setMode && (
-        <div className="mb-4">
-          <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800/90 shadow-inner">
-            {(['Train', 'Inference'] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={cn(
-                  "py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-                  mode === m
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-slate-200"
-                )}
-              >
-                {m}
-              </button>
-            ))}
+      {/* Quick Architecture Glossary & Training TLDR Launcher */}
+      {onOpenGlossary && (
+        <button
+          onClick={onOpenGlossary}
+          className="mb-3.5 py-1.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-indigo-300 flex items-center justify-between transition-all group cursor-pointer shadow-xs"
+          title={`Open ${architecture} Glossary & Training TLDR`}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
+            <span className="font-semibold text-[11px] truncate">{architecture} Glossary & TLDR</span>
           </div>
-        </div>
+          <span className="text-[10px] font-mono text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
+            Open ↗
+          </span>
+        </button>
       )}
+
 
       {/* Custom Model File Inspector */}
       {architecture === 'Custom Model' && (
@@ -320,7 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       {meta.dataSourceCategoryLabel}
                     </label>
                     <button
-                      onClick={() => onPreviewDataSource(dataSource, null)}
+                      onClick={() => onPreviewDataSource(dataSource, customModelFile)}
                       className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 cursor-pointer"
                     >
                       <Eye className="w-3 h-3" />
@@ -365,9 +336,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="px-3.5 pb-3.5 pt-2 space-y-3.5 border-t border-slate-800/60">
                 {/* Learning Rate */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                  <label className="text-[11px] font-medium text-slate-300 block">
                     Learning Rate
-                    <InfoTooltip content="Step size at each iteration while moving toward a minimum of the loss function." />
                   </label>
                   <select
                     value={hyperparams.learningRate}
@@ -388,9 +358,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {/* Optimizer */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                  <label className="text-[11px] font-medium text-slate-300 block">
                     Optimizer
-                    <InfoTooltip content="Algorithm used to update network weights from computed gradients." />
                   </label>
                   <div className="grid grid-cols-3 gap-1.5">
                     {(['Adam', 'SGD', 'RMSprop'] as Optimizer[]).map((opt) => (
@@ -414,9 +383,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 {/* Loss Function */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium text-slate-300 flex items-center">
+                  <label className="text-[11px] font-medium text-slate-300 block">
                     Loss Function
-                    <InfoTooltip content="Mathematical objective measuring discrepancy between predictions and ground truth." />
                   </label>
                   <select
                     value={hyperparams.lossFunction}

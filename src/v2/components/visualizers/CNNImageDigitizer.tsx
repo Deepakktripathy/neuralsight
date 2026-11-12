@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Play, RotateCcw, Scan, Sparkles, Layers, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion } from 'motion/react';
+import { Scan, Sparkles, ArrowRight, Check } from 'lucide-react';
 import { DataSource } from '../../types';
-import { InfoTooltip } from '../InfoTooltip';
 
 export interface CNNSampleImage {
   id: string;
@@ -305,6 +304,9 @@ interface CNNImageDigitizerProps {
   selectedSample: CNNSampleImage;
   hoveredCellIdx: number | null;
   onHoverCell: (idx: number | null) => void;
+  isPlaying?: boolean;
+  step?: number;
+  onScanStateChange?: (isScanning: boolean) => void;
 }
 
 export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
@@ -312,10 +314,17 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
   onSelectSample,
   selectedSample,
   hoveredCellIdx,
-  onHoverCell
+  onHoverCell,
+  isPlaying = false,
+  step = 0,
+  onScanStateChange,
 }) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(1); // 0 to 1
+  const [hasScanned, setHasScanned] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0); // 0 to 1
+  const scannedSampleIdRef = useRef<string | null>(null);
+  const onScanStateChangeRef = useRef(onScanStateChange);
+  onScanStateChangeRef.current = onScanStateChange;
 
   const datasetKey = useMemo(() => {
     if (dataSource?.includes('CIFAR')) return 'cifar';
@@ -325,35 +334,82 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
 
   const samples = CNN_SAMPLES_BY_DATASET[datasetKey] || CNN_SAMPLES_BY_DATASET.mnist;
 
-  // Trigger scanning laser animation
-  const triggerScan = () => {
+  // Reset scan state when simulation is reset to step 0 while paused
+  useEffect(() => {
+    if (step === 0 && !isPlaying) {
+      scannedSampleIdRef.current = null;
+      setHasScanned(false);
+      setIsScanning(false);
+      setScanProgress(0);
+      onScanStateChangeRef.current?.(false);
+    }
+  }, [step, isPlaying]);
+
+  // If user selects a different sample while paused, mark it as needing scan on Play
+  useEffect(() => {
+    if (!isPlaying && scannedSampleIdRef.current !== selectedSample.id) {
+      setHasScanned(false);
+      setScanProgress(0);
+    }
+  }, [selectedSample.id, isPlaying]);
+
+  // Run the 1-pass optical scan when the user hits Play (or switches samples while playing)
+  useEffect(() => {
+    if (!isPlaying) {
+      setIsScanning(false);
+      onScanStateChangeRef.current?.(false);
+      return;
+    }
+
+    if (scannedSampleIdRef.current === selectedSample.id) {
+      // Already scanned this sample during the current run
+      setHasScanned(true);
+      setScanProgress(1);
+      onScanStateChangeRef.current?.(false);
+      return;
+    }
+
     setIsScanning(true);
+    setHasScanned(false);
+    onScanStateChangeRef.current?.(true);
     setScanProgress(0);
+
     const start = performance.now();
-    const duration = 1200; // ms
+    const duration = 1100; // ms for clear column-by-column sweep
+    let rafId: number;
+    let cancelled = false;
 
     const stepAnim = (time: number) => {
+      if (cancelled) return;
       const elapsed = time - start;
       const progress = Math.min(1, elapsed / duration);
       setScanProgress(progress);
+
       if (progress < 1) {
-        requestAnimationFrame(stepAnim);
+        rafId = requestAnimationFrame(stepAnim);
       } else {
+        scannedSampleIdRef.current = selectedSample.id;
+        setHasScanned(true);
         setIsScanning(false);
+        onScanStateChangeRef.current?.(false);
       }
     };
-    requestAnimationFrame(stepAnim);
-  };
 
-  // Re-run scan when sample changes
-  useEffect(() => {
-    triggerScan();
-  }, [selectedSample.id]);
+    rafId = requestAnimationFrame(stepAnim);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [isPlaying, selectedSample.id]);
+
+  // Active column index (0..5) being scanned right now
+  const activeScanCol = isScanning ? Math.min(5, Math.floor(scanProgress * 6)) : -1;
 
   return (
     <div className="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 sm:p-4 backdrop-blur-md shadow-2xl flex flex-col gap-3 w-full max-w-5xl">
       
-      {/* Header bar: Dataset sample selector + action */}
+      {/* Header bar: Dataset sample selector + status badge */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
@@ -361,23 +417,29 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
           </div>
           <div>
             <span className="text-xs font-semibold text-slate-200 block leading-tight">
-              Dataset Ingestion & Digitization Pipeline
+              Stage 1: Dataset Ingestion & Digitization Pipeline
             </span>
             <span className="text-[10px] text-slate-400">
-              Select a raw image to watch the model "swallow" visual pixels into numerical tensors
+              Scans the selected image once on Play to quantize optical pixels into a 6×6 Float32 tensor
             </span>
           </div>
         </div>
 
-        {/* Action button */}
-        <button
-          onClick={triggerScan}
-          disabled={isScanning}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white text-xs font-medium transition-all shadow-md shadow-indigo-600/20"
-        >
-          <Scan className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} />
-          <span>{isScanning ? 'Scanning Pixels...' : 'Rescan Image'}</span>
-        </button>
+        {isScanning ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 text-[10px] font-mono">
+            <Scan className="w-3 h-3 animate-spin" />
+            Scanning Image → Tensor ({Math.round(scanProgress * 100)}%)
+          </span>
+        ) : hasScanned ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono">
+            <Check className="w-3 h-3" />
+            Digitized · 6×6 Tensor Active
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700 text-slate-400 text-[10px] font-mono">
+            Ready — Scans 1× on Play
+          </span>
+        )}
       </div>
 
       {/* Row of sample selector thumbnails */}
@@ -421,7 +483,7 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
             
             {/* Laser scanning line */}
             {isScanning && (
-              <motion.div 
+              <div 
                 className="absolute top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,1)] z-20 pointer-events-none"
                 style={{ left: `${scanProgress * 100}%` }}
               />
@@ -429,8 +491,8 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
 
             {/* Glowing sweep overlay */}
             {isScanning && (
-              <motion.div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/20 to-transparent pointer-events-none z-10"
+              <div 
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/25 to-transparent pointer-events-none z-10"
                 style={{ width: `${scanProgress * 100}%` }}
               />
             )}
@@ -473,24 +535,17 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
             <span className="text-[10px] font-mono text-cyan-400 font-semibold tracking-wider uppercase">
               Quantization
             </span>
-            <InfoTooltip content="Quantization (Analog-to-Digital Conversion): Maps continuous physical light/photon intensities from the optical sensor into discrete, normalized floating-point numbers between 0.00 (black) and 1.00 (peak white) so the convolutional neural network can compute tensor math." />
           </div>
           
           {/* Directional Data Stream Pipeline (Image -> Tensor) */}
           <div className="w-full flex items-center justify-center relative my-1.5 overflow-hidden h-5">
-            <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500/40 via-cyan-500/80 to-indigo-500/90 rounded-full" />
-            {/* Pulsing directional particles flowing from left to right */}
-            <motion.div 
-              className="absolute w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)]"
-              animate={{ x: [-35, 35], opacity: [0, 1, 0] }}
-              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-            />
-            <motion.div 
-              className="absolute w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(99,102,241,1)]"
-              animate={{ x: [-35, 35], opacity: [0, 1, 0] }}
-              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: 0.8 }}
-            />
-            <ArrowRight className="absolute right-0 w-3 h-3 text-indigo-400 pointer-events-none" />
+            <div className="h-0.5 w-full bg-slate-800 rounded-full relative overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 rounded-full transition-none"
+                style={{ width: isScanning ? `${scanProgress * 100}%` : hasScanned ? '100%' : '35%' }}
+              />
+            </div>
+            <ArrowRight className={`absolute right-0 w-3 h-3 pointer-events-none transition-colors ${hasScanned || isScanning ? 'text-indigo-400' : 'text-slate-600'}`} />
           </div>
 
           {/* Formatted Mathematical & Scientific Normalization Badges */}
@@ -521,23 +576,26 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
               const x = i % 6;
               const y = Math.floor(i / 6);
               
-              // Fade in numbers according to scan progress if scanning
-              const cellProgress = (x + y * 0.2) / 7;
-              const isRevealed = !isScanning || scanProgress >= cellProgress;
+              // Reveal columns left-to-right during scan; fully revealed after scan; dimmed preview before scan
+              const cellProgress = (x + y * 0.15) / 6;
+              const isColumnActive = isScanning && x === activeScanCol;
+              const isRevealed = hasScanned || isHovered || (isScanning && scanProgress >= cellProgress);
 
               return (
                 <motion.div
                   key={i}
                   onMouseEnter={() => onHoverCell(i)}
                   onMouseLeave={() => onHoverCell(null)}
-                  className={`flex flex-col items-center justify-center rounded transition-all cursor-crosshair relative ${
+                  className={`flex flex-col items-center justify-center rounded transition-colors cursor-crosshair relative ${
                     isHovered 
                       ? 'bg-indigo-500 text-white font-bold shadow-[0_0_8px_rgba(99,102,241,0.8)] z-20 scale-105 ring-1 ring-white' 
-                      : val > 0.5 
-                        ? 'bg-slate-800 text-slate-200 border border-slate-700' 
-                        : val > 0.1 
-                          ? 'bg-slate-900 text-slate-400 border border-slate-800/80' 
-                          : 'bg-slate-950 text-slate-600 border border-slate-900'
+                      : isColumnActive
+                        ? 'ring-1 ring-cyan-400/80 shadow-[0_0_6px_rgba(34,211,238,0.45)] z-10'
+                        : val > 0.5 
+                          ? 'bg-slate-800 text-slate-200 border border-slate-700' 
+                          : val > 0.1 
+                            ? 'bg-slate-900 text-slate-400 border border-slate-800/80' 
+                            : 'bg-slate-950 text-slate-600 border border-slate-900'
                   }`}
                   style={{
                     backgroundColor: isHovered 
@@ -545,10 +603,10 @@ export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
                       : `rgba(99, 102, 241, ${val * 0.35 + 0.05})`
                   }}
                   animate={{
-                    opacity: isRevealed ? 1 : 0.2,
-                    scale: isRevealed ? 1 : 0.9
+                    opacity: isRevealed ? 1 : isScanning ? 0.15 : 0.45,
+                    scale: isColumnActive ? 1.04 : isRevealed ? 1 : 0.94
                   }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.15 }}
                 >
                   <span className={`text-[8.5px] font-mono leading-none ${isHovered ? 'text-white' : val > 0.4 ? 'text-slate-100 font-semibold' : 'text-slate-400'}`}>
                     {val.toFixed(2)}

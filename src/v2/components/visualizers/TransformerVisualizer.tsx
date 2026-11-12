@@ -13,6 +13,7 @@ interface TransformerVisualizerProps {
   step: number;
   mode: Mode;
   dataSource: DataSource;
+  onOpenGlossary?: () => void;
 }
 
 type ConceptView = 'concept_a' | 'concept_b';
@@ -21,7 +22,8 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
   hyperparams, 
   step, 
   mode, 
-  dataSource 
+  dataSource,
+  onOpenGlossary,
 }) => {
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
   const [showIngestion, setShowIngestion] = useState(true);
@@ -62,7 +64,6 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_60%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-15 pointer-events-none" />
 
       {/* Ingestion Animation */}
       <AnimatePresence>

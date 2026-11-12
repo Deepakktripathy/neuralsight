@@ -6,37 +6,79 @@ import { FailureMode, Architecture } from '../types';
 interface Props {
   failureMode: FailureMode;
   architecture: Architecture;
+  isEmbedded?: boolean;
 }
 
-export const SandboxDiagnosticsPanel: React.FC<Props> = ({ failureMode, architecture }) => {
+export const SandboxDiagnosticsPanel: React.FC<Props> = ({ 
+  failureMode, 
+  architecture,
+  isEmbedded = true 
+}) => {
   if (failureMode === 'None') return null;
 
   const content = getDiagnosticsContent(failureMode, architecture);
   if (!content) return null;
 
+  if (isEmbedded) {
+    return (
+      <div className="bg-slate-950/40 border-b border-slate-800/70 p-3 select-none">
+        <div className="flex items-start gap-2.5">
+          <div className="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg shrink-0 mt-0.5 border border-rose-500/20">
+            {content.icon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-rose-400">
+                Diagnostic Fault
+              </span>
+              <span className="text-slate-600">·</span>
+              <h4 className="text-xs font-bold text-slate-100">
+                {failureMode}
+              </h4>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
+              {content.explanation}
+            </p>
+            <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-400">
+              <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
+                Watch for:
+              </span>
+              <span className="truncate">{content.watch}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AnimatePresence>
       <motion.div 
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="absolute top-4 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg pointer-events-none"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="w-full"
       >
-        <div className="bg-slate-900/95 backdrop-blur-md border border-rose-500/50 rounded-xl shadow-2xl p-4 drop-shadow-[0_0_15px_rgba(244,63,94,0.15)] pointer-events-auto">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400 mt-0.5 shrink-0">
+        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 shadow-xl">
+          <div className="flex items-start gap-2.5">
+            <div className="p-1.5 bg-rose-500/10 text-rose-400 rounded-lg shrink-0 mt-0.5 border border-rose-500/20">
               {content.icon}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                <span className="text-rose-400">Diagnostic:</span> {failureMode}
-              </h3>
-              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-rose-400">
+                  Diagnostic:
+                </span>
+                <h4 className="text-xs font-bold text-slate-100">{failureMode}</h4>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
                 {content.explanation}
               </p>
-              <div className="mt-2.5 p-2 bg-slate-950/80 rounded-md border border-slate-800">
-                <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block mb-0.5">Watch for:</span>
-                <p className="text-xs text-slate-400">{content.watch}</p>
+              <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-400">
+                <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
+                  Watch for:
+                </span>
+                <span>{content.watch}</span>
               </div>
             </div>
           </div>

@@ -69,11 +69,12 @@ export const TransformerConceptB: React.FC<TransformerConceptBProps> = ({
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-bold text-white tracking-wide">
-                Concept B: Full Transformer Block Flow
+                02. Full Transformer Block Flow
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono">
+              <span className="text-slate-600 font-mono text-xs">·</span>
+              <span className="text-emerald-400 text-xs font-mono font-medium">
                 Encoder / Decoder Block Anatomy
               </span>
             </div>

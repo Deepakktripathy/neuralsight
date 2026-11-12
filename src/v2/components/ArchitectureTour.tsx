@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Architecture } from '../types';
 import { Sparkles, Layers, Box, Cpu, Eye, Zap, Database, ArrowRight, ArrowLeft, X, GitCommit, MoveUpRight, FastForward, ActivitySquare, Network } from 'lucide-react';
+import { MathFormula } from './MathFormula';
 
 interface ArchitectureTourProps {
   architecture: Architecture;
@@ -140,9 +141,7 @@ export const ArchitectureTour: React.FC<ArchitectureTourProps> = ({ architecture
           </div>
 
           {step.formula && (
-            <div className="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 font-mono text-xs text-indigo-300 text-center shadow-inner mt-1">
-              <code>{step.formula}</code>
-            </div>
+            <MathFormula formula={step.formula} className="w-full mt-1" />
           )}
         </div>
 

@@ -11,9 +11,10 @@ interface StandardNNVisualizerProps {
   mode: Mode;
   useCase: UseCase;
   dataSource: DataSource;
+  onOpenGlossary?: () => void;
 }
 
-export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource }) => {
+export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource, onOpenGlossary }) => {
   const [inspectedNode, setInspectedNode] = useState<{lIdx: number, nIdx: number, act: number, bias: number} | null>(null);
   const [isDecisionSpaceMinimized, setIsDecisionSpaceMinimized] = useState(false);
   const numHiddenLayers = Math.max(1, hyperparams.layers - 2);
@@ -81,7 +82,6 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
     <div className="w-full min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pt-12 relative bg-slate-950 pb-28">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1e293b,transparent_70%)] opacity-30 pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none" />
 
       {/* Visual Decision Boundary Floating Overlay */}
       {useCase === 'Classification' && (
