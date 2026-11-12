@@ -76,25 +76,35 @@ Deep learning education is often split between two extremes:
 
 ## Visual Tour & Architectural Screenshots
 
-### Generative Adversarial Network (GAN) Visualizer
-The GAN canvas illustrates the zero-sum Minimax game between Generator $G(z)$ and Discriminator $D(x)$, featuring real-time latent space transformation, score meters, diversity grids, and the 50/50 Nash Equilibrium balance bar.
+### 01. Architecture Selection Hub
+Start by choosing from seven model families. Each card summarizes the architecture's domain, core mechanism, and suggested use cases before moving into setup.
 
-![GAN Architecture Visualizer](docs/screenshots/gan_visualizer_overview.jpg)
+![Architecture Selection Hub](assets/screenshots/architecture-hub.jpg)
 
-### Multi-Architecture Deep Learning Suite
-Explore and compare six foundational neural network paradigms—from spatial convolutions to self-attention webs and reinforcement learning gridworlds.
+### 02. Problem Setup
+Define the task objective and target dataset with inline dataset previews. Hyperparameters, topology, and failure diagnostics are intentionally deferred to the Studio's live tuning controls.
 
-![Multi-Architecture Showcase](docs/screenshots/multi_architecture_showcase.jpg)
+![Problem Setup](assets/screenshots/problem-setup.jpg)
 
-### Hyperparameters, Diagnostics & Playback Engine
-Fine-tune learning rates, toggle optimizers (Adam, SGD, RMSprop), trigger simulated failure modes, and scrub training speed from 0.25× to 4×.
+### 03. CNN Studio — Unified Convolution Pipeline
+A single-card pipeline walks through optical scanning, quantization into a 6×6 tensor, a live 3×3 sliding window, and the resulting 4×4 feature map — synchronized with the global playback transport.
 
-![Controls and Diagnostics](docs/screenshots/controls_and_diagnostics.jpg)
+![CNN Unified Convolution Studio](assets/screenshots/cnn-studio.jpg)
 
-### Latent Walk, Manifold Morphing & Diversity Inspection
-Switch the GAN view to **Latent Walk** to interpolate between two latent seeds ($z_A \leftrightarrow z_B$) and watch features morph smoothly across the Gaussian latent manifold $z \sim \mathcal{N}(0, I)$, or use the **Batch Grid** to inspect output diversity and entropy.
+### 04. GAN Studio — Latent Walk & Nash Equilibrium
+The GAN workspace shows the Generator/Discriminator tug-of-war, live losses, and the 50/50 Nash Equilibrium bar. Switch to **Latent Walk** to morph smoothly between latent seeds.
 
-![Latent Morph and Diversity](docs/screenshots/latent_morph_and_diversity.jpg)
+![GAN Studio with Latent Walk](assets/screenshots/gan-studio.jpg)
+
+### 05. Transformer Studio — Attention Heatmaps
+Inspect per-head attention matrices, Q/K/V projections, and a live mathematical breakdown of the softmax computation for the selected token pair.
+
+![Transformer Attention Studio](assets/screenshots/transformer-studio.jpg)
+
+### 06. Training Companion — Docs, TLDR & Glossary
+The adaptive companion drawer provides architecture-specific documentation, phase-by-phase training expectations, and a searchable glossary with KaTeX-rendered formulas.
+
+![Training Companion and Glossary](assets/screenshots/training-companion.jpg)
 
 ---
 
