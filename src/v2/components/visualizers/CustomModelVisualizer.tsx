@@ -612,9 +612,9 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
       <div className="w-full h-full overflow-y-auto bg-slate-950 font-sans p-6 md:p-8 custom-scrollbar">
         <div className="max-w-4xl mx-auto space-y-8">
           
-          {/* Header / Hero */}
+          {/* Header / Hero (AUDIT-10: Zero-Pill Discipline) */}
           <div className="text-center space-y-3 pt-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium">
+            <div className="text-xs font-mono text-indigo-400 font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Custom Neural Network Explorer</span>
             </div>

@@ -26,9 +26,10 @@ export const RNNComparisonModal: React.FC<RNNComparisonModalProps> = ({ isOpen, 
                 <ArrowRightLeft className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2 flex-wrap">
                   The Paradigm Shift: Why Transformers Replaced RNNs
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <span className="text-slate-500 font-mono text-xs">·</span>
+                  <span className="text-xs font-mono text-amber-400 font-normal">
                     Historical Analysis
                   </span>
                 </h3>

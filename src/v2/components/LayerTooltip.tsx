@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Info, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface LayerTooltipProps {
@@ -151,7 +151,6 @@ export const LayerTooltip: React.FC<LayerTooltipProps> = ({ label, description, 
         <span className="text-[11px] text-slate-500 hover:text-slate-300 whitespace-nowrap transition-colors">
           {label}
         </span>
-        <Info className="w-3.5 h-3.5 text-slate-600 hover:text-indigo-400 transition-colors" />
       </button>
       {typeof document !== 'undefined' ? createPortal(modal, document.body) : modal}
       {hoverTooltip}

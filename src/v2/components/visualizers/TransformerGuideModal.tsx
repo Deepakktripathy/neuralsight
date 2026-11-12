@@ -37,9 +37,10 @@ export const TransformerGuideModal: React.FC<TransformerGuideModalProps> = ({ on
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-white flex items-center gap-2 flex-wrap">
                 Transformer Pedagogical Guide: Concept 1 vs Concept 2
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-slate-500 font-mono text-xs">·</span>
+                <span className="text-xs font-mono text-indigo-400 font-normal">
                   Documentation
                 </span>
               </h3>

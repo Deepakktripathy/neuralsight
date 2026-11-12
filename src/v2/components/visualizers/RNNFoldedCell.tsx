@@ -171,8 +171,8 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
               />
             </svg>
 
-            {/* Loop Label Badge */}
-            <div className="absolute -top-14 bg-slate-900 border border-purple-500/40 px-2.5 py-0.5 rounded-full text-[10px] font-mono text-purple-300 shadow-lg z-20 flex items-center gap-1.5">
+            {/* Loop Feedback Label (AUDIT-10: Zero-Pill Discipline) */}
+            <div className="absolute -top-8 text-[11px] font-mono text-purple-300 z-20 flex items-center gap-1.5 font-medium">
               <RefreshCw className="w-3 h-3 text-purple-400" />
               <span>Feedback Memory: h<sub>t-1</sub> → h<sub>t</sub></span>
             </div>
@@ -187,7 +187,7 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
                   <Layers className="w-4 h-4 text-indigo-400" />
                   RNN Unit (Hidden State)
                 </span>
-                <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/20 px-1.5 py-0.5 rounded border border-indigo-500/30">
+                <span className="text-[11px] font-mono text-indigo-300 font-semibold">
                   Step {currentTokenIdx}
                 </span>
               </div>
