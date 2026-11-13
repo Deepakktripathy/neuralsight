@@ -7,25 +7,7 @@ import {
   Hyperparameters,
 } from '../types';
 import { ARCHITECTURE_METADATA } from '../lib/architectureConfig';
-import {
-  BrainCircuit,
-  ArrowLeft,
-  Play,
-  Database,
-  Eye,
-  Check,
-  UploadCloud,
-  FileJson,
-  X,
-  BookOpen,
-  Layers,
-  Target,
-  SlidersHorizontal,
-  Activity,
-  Cpu,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react';
+import { BrainCircuit, Play, Database, Eye, Check, UploadCloud, FileJson, X, BookOpen, Target, SlidersHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface ModelConfigurationPageProps {
@@ -108,18 +90,18 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
             onClick={onBackToArchitectures}
             className="hover:text-slate-200 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
-            01. Architecture
+            01 · Model
           </button>
           <span className="text-slate-700" aria-hidden="true">/</span>
           <span className="text-white font-semibold whitespace-nowrap shrink-0">
-            02. Problem Setup ({meta.title})
+            02 · Setup
           </span>
           <span className="text-slate-700" aria-hidden="true">/</span>
           <button
             onClick={onLaunchStudio}
             className="hover:text-slate-200 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
-            03. Studio
+            03 · Studio
           </button>
           <span className="text-slate-700" aria-hidden="true">/</span>
           <button
@@ -127,7 +109,7 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
             className="hover:text-slate-200 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-            <span>Glossary</span>
+            <span>Docs</span>
           </button>
         </nav>
 
@@ -146,20 +128,12 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
       {/* Main Content Container */}
       <main className="flex-1 w-full max-w-[1360px] mx-auto px-6 lg:px-12 py-8 lg:py-10 space-y-8 relative z-10">
         {/* Top Architecture Context Bar */}
-        <div className="rounded-2xl bg-slate-900/90 border border-slate-800/90 p-6 shadow-[0_12px_32px_-8px_rgba(2,6,23,0.85)] flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="rounded-2xl bg-slate-900/90 border border-slate-800/90 p-6 shadow-[0_12px_32px_-8px_rgba(2,6,23,0.85)]">
           <div className="space-y-2 max-w-3xl">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onBackToArchitectures}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Models</span>
-              </button>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+              <span className="text-indigo-400">02 · Setup</span>
               <span className="text-slate-700" aria-hidden="true">·</span>
-              <span className="text-xs font-medium text-indigo-400">Step 2: Problem Setup</span>
-              <span className="text-slate-700" aria-hidden="true">·</span>
-              <span className="text-xs text-slate-400">{meta.domainTag}</span>
+              <span className="text-slate-400">{meta.domainTag}</span>
             </div>
 
             <div className="flex flex-wrap items-baseline gap-3">
@@ -172,17 +146,8 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
-              Select your task objective and target dataset. All hyperparameters, layer topologies, and failure diagnostics run interactively inside the Studio Canvas.
+              Pick the task objective and target dataset. Hyperparameters, layer topologies and failure diagnostics are tuned live in the Studio.
             </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              onClick={onBackToArchitectures}
-              className="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-800 hover:text-white border border-slate-700/80 transition-all duration-150 cursor-pointer whitespace-nowrap"
-            >
-              Change Model
-            </button>
           </div>
         </div>
 
@@ -334,15 +299,19 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
                       return (
                         <div
                           key={ds.id}
-                          onClick={() => setDataSource(ds.id)}
                           className={cn(
-                            "group p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between cursor-pointer hover:-translate-y-0.5",
+                            "group p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between hover:-translate-y-0.5",
                             active
                               ? "bg-indigo-600/12 border-indigo-500/70 shadow-lg shadow-indigo-950/40"
                               : "bg-slate-950/60 border-slate-800 hover:border-slate-700"
                           )}
                         >
-                          <div>
+                          <button
+                            type="button"
+                            onClick={() => setDataSource(ds.id)}
+                            aria-pressed={active}
+                            className="w-full text-left cursor-pointer"
+                          >
                             <div className="flex items-start justify-between gap-2 mb-1.5">
                               <h3 className="text-sm font-semibold text-white leading-snug">
                                 {ds.label}
@@ -354,7 +323,7 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
                             <p className="text-xs text-slate-400 leading-relaxed mb-3">
                               {ds.description}
                             </p>
-                          </div>
+                          </button>
 
                           <div className="pt-2.5 border-t border-slate-800/70 flex items-center justify-between gap-2">
                             <span className="text-[11px] font-mono text-slate-400 truncate">
@@ -362,12 +331,12 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
                             </span>
                             <button
                               type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
+                              onClick={() => {
                                 setDataSource(ds.id);
                                 onPreviewDataSource(ds.id);
                               }}
                               className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 flex items-center gap-1 shrink-0 cursor-pointer"
+                              aria-label={`Preview ${ds.label}`}
                             >
                               <Eye className="w-3 h-3" />
                               <span>Preview</span>
@@ -381,79 +350,22 @@ export const ModelConfigurationPage: React.FC<ModelConfigurationPageProps> = ({
               </div>
             </div>
 
-            {/* Row 2: Live Studio Tuning Handoff Card (Option A: Streamline Page 2 to Problem Setup) */}
-            <div className="rounded-2xl bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-indigo-950/25 border border-slate-800/90 p-6 sm:p-8 shadow-[0_12px_32px_-8px_rgba(2,6,23,0.85)] space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-sm">
-                    <SlidersHorizontal className="w-5 h-5 text-indigo-400" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-base sm:text-lg font-bold text-white">
-                        Live Interactive Tuning in Studio
-                      </h2>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> Live on Canvas
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Hyperparameters, network topology, and failure sandbox diagnostics are tuned interactively with real-time visual feedback in the Studio Sidebar.
-                    </p>
-                  </div>
+            {/* Row 2: Compact handoff — the detailed controls live in the Studio */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-slate-800/90 bg-slate-900/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0 rounded-lg border border-indigo-500/25 bg-indigo-500/10 p-2 text-indigo-400">
+                  <SlidersHorizontal className="h-4 w-4" />
                 </div>
-              </div>
-
-              {/* 3 Pillars of Studio Live Tuning */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* 1. Live Hyperparameters */}
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Live Hyperparameters</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-1.5 py-0.5 rounded">
-                      α={hyperparams?.learningRate ?? 0.01}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Tune learning rate, optimizer ({hyperparams?.optimizer ?? 'Adam'}), loss metric ({hyperparams?.lossFunction ?? 'Cross-Entropy'}), and batch size while observing real-time loss and accuracy curves.
-                  </p>
-                </div>
-
-                {/* 2. Topology Controls */}
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Dynamic Topology</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-indigo-300 bg-indigo-950/60 border border-indigo-800/40 px-1.5 py-0.5 rounded">
-                      {architecture}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Adjust hidden layers, convolutional filters, stride, or attention heads directly beside the architecture visualization with immediate node recalculation.
-                  </p>
-                </div>
-
-                {/* 3. Failure Mode Diagnostics */}
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-rose-400" />
-                      <span>Failure Sandbox</span>
-                    </span>
-                    <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded">
-                      Healthy Baseline
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Simulate vanishing gradients, dead neurons, or mode collapse on live weights and examine the resulting anomaly signatures in real time.
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Tune the rest in the Studio</h2>
+                  <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-slate-400">
+                    Hyperparameters, topology and failure modes run live beside the canvas, with loss and accuracy plotted as training advances.
                   </p>
                 </div>
               </div>
+              <span className="shrink-0 font-mono text-[11px] text-slate-500">
+                {hyperparams?.optimizer ?? 'Adam'} · lr {hyperparams?.learningRate ?? 0.01} · {hyperparams?.lossFunction ?? 'Cross-Entropy'}
+              </span>
             </div>
           </>
         )}

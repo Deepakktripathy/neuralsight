@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
   Architecture,
-  Mode,
   UseCase,
   LossFunction,
   Optimizer,
@@ -20,7 +19,6 @@ import {
   Gauge,
   ChevronDown,
   PanelLeftClose,
-  BookOpen,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FAILURE_MODES_BY_ARCH } from '../lib/failureModes';
@@ -30,8 +28,6 @@ interface SidebarProps {
   className?: string;
   architecture: Architecture;
   setArchitecture: (a: Architecture) => void;
-  mode: Mode;
-  setMode?: (m: Mode) => void;
   useCase: UseCase;
   setUseCase: (u: UseCase) => void;
   dataSource: DataSource;
@@ -45,14 +41,11 @@ interface SidebarProps {
   setCustomModelFile: (f: File | null) => void;
   onOpenArchHub?: () => void;
   onOpenConfigPage?: () => void;
-  onOpenGlossary?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   className,
   architecture,
-  mode,
-  setMode,
   useCase,
   setUseCase,
   dataSource,
@@ -66,11 +59,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCustomModelFile,
   onOpenArchHub,
   onOpenConfigPage,
-  onOpenGlossary,
 }) => {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const [modelDragActive, setModelDragActive] = useState(false);
-  const [openSection, setOpenSection] = useState<'data' | 'hyperparams' | 'topology' | 'failure' | null>('hyperparams');
+  const [openSection, setOpenSection] = useState<'hyperparams' | 'topology' | 'failure' | null>('hyperparams');
 
   const meta = ARCHITECTURE_METADATA[architecture];
 
@@ -89,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const toggleSection = (sec: 'data' | 'hyperparams' | 'topology' | 'failure') => {
+  const toggleSection = (sec: 'hyperparams' | 'topology' | 'failure') => {
     setOpenSection((prev) => (prev === sec ? null : sec));
   };
 
@@ -126,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Stage Navigation Stepper: [01. Models] [02. Setup] [03. Studio] */}
+      {/* Stage Navigation Stepper: [01. Model] [02. Setup] [03. Studio] */}
       <div className="mb-3.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800/80 grid grid-cols-3 gap-1 text-[11px] font-medium">
         <button
           onClick={onOpenArchHub}
@@ -134,7 +126,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           title="Go to Stage 1: Architecture Selection Hub"
         >
           <span className="text-[9px] font-mono text-slate-500 group-hover:text-indigo-400 leading-none">01</span>
-          <span className="font-semibold truncate">Models</span>
+          <span className="font-semibold truncate">Model</span>
         </button>
         <button
           onClick={onOpenConfigPage}
@@ -152,24 +144,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="font-semibold truncate">Studio</span>
         </div>
       </div>
-
-      {/* Quick Architecture Glossary & Training TLDR Launcher */}
-      {onOpenGlossary && (
-        <button
-          onClick={onOpenGlossary}
-          className="mb-3.5 py-1.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-indigo-300 flex items-center justify-between transition-all group cursor-pointer shadow-xs"
-          title={`Open ${architecture} Glossary & Training TLDR`}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
-            <span className="font-semibold text-[11px] truncate">{architecture} Glossary & TLDR</span>
-          </div>
-          <span className="text-[10px] font-mono text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
-            Open ↗
-          </span>
-        </button>
-      )}
-
 
       {/* Custom Model File Inspector */}
       {architecture === 'Custom Model' && (
@@ -237,6 +211,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   resetSimulation();
                 }}
                 className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
+                aria-label="Remove uploaded model file"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -248,70 +223,67 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Collapsible Live Tuning Sections for Non-Custom Models */}
       {architecture !== 'Custom Model' && (
         <div className="space-y-2.5 flex-1">
-          {/* 1. Task & Target Distribution */}
-          <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 overflow-hidden">
-            <button
-              onClick={() => toggleSection('data')}
-              className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
-            >
-              <span className="text-xs font-semibold text-slate-200 flex items-center gap-2">
+          {/* 1. Task & Dataset — compact live context; full setup lives on the Setup page */}
+          <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Task & Dataset</span>
+                Task &amp; Dataset
               </span>
-              <ChevronDown
-                className={cn(
-                  "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
-                  openSection === 'data' && "rotate-180"
-                )}
-              />
-            </button>
+              <button
+                onClick={onOpenConfigPage}
+                className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+                title="Edit task and dataset on the Setup page"
+              >
+                Setup ↗
+              </button>
+            </div>
 
-            {openSection === 'data' && (
-              <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-800/60">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-medium text-slate-400">
-                    Use Case
-                  </label>
-                  <select
-                    value={useCase}
-                    onChange={(e) => setUseCase(e.target.value as UseCase)}
-                    className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-                  >
-                    {meta.useCases.map((uc) => (
-                      <option key={uc.id} value={uc.id}>
-                        {uc.id}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[11px] font-medium text-slate-400">
-                      {meta.dataSourceCategoryLabel}
-                    </label>
-                    <button
-                      onClick={() => onPreviewDataSource(dataSource, customModelFile)}
-                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 cursor-pointer"
-                    >
-                      <Eye className="w-3 h-3" />
-                      <span>Preview</span>
-                    </button>
-                  </div>
-                  <select
-                    value={dataSource}
-                    onChange={(e) => setDataSource(e.target.value as DataSource)}
-                    className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-                  >
-                    {meta.dataSources.map((ds) => (
-                      <option key={ds.id} value={ds.id}>
-                        {ds.id}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <label htmlFor="sidebar-usecase" className="w-11 shrink-0 text-[11px] text-slate-400">
+                  Task
+                </label>
+                <select
+                  id="sidebar-usecase"
+                  value={useCase}
+                  onChange={(e) => setUseCase(e.target.value as UseCase)}
+                  className="min-w-0 flex-1 rounded-lg border border-slate-700/80 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  {meta.useCases.map((uc) => (
+                    <option key={uc.id} value={uc.id}>
+                      {uc.id}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
+
+              <div className="flex items-center gap-2">
+                <label htmlFor="sidebar-dataset" className="w-11 shrink-0 text-[11px] text-slate-400">
+                  Data
+                </label>
+                <select
+                  id="sidebar-dataset"
+                  value={dataSource}
+                  onChange={(e) => setDataSource(e.target.value as DataSource)}
+                  className="min-w-0 flex-1 rounded-lg border border-slate-700/80 bg-slate-900 px-2 py-1.5 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  {meta.dataSources.map((ds) => (
+                    <option key={ds.id} value={ds.id}>
+                      {ds.id}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => onPreviewDataSource(dataSource, customModelFile)}
+                  className="shrink-0 rounded-lg border border-slate-800 p-1.5 text-slate-400 transition-colors hover:border-slate-700 hover:text-indigo-300 cursor-pointer"
+                  aria-label={`Preview ${dataSource} dataset`}
+                  title="Preview dataset"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* 2. Hyperparameters */}

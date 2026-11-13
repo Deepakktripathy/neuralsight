@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { PlaybackControls } from './components/PlaybackControls';
-import { MetricsChart } from './components/MetricsChart';
 import { MetricsHUD } from './components/MetricsHUD';
 import { CNNVisualizer } from './components/visualizers/CNNVisualizer';
 import { TransformerVisualizer } from './components/visualizers/TransformerVisualizer';
@@ -12,16 +11,22 @@ import { RNNVisualizer } from './components/visualizers/RNNVisualizer';
 import { CustomModelVisualizer } from './components/visualizers/CustomModelVisualizer';
 import { Architecture, Mode, UseCase, Hyperparameters, DataSource } from './types';
 import {
-  X,
   HelpCircle,
-  Menu,
   Code2,
-  Check,
   Eye,
   BookOpen,
   PanelLeftOpen,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from './lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './components/ui/dropdown-menu';
 import { DatasetPreviewModal } from './components/DatasetPreviewModal';
 import { CodeExportModal } from './components/CodeExportModal';
 import { WelcomeTour } from './components/WelcomeTour';
@@ -365,7 +370,6 @@ export default function App() {
             useCase={useCase}
             dataSource={dataSource}
             isPlaying={isPlaying}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Transformer':
@@ -375,7 +379,6 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'DQN':
@@ -386,7 +389,6 @@ export default function App() {
             mode={mode}
             dataSource={dataSource}
             isSpotlightOpen={activeSpotlightArch !== null}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Standard NN':
@@ -397,7 +399,6 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'GAN':
@@ -408,7 +409,6 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'RNN':
@@ -418,7 +418,6 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Custom Model':
@@ -442,11 +441,10 @@ export default function App() {
       )}
       {showCodeExport && (
         <CodeExportModal
-          isOpen={showCodeExport}
           onClose={() => setShowCodeExport(false)}
           architecture={architecture}
           hyperparams={hyperparams}
-          mode={mode}
+          useCase={useCase}
           dataSource={dataSource}
         />
       )}
@@ -460,7 +458,6 @@ export default function App() {
         <ArchitectureSelectionHub
           selectedArchitecture={architecture}
           onSelectArchitecture={handleSelectArchitectureFromHub}
-          onQuickLaunchStudio={() => setViewStage('studio')}
           onOpenGlossary={() => setShowGlossary(true)}
         />
         {renderGlobalModals()}
@@ -520,8 +517,6 @@ export default function App() {
           onClose={() => setIsSidebarOpen(false)}
           architecture={architecture}
           setArchitecture={setArchitecture}
-          mode={mode}
-          setMode={setMode}
           useCase={useCase}
           setUseCase={setUseCase}
           dataSource={dataSource}
@@ -540,7 +535,6 @@ export default function App() {
             setIsPlaying(false);
             setViewStage('configure');
           }}
-          onOpenGlossary={() => setShowGlossary(true)}
         />
       </div>
 
@@ -561,7 +555,7 @@ export default function App() {
             )}
 
             <div className="flex items-center gap-2 text-xs font-medium text-slate-400 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
               <span className="text-white font-semibold tracking-tight text-sm shrink-0">
                 {ARCHITECTURE_METADATA[architecture]?.title || architecture}
               </span>
@@ -578,55 +572,52 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Studio Action Controls */}
+          {/* Right Studio Action Controls: one Learn menu + one primary action */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <button
-              onClick={() => setShowWelcome(true)}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Open Quick-Start Guide"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors border cursor-pointer whitespace-nowrap",
+                    showGlossary
+                      ? "bg-indigo-600 text-white border-indigo-500"
+                      : "bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white border-slate-700/80"
+                  )}
+                  title="Quick-start guide, canvas spotlight and training docs"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Learn</span>
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Learn</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setShowWelcome(true)}>
+                  <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                  Quick-start guide
+                </DropdownMenuItem>
+                {TOUR_STEPS[architecture] && (
+                  <DropdownMenuItem onSelect={() => setActiveSpotlightArch(architecture)}>
+                    <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                    Spotlight the canvas
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setShowGlossary(true)}>
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                  Docs &amp; glossary
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <button
               onClick={() => setShowCodeExport(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-700 hover:text-white transition-all border border-slate-700/80 shadow-sm cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-700 hover:text-white transition-colors border border-slate-700/80 shadow-sm cursor-pointer whitespace-nowrap"
               title="Export PyTorch / Keras / ONNX Code"
             >
               <Code2 className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden sm:inline">Code</span>
             </button>
-
-            {architecture !== 'Custom Model' && (
-              <>
-                <div className="h-5 w-px bg-slate-800 mx-0.5 hidden sm:block" />
-
-                {TOUR_STEPS[architecture] && (
-                  <button
-                    onClick={() => setActiveSpotlightArch(architecture)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 transition-all border border-indigo-500/30 cursor-pointer whitespace-nowrap"
-                    title="Interactive step-by-step canvas spotlight highlights"
-                  >
-                    <Eye className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="hidden sm:inline">Spotlight</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setShowGlossary(true)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
-                    showGlossary
-                      ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-950/40"
-                      : "bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700/90 border-slate-700/80"
-                  )}
-                  title="Open Unified Training Documentation, TLDR Notes & Glossary"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Docs & Guide</span>
-                </button>
-              </>
-            )}
           </div>
         </header>
 
@@ -650,7 +641,6 @@ export default function App() {
               step={step}
               mode={mode}
               epochs={hyperparams.epochs}
-              onOpenGlossary={() => setShowGlossary(true)}
             />
 
             <div className="h-16 flex items-center justify-center bg-slate-900/95 border-t border-slate-800/80 z-20 shrink-0 shadow-[0_-4px_25px_rgba(2,6,23,0.7)] px-4">
