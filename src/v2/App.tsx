@@ -92,15 +92,17 @@ export default function App() {
     return fallback;
   };
 
-  // Start on the Architecture Selection Hub unless deep-linked via URL params
+  // Start on the Architecture Selection Hub unless deep-linked via URL params.
+  // `view` wins over `arch` so ?arch=CNN&view=configure reaches Setup rather than Studio.
   const [viewStage, setViewStage] = useState<ViewStage>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.has('arch') || params.get('view') === 'studio') {
-        return 'studio';
-      }
-      if (params.get('view') === 'configure') {
+      const view = params.get('view');
+      if (view === 'configure') {
         return 'configure';
+      }
+      if (view === 'studio' || params.has('arch')) {
+        return 'studio';
       }
     }
     return 'select-arch';
