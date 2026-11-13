@@ -12,9 +12,17 @@ venv/
 __pycache__/
 *.pyc
 
-#Screenshots
-docs/
-CHANGELOG.md
-# public/
+# AI Studio scratch data
+.aistudio/
+
+# Legacy local image scratch (unreferenced by the app)
 src/assets/images/
 src/v2/assets/images/
+
+# Local notes & legacy screenshots
+docs/
+CHANGELOG.md
+
+# Local build caches
+.vite/
+*.tsbuildinfo
