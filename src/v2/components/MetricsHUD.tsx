@@ -147,7 +147,6 @@ export const MetricsHUD: React.FC<MetricsHUDProps> = ({
           {hasActiveFault && (
             <SandboxDiagnosticsPanel
               failureMode={failureMode}
-              architecture={architecture}
               isEmbedded={true}
             />
           )}

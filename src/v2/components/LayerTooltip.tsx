@@ -6,11 +6,9 @@ import { motion, AnimatePresence } from 'motion/react';
 interface LayerTooltipProps {
   label: string;
   description: string;
-  position?: 'left' | 'center' | 'right';
-  align?: 'top' | 'bottom';
 }
 
-export const LayerTooltip: React.FC<LayerTooltipProps> = ({ label, description, position = 'center', align = 'top' }) => {
+export const LayerTooltip: React.FC<LayerTooltipProps> = ({ label, description }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverCoords, setHoverCoords] = useState<{ top: number; left: number; placement: 'top' | 'bottom' }>({

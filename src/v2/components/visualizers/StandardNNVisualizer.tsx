@@ -14,7 +14,7 @@ interface StandardNNVisualizerProps {
   onOpenGlossary?: () => void;
 }
 
-export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource, onOpenGlossary }) => {
+export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource }) => {
   const [inspectedNode, setInspectedNode] = useState<{lIdx: number, nIdx: number, act: number, bias: number} | null>(null);
   const [isDecisionSpaceMinimized, setIsDecisionSpaceMinimized] = useState(false);
   const numHiddenLayers = Math.max(1, hyperparams.layers - 2);
@@ -79,7 +79,7 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pt-12 relative bg-slate-950 pb-28">
+    <div className="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 relative bg-slate-950 pb-16">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1e293b,transparent_70%)] opacity-30 pointer-events-none" />
 

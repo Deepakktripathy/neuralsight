@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Flag, Skull, ShieldAlert, Compass, Eye, Sparkles } from 'lucide-react';
+import { Flag, Skull } from 'lucide-react';
 
 interface DQNGridworldProps {
   agentX: number;
@@ -21,7 +21,6 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
   targetX,
   targetY,
   gridSize = 6,
-  selectedAction,
   isPoorExploration,
   onSelectCell,
   selectedCell,
@@ -131,7 +130,6 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
           } else if (hazard) {
             cellBg = 'bg-rose-950/40 border-rose-500/40';
           } else if (displayMode === 'heatmap') {
-            const intensity = Math.max(0, Math.min(1, val));
             cellBg = `border-slate-800`;
           }
 

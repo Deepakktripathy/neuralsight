@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Play, Pause, RotateCcw, ArrowUp, Layers, Activity, Sparkles } from 'lucide-react';
 import { Mode, FailureMode } from '../../types';
 
@@ -15,9 +15,6 @@ type BlockStage = 0 | 1 | 2 | 3 | 4 | 5; // 0: Input+PE, 1: MultiHead, 2: Add&No
 
 export const TransformerConceptB: React.FC<TransformerConceptBProps> = ({
   tokens,
-  mode,
-  step,
-  failureMode,
   dataSource
 }) => {
   const [activeStage, setActiveStage] = useState<BlockStage>(1);

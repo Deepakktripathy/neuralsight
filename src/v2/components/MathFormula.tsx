@@ -25,10 +25,15 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
   }, [formula, displayMode]);
 
   if (!renderedHtml) {
+    return <code className={`font-mono text-indigo-300 ${className}`}>{formula}</code>;
+  }
+
+  if (!displayMode) {
     return (
-      <div className={`p-2 rounded-lg bg-slate-900 border border-slate-800 font-mono text-xs text-indigo-300 text-center select-all ${className}`}>
-        <code>{formula}</code>
-      </div>
+      <span
+        className={`inline-block align-middle text-indigo-200 ${className}`}
+        dangerouslySetInnerHTML={{ __html: renderedHtml }}
+      />
     );
   }
 

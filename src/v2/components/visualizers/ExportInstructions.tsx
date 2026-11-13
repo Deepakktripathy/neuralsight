@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Code, Info, ArrowRight } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 export function ExportInstructions() {
   return (

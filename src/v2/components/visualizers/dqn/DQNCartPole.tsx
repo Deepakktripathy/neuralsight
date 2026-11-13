@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Gauge, Activity, RotateCcw } from 'lucide-react';
+
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DQNCartPoleProps {
   step: number;

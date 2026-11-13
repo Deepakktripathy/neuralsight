@@ -31,7 +31,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
   step: globalStep,
   stride = 1,
   onScanStateChange,
-  onOpenGlossary,
 }) => {
   // Determine sample list based on dataset
   const datasetKey = useMemo(() => {
@@ -209,8 +208,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
     return out;
   }, [selectedSample.grid, kernel, outputDim, totalSteps, validOffsets]);
 
-  const activeScanCol = isScanning ? Math.min(5, Math.floor(scanProgress * 6)) : -1;
-
   return (
     <div
       id="tour-cnn-filter"
@@ -368,7 +365,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
                 const x = i % 6;
                 const y = Math.floor(i / 6);
                 const cellProgress = (x + y * 0.15) / 6;
-                const isColumnActive = isScanning && x === activeScanCol;
                 const isRevealed = hasScanned || isHovered || (isScanning && scanProgress >= cellProgress);
 
                 return (

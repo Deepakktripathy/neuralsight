@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { X, BookOpen, Layers, Compass, ArrowRight, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
 
-const concept1Img = '/src/assets/images/transformer_concept1_guide_1788703214233.jpg';
-const concept2Img = '/src/assets/images/transformer_concept2_guide_1788703229127.jpg';
-
 interface TransformerGuideModalProps {
   onClose: () => void;
   onSelectConcept?: (concept: 'concept_a' | 'concept_b') => void;
@@ -125,17 +122,37 @@ export const TransformerGuideModal: React.FC<TransformerGuideModalProps> = ({ on
                       <span className="text-[10px] text-slate-500 font-mono">Micro Inspection</span>
                     </div>
 
-                    <div className="rounded-lg overflow-hidden border border-slate-800 relative group aspect-video bg-slate-900 flex items-center justify-center">
-                      <img 
-                        src={concept1Img} 
-                        alt="Concept 1 Self-Attention Heatmap" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    <div className="rounded-lg overflow-hidden border border-slate-800 bg-slate-950 p-3">
+                      <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-slate-500">
+                        <span>Attention weights · 4 × 4</span>
+                        <span className="text-indigo-400">softmax(QKᵀ/√d)</span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1">
+                        {[
+                          [0.62, 0.12, 0.18, 0.08],
+                          [0.24, 0.48, 0.20, 0.08],
+                          [0.10, 0.14, 0.58, 0.18],
+                          [0.06, 0.08, 0.16, 0.70],
+                        ].flatMap((row, r) =>
+                          row.map((weight, c) => (
+                            <div
+                              key={`${r}-${c}`}
+                              className="flex h-7 items-center justify-center rounded-sm border border-indigo-500/20 font-mono text-[10px]"
+                              style={{ backgroundColor: `rgba(99, 102, 241, ${weight})`, color: weight > 0.4 ? '#f8fafc' : '#94a3b8' }}
+                            >
+                              {weight.toFixed(2)}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                        Rows are query tokens, columns are key tokens. Brighter cells receive more attention.
+                      </p>
                     </div>
 
                     <h4 className="font-semibold text-white text-sm">The Fundamental Attention Heatmap</h4>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Displays the full $N \times N$ attention weight matrix. Shows how each row token projects a <strong>Query (Q)</strong> vector, compares against all column <strong>Key (K)</strong> vectors, and applies <strong>Softmax</strong> to produce weights that blend <strong>Value (V)</strong> vectors.
+                      Displays the full N × N attention weight matrix. Shows how each row token projects a <strong>Query (Q)</strong> vector, compares against all column <strong>Key (K)</strong> vectors, and applies <strong>Softmax</strong> to produce weights that blend <strong>Value (V)</strong> vectors.
                     </p>
 
                     <div className="bg-slate-900/90 rounded-lg p-2.5 border border-slate-800 text-[11px] font-mono text-slate-300">
@@ -165,12 +182,24 @@ export const TransformerGuideModal: React.FC<TransformerGuideModalProps> = ({ on
                       <span className="text-[10px] text-slate-500 font-mono">Macro Pipeline</span>
                     </div>
 
-                    <div className="rounded-lg overflow-hidden border border-slate-800 relative group aspect-video bg-slate-900 flex items-center justify-center">
-                      <img 
-                        src={concept2Img} 
-                        alt="Concept 2 Full Transformer Block Architecture" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                    <div className="rounded-lg overflow-hidden border border-slate-800 bg-slate-950 p-3">
+                      <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-slate-500">
+                        <span>Block pipeline</span>
+                        <span className="text-emerald-400">4 heads</span>
+                      </div>
+                      <div className="space-y-1">
+                        {['Input embedding + positional encoding', 'Multi-head attention (heads 1–4)', 'Residual add & layer norm', 'Feed-forward network', 'Residual add & softmax output'].map((stage, idx) => (
+                          <div key={stage} className="flex items-center gap-2 rounded-md border border-slate-800 bg-slate-900/70 px-2.5 py-1.5">
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 font-mono text-[9px] text-emerald-300">
+                              {idx + 1}
+                            </span>
+                            <span className="truncate text-[11px] text-slate-300">{stage}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                        Each block keeps a residual path around attention and the FFN.
+                      </p>
                     </div>
 
                     <h4 className="font-semibold text-white text-sm">Vertical End-to-End Execution Flow</h4>
@@ -317,7 +346,7 @@ export const TransformerGuideModal: React.FC<TransformerGuideModalProps> = ({ on
                   </div>
 
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    <strong>The Educational Challenge:</strong> Why use Transformers for numbers? Because unlike CNNs (which only see local windows) or RNNs (which forget distant trends), Attention allows step $T=5$ (148.90) to selectively attend to key breakout moments anywhere in the history!
+                    <strong>The Educational Challenge:</strong> Why use Transformers for numbers? Because unlike CNNs (which only see local windows) or RNNs (which forget distant trends), Attention allows step T = 5 (148.90) to selectively attend to key breakout moments anywhere in the history!
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -376,7 +405,7 @@ export const TransformerGuideModal: React.FC<TransformerGuideModalProps> = ({ on
                         In Concept 2 (Full Architecture):
                       </strong>
                       <p className="text-slate-400 leading-relaxed">
-                        Cycle through <strong>Head 1, Head 2, and Head 3</strong>. Notice how Head 1 tracks immediate neighboring tokens, while Head 3 tracks long-range grammatical connections (e.g. subject <em>fox</em> $\to$ verb <em>jumps</em>).
+                        Cycle through <strong>Head 1, Head 2, and Head 3</strong>. Notice how Head 1 tracks immediate neighboring tokens, while Head 3 tracks long-range grammatical connections (e.g. subject <em>fox</em> → verb <em>jumps</em>).
                       </p>
                     </div>
                   </div>

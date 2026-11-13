@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Eye, Info, Layers, Compass, HelpCircle, AlertTriangle } from 'lucide-react';
+import { Sparkles, Eye, Layers, Compass, AlertTriangle } from 'lucide-react';
 import { Mode, FailureMode } from '../../types';
+import { MathFormula } from '../MathFormula';
 
 interface TransformerConceptAProps {
   tokens: string[];
@@ -20,13 +21,12 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
   mode,
   step,
   failureMode,
-  dataSource,
   attentionHeads = 2
 }) => {
   const [activeHead, setActiveHead] = useState<HeadType>('sentiment');
   const [activeTab, setActiveTab] = useState<ActiveTab>('heatmap');
   const [hoveredCell, setHoveredCell] = useState<{ qIdx: number; kIdx: number } | null>(null);
-  const [selectedTokenIdx, setSelectedTokenIdx] = useState<number>(0);
+  const [selectedTokenIdx, setSelectedTokenIdx] = useState<number>(1);
 
   // Available heads filtered by user hyperparameter choice
   const availableHeads = useMemo(() => {
@@ -51,8 +51,9 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
 
   // Simulated Q, K, V vectors per token and head with semantic differentiation and training step progression
   const vectors = useMemo(() => {
-    // Training progress factor: 0.0 at step 0 (diffuse/unlearned) -> 1.0 at step 50+ (converged/sharp)
-    const trainProgress = mode === 'Train' ? Math.min(1, Math.max(0.15, step / 45)) : 1.0;
+    // Training progress factor: 0.55 at step 0 (readable, directional) -> 1.0 at step ~35 (converged/sharp).
+    // Starting above zero keeps the very first frame illustrative instead of a flat matrix.
+    const trainProgress = mode === 'Train' ? Math.min(1, Math.max(0.55, step / 35)) : 1.0;
     const stepJitter = mode === 'Train' && step > 0 ? ((step % 7) - 3) * 0.015 : 0;
 
     return tokens.map((token, i) => {
@@ -78,7 +79,7 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
       if (activeHead === 'sentiment') {
         // Head 1: Semantic Salience & Keywords (content words, negation, sentiment, verbs)
         const salienceScore = isSentiment ? 1.0 : isNegation ? 0.85 : isAction ? 0.70 : isStopWord ? 0.20 : 0.55;
-        const contrast = 0.3 + 0.7 * trainProgress;
+        const contrast = 0.5 + 0.5 * trainProgress;
 
         q = [
           (salienceScore * 0.9 + dim0 * 0.2) * contrast + stepJitter,
@@ -126,9 +127,11 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
       return Array.from({ length: N }, () => Array.from({ length: N }, () => uniform));
     }
 
-    // Softmax temperature: 2.2 (diffuse, untrained) -> 0.75 (sharp, converged) as training steps advance
-    const trainProgress = mode === 'Train' ? Math.min(1, Math.max(0.05, step / 50)) : 1.0;
-    const temperature = mode === 'Train' ? 2.2 - trainProgress * 1.45 : 0.85;
+    // Softmax temperature: 1.55 (soft, still directional) -> 0.70 (sharp, converged) as training steps advance
+    const trainProgress = mode === 'Train' ? Math.min(1, Math.max(0.6, step / 40)) : 1.0;
+    // Lower temperature earlier than before so the first frames already show
+    // directional structure instead of a visually flat near-uniform matrix.
+    const temperature = mode === 'Train' ? 1.05 - trainProgress * 0.45 : 0.55;
 
     const matrix: number[][] = [];
     for (let i = 0; i < N; i++) {
@@ -200,8 +203,8 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
                 {'Softmax(QKᵀ / √d_k) V'}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Inspect how word tokens project into $Q, K, V$ vectors and calculate pairwise $N \times N$ attention weights
+            <p className="text-xs text-slate-400 mt-0.5">
+              Inspect how word tokens project into Q, K, V vectors and calculate pairwise N × N attention weights
             </p>
           </div>
         </div>
@@ -260,7 +263,7 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          2. Query Vectors ($Q$)
+          2. Query Vectors (Q)
         </button>
         <button
           onClick={() => setActiveTab('key')}
@@ -270,7 +273,7 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          3. Key Vectors ($K$)
+          3. Key Vectors (K)
         </button>
         <button
           onClick={() => setActiveTab('value')}
@@ -280,7 +283,7 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          4. Value Vectors ($V$)
+          4. Value Vectors (V)
         </button>
       </div>
 
@@ -289,37 +292,37 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
           {/* N x N Matrix Grid (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col items-center bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner">
-            <div className="flex items-center justify-between w-full mb-3">
-              <span className="text-xs font-semibold text-slate-300 flex items-center gap-2 font-mono">
-                <span>{'Self-Attention Matrix A (N × N)'}</span>
+          <div className="lg:col-span-7 flex flex-col bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-inner">
+            <div className="flex w-full flex-wrap items-center justify-between gap-2 mb-3">
+              <span className="flex items-center gap-2 font-mono text-xs font-semibold text-slate-300">
+                <span>Self-Attention Matrix A (N × N)</span>
                 {mode === 'Train' && (
                   <>
-                    <span className="text-slate-600">·</span>
-                    <span className="text-[11px] font-mono text-indigo-300 flex items-center gap-1.5 font-normal">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-slate-600" aria-hidden="true">·</span>
+                    <span className="flex items-center gap-1.5 font-mono text-[11px] font-normal text-indigo-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                       <span>Learning (Step {step})</span>
                     </span>
                   </>
                 )}
               </span>
-              <span className="text-[10px] font-mono text-slate-500">
-                {'Row = Query (q_i) | Column = Key (k_j)'}
+              <span className="font-mono text-[11px] text-slate-500">
+                Row = Query (q_i) · Column = Key (k_j)
               </span>
             </div>
 
             {/* Matrix Container */}
-            <div className="overflow-x-auto w-full flex justify-center">
-              <div className="inline-block">
+            <div className="w-full">
+              <div className="w-full">
                 
                 {/* Top Column Labels (Key Tokens) */}
-                <div className="flex ml-20 mb-1.5 gap-1">
+                <div className="ml-[5.25rem] flex mb-1.5 gap-1">
                   {tokens.map((token, j) => {
                     const isKeyActive = activeCellData.kIdx === j;
                     return (
                       <div
                         key={`k-hdr-${j}`}
-                        className={`w-12 text-center text-[10px] font-mono truncate px-1 py-0.5 rounded ${
+                        className={`min-w-0 flex-1 text-center text-[10px] font-mono truncate px-1 py-0.5 rounded ${
                           isKeyActive ? 'bg-indigo-500/30 text-indigo-200 font-bold border border-indigo-400/50' : 'text-slate-400'
                         }`}
                         title={token}
@@ -336,40 +339,48 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
                     const isQueryActive = activeCellData.qIdx === i;
                     return (
                       <div key={`q-row-${i}`} className="flex items-center gap-1">
-                        
+
                         {/* Row Label (Query Token) */}
-                        <div
+                        <button
+                          type="button"
                           onClick={() => setSelectedTokenIdx(i)}
-                          className={`w-20 text-right text-[10px] font-mono truncate pr-2 py-1 rounded cursor-pointer transition-colors ${
+                          className={`w-20 shrink-0 text-right text-[10px] font-mono truncate pr-2 py-1 rounded cursor-pointer transition-colors ${
                             isQueryActive ? 'bg-indigo-500/30 text-indigo-200 font-bold border border-indigo-400/50' : 'text-slate-400 hover:text-slate-200'
                           }`}
-                          title={qTok}
+                          title={`Select query token: ${qTok}`}
                         >
                           {qTok}
-                        </div>
+                        </button>
 
                         {/* Cells for this row */}
-                        <div className="flex gap-1">
+                        <div className="flex min-w-0 flex-1 gap-1">
                           {tokens.map((_, j) => {
                             const weight = attentionMatrix[i]?.[j] ?? 0;
                             const isCellHovered = activeCellData.qIdx === i && activeCellData.kIdx === j;
+                            // Colour is normalized per row so the eye can read the
+                            // relative ranking even when early-training weights are close.
+                            const row = attentionMatrix[i] ?? [];
+                            const rowMin = Math.min(...row);
+                            const rowMax = Math.max(...row);
+                            const rank = rowMax > rowMin ? (weight - rowMin) / (rowMax - rowMin) : 0.5;
+                            const intensity = 0.10 + rank * 0.80;
 
                             return (
                               <motion.div
                                 key={`cell-${i}-${j}`}
                                 onMouseEnter={() => setHoveredCell({ qIdx: i, kIdx: j })}
                                 onMouseLeave={() => setHoveredCell(null)}
-                                className={`w-12 h-10 rounded flex flex-col items-center justify-center cursor-pointer transition-all relative ${
-                                  isCellHovered 
-                                    ? 'ring-2 ring-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.9)] z-20 scale-105' 
+                                className={`h-10 min-w-0 flex-1 rounded flex flex-col items-center justify-center cursor-pointer transition-all relative ${
+                                  isCellHovered
+                                    ? 'ring-2 ring-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.9)] z-20 scale-105'
                                     : 'hover:ring-1 hover:ring-indigo-300'
                                 }`}
                                 style={{
-                                  backgroundColor: `rgba(99, 102, 241, ${Math.max(0.08, weight * 0.9)})`,
-                                  color: weight > 0.4 ? '#ffffff' : '#94a3b8'
+                                  backgroundColor: `rgba(99, 102, 241, ${intensity})`,
+                                  color: intensity > 0.5 ? '#ffffff' : '#cbd5e1'
                                 }}
                               >
-                                <span className="text-[10px] font-mono font-bold leading-tight">
+                                <span className="text-[11px] font-mono font-semibold leading-tight">
                                   {weight.toFixed(2)}
                                 </span>
                               </motion.div>
@@ -383,10 +394,10 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between w-full mt-3 text-[10px] text-slate-500 pt-2 border-t border-slate-900">
-              <span>Low Attention (0.00)</span>
+            <div className="flex items-center justify-between w-full mt-3 text-[11px] text-slate-500 pt-2 border-t border-slate-900">
+              <span>Low attention</span>
               <div className="w-32 h-2 rounded bg-gradient-to-r from-slate-900 via-indigo-700 to-indigo-400 border border-slate-700" />
-              <span>High Attention (1.00)</span>
+              <span>High attention</span>
             </div>
           </div>
 
@@ -419,13 +430,18 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
             {/* Step-by-Step Formula */}
             <div className="space-y-2 text-[11px] font-mono bg-slate-900 p-3 rounded-lg border border-slate-800">
               <div className="flex justify-between items-center text-slate-400 pb-1 border-b border-slate-800">
-                <span>Step 1: Dot Product ($q_i \cdot k_j$)</span>
+                <span className="flex items-center gap-1">
+                  Step 1: Dot Product (<MathFormula formula="q_i \cdot k_j" displayMode={false} />)
+                </span>
                 <span className="text-slate-200 font-semibold">
                   {(activeCellData.weight * 3.42).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between items-center text-slate-400 pb-1 border-b border-slate-800">
-                <span>Step 2: Scale by $\sqrt{d_k}$ ($\sqrt{4} = 2$)</span>
+                <span className="flex items-center gap-1">
+                  Step 2: Scale by <MathFormula formula="\sqrt{d_k}" displayMode={false} />
+                  <span className="text-slate-500">(√4 = 2)</span>
+                </span>
                 <span className="text-slate-200 font-semibold">
                   {((activeCellData.weight * 3.42) / 2).toFixed(2)}
                 </span>
@@ -439,7 +455,10 @@ export const TransformerConceptA: React.FC<TransformerConceptAProps> = ({
             </div>
 
             <div className="text-[10px] text-slate-400 leading-relaxed">
-              <strong className="text-slate-300">Why scale by $\sqrt{d_k}$?</strong> In high dimensions, dot products grow large, pushing the Softmax into tiny gradient regions. Scaling keeps variance around 1.0.
+              <strong className="text-slate-300 inline-flex items-center gap-1">
+                Why scale by <MathFormula formula="\sqrt{d_k}" displayMode={false} />?
+              </strong>{' '}
+              In high dimensions, dot products grow large, pushing the Softmax into tiny gradient regions. Scaling keeps variance around 1.0.
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, ArrowLeft, Cpu, Activity, AlertTriangle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Cpu, AlertTriangle } from 'lucide-react';
 import { LayerTooltip } from '../LayerTooltip';
 
 interface RNNUnrolledSequenceProps {
@@ -24,7 +24,6 @@ export const RNNUnrolledSequence: React.FC<RNNUnrolledSequenceProps> = ({
   currentTokenIdx,
   isSequenceFinished,
   getHiddenVectorForStep,
-  getInputVectorForStep,
   getSignalStrength,
   mode,
   step,

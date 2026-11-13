@@ -1,8 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Cpu, Dice5, Zap, Award, AlertTriangle, ArrowRight } from 'lucide-react';
-import { LayerTooltip } from '../../LayerTooltip';
-import { getArchitectureTooltip } from '../../../utils/tooltips';
+import { Cpu, Dice5, Zap, ArrowRight } from 'lucide-react';
+
 
 interface DQNNetworkViewProps {
   stateVector: { label: string; value: number }[];
@@ -22,7 +21,6 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
   epsilon,
   isExploring,
   selectedAction,
-  isPoorExploration,
   numHiddenLayers = 2,
   step,
   onInspectMath

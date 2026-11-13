@@ -23,7 +23,6 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
   step, 
   mode, 
   dataSource,
-  onOpenGlossary,
 }) => {
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
   const [showIngestion, setShowIngestion] = useState(true);
@@ -60,7 +59,7 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
   }, [baseTokens, isGeneratingCycle, activePrompt]);
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 relative bg-slate-950 gap-6 pb-28">
+    <div className="w-full min-h-full flex flex-col items-center justify-center p-4 relative bg-slate-950 gap-6 pb-16">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_60%)] pointer-events-none" />

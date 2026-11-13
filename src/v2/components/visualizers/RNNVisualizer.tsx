@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+
 import { Hyperparameters, Mode, DataSource } from '../../types';
 import { PREDEFINED_PROMPTS } from '../../lib/prompts';
 import { RNNUnrolledSequence } from './RNNUnrolledSequence';
 import { RNNFoldedCell } from './RNNFoldedCell';
 import { RNNCellMathModal } from './RNNCellMathModal';
 import { RNNComparisonModal } from './RNNComparisonModal';
-import { RefreshCw, AlignLeft, Cpu, Zap, ArrowRightLeft, BookOpen, AlertTriangle } from 'lucide-react';
+import { RefreshCw, AlignLeft, ArrowRightLeft } from 'lucide-react';
 
 interface RNNVisualizerProps {
   hyperparams: Hyperparameters;
@@ -23,7 +23,6 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
   step, 
   mode, 
   dataSource,
-  onOpenGlossary,
 }) => {
   const [viewMode, setViewMode] = useState<RNNViewMode>('unrolled');
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
@@ -127,7 +126,7 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
     : (isGeneratingCycle && activePrompt ? activePrompt.next : 'EOS');
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 sm:p-6 relative bg-slate-950 gap-6">
+    <div className="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 relative bg-slate-950 gap-6">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_65%)] pointer-events-none" />

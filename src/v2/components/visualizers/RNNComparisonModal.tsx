@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Zap, ArrowRightLeft, Cpu, Layers, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, ArrowRightLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface RNNComparisonModalProps {
   isOpen: boolean;

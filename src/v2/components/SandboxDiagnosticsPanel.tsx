@@ -1,22 +1,20 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle, Activity, ZapOff, ActivitySquare } from 'lucide-react';
-import { FailureMode, Architecture } from '../types';
+import { FailureMode } from '../types';
 
 interface Props {
   failureMode: FailureMode;
-  architecture: Architecture;
   isEmbedded?: boolean;
 }
 
 export const SandboxDiagnosticsPanel: React.FC<Props> = ({ 
   failureMode, 
-  architecture,
   isEmbedded = true 
 }) => {
   if (failureMode === 'None') return null;
 
-  const content = getDiagnosticsContent(failureMode, architecture);
+  const content = getDiagnosticsContent(failureMode);
   if (!content) return null;
 
   if (isEmbedded) {
@@ -88,7 +86,7 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
   );
 };
 
-function getDiagnosticsContent(failureMode: FailureMode, architecture: Architecture) {
+function getDiagnosticsContent(failureMode: FailureMode) {
   switch (failureMode) {
     case 'Vanishing Gradients':
       return {

@@ -2,9 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Hyperparameters, Mode, UseCase, DataSource } from '../../types';
 import { LayerTooltip } from '../LayerTooltip';
-import { getArchitectureTooltip } from '../../utils/tooltips';
+
 import { GANSampleRenderer } from './GANSampleRenderer';
-import { Shuffle, Sliders, Eye, Grid3X3, Zap, ShieldAlert, Sparkles, Scale, Info } from 'lucide-react';
+import { Shuffle, Sliders, Eye, Grid3X3, Sparkles, Scale } from 'lucide-react';
 
 interface GANVisualizerProps {
   hyperparams: Hyperparameters;
@@ -25,9 +25,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   hyperparams,
   step,
   mode,
-  useCase,
   dataSource = 'Celebrity Faces (CelebA)',
-  onOpenGlossary,
 }) => {
   const isModeCollapse = mode === 'Train' && hyperparams.failureMode === 'Mode Collapse';
   const isDiscOverpowered = mode === 'Train' && hyperparams.failureMode === 'Discriminator Overpowering';
@@ -35,7 +33,6 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   // Interactive state for Latent Walk & View Mode
   const [interactiveLatent, setInteractiveLatent] = useState<number[]>([0.2, -0.5, 0.8, -0.1, 0.4, -0.3, 0.6, -0.7]);
   const [viewMode, setViewMode] = useState<'single' | 'batch' | 'walk'>('single');
-  const [inspectDiscTarget, setInspectDiscTarget] = useState<'real' | 'fake'>('fake');
   const [interpolationAlpha, setInterpolationAlpha] = useState<number>(0.5);
   const [latentSeedA, setLatentSeedA] = useState<number>(10);
   const [latentSeedB, setLatentSeedB] = useState<number>(50);
@@ -44,7 +41,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   const latentVector = useMemo(() => {
     if (viewMode === 'walk' || mode === 'Inference') {
       // Interpolate between vector A and B based on slider
-      return interactiveLatent.map((val, i) => {
+      return interactiveLatent.map((_val, i) => {
         const vA = (seededRandom(latentSeedA + i) * 2 - 1);
         const vB = (seededRandom(latentSeedB + i) * 2 - 1);
         return Number((vA * (1 - interpolationAlpha) + vB * interpolationAlpha).toFixed(2));
@@ -115,7 +112,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   const trainingCyclePhase = step % 2 === 0 ? 'D_STEP' : 'G_STEP';
 
   return (
-    <div className="w-full min-h-full flex flex-col p-3 sm:p-5 relative bg-slate-950 text-slate-100 pb-36">
+    <div className="w-full min-h-full flex flex-col justify-center p-3 sm:p-5 relative bg-slate-950 text-slate-100 pb-20">
       
       {/* Top Header & Context Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800/80">
@@ -173,17 +170,17 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
       </div>
 
       {/* Main Adversarial Pipeline Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch min-h-[440px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         
         {/* Left Col (Generator Network G): Latent vector -> Transposed Conv -> Fake Output */}
         <div
           id="tour-gan-generator"
-          className="lg:col-span-6 bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative backdrop-blur-sm"
+          className="lg:col-span-6 bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-4 flex flex-col gap-3 shadow-xl relative backdrop-blur-sm"
         >
           {/* Header (AUDIT-10: Zero-Pill Discipline) */}
           <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 font-mono flex-wrap">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-indigo-400" />
               <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-300">
                 01. Generator G(z; θ_g)
               </h3>
@@ -203,7 +200,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           {/* Generator Sub-Components Pipeline (AUDIT-09: Direct Hairline Dividers, Zero Nested Boxes) */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center my-auto py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center py-1">
             
             {/* Latent Vector Stage (4 cols) */}
             <div id="tour-gan-latent" className="sm:col-span-4 flex flex-col items-center gap-1.5 sm:pr-3 w-full">
@@ -336,12 +333,12 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
         {/* Right Col (Discriminator Network D): Real x & Fake G(z) -> Conv2D -> Real/Fake Probability */}
         <div
           id="tour-gan-discriminator"
-          className="lg:col-span-6 bg-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative backdrop-blur-sm"
+          className="lg:col-span-6 bg-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 flex flex-col gap-3 shadow-xl relative backdrop-blur-sm"
         >
           {/* Header (AUDIT-10: Zero-Pill Discipline) */}
           <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 font-mono flex-wrap">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300">
                 02. Discriminator D(x; θ_d)
               </h3>
@@ -361,7 +358,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           {/* Discriminator Sub-Components Pipeline (AUDIT-09: Direct Hairline Dividers, Unified Score Panel) */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center my-auto py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center py-1">
             
             {/* Real Data Stream (4 cols) */}
             <div className="sm:col-span-4 flex flex-col items-center gap-2 sm:pr-3 w-full">

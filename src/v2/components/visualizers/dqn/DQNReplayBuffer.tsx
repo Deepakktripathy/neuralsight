@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Database, RefreshCw, Layers, Zap, Shuffle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Database, RefreshCw, Shuffle } from 'lucide-react';
 
 interface Transition {
   id: number;
@@ -19,8 +19,7 @@ interface DQNReplayBufferProps {
 
 export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
   step,
-  currentTransition,
-  isPoorExploration
+  currentTransition
 }) => {
   // Target network updates every 20 steps
   const syncInterval = 20;

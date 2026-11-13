@@ -1,7 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion } from 'motion/react';
-import { Scan, Sparkles, ArrowRight, Check } from 'lucide-react';
-import { DataSource } from '../../types';
+﻿import React from 'react';
 
 export interface CNNSampleImage {
   id: string;
@@ -177,7 +174,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
           <svg viewBox="0 0 32 32" className="w-full h-full text-white fill-current filter drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">
             <path d="M 9 7 C 9 6, 21 6, 21 7 C 21 11, 16 13, 16 14 C 20 14, 23 17, 23 21 C 23 26, 10 26, 9 24 C 9 22, 18 24, 18 21 C 18 17, 12 17, 12 15 C 15 15, 17 12, 17 9 C 17 8, 12 8, 9 7 Z" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28×28</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28Ã—28</span>
         </div>
       );
     case 'mnist_7':
@@ -186,7 +183,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
           <svg viewBox="0 0 32 32" className="w-full h-full text-white fill-current filter drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">
             <path d="M 7 8 L 24 8 L 24 10 L 17 26 L 13 26 L 19 12 L 8 12 Z" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28×28</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28Ã—28</span>
         </div>
       );
     case 'mnist_0':
@@ -195,7 +192,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
           <svg viewBox="0 0 32 32" className="w-full h-full text-white fill-current filter drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]">
             <path d="M 16 6 C 22 6, 24 11, 24 16 C 24 21, 22 26, 16 26 C 10 26, 8 21, 8 16 C 8 11, 10 6, 16 6 Z M 16 10 C 13 10, 12 12, 12 16 C 12 20, 13 22, 16 22 C 19 22, 20 20, 20 16 C 20 12, 19 10, 16 10 Z" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28×28</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500">28Ã—28</span>
         </div>
       );
     case 'cifar_car':
@@ -213,7 +210,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
             <circle cx="10" cy="22" r="3" fill="#1e293b" stroke="#94a3b8" strokeWidth="1" />
             <circle cx="23" cy="22" r="3" fill="#1e293b" stroke="#94a3b8" strokeWidth="1" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32×32 RGB</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32Ã—32 RGB</span>
         </div>
       );
     case 'cifar_plane':
@@ -229,7 +226,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
             {/* Tail */}
             <polygon points="6,16 4,11 8,16" fill="#cbd5e1" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32×32 RGB</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32Ã—32 RGB</span>
         </div>
       );
     case 'cifar_ship':
@@ -245,7 +242,7 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
             <rect x="13" y="15" width="7" height="7" fill="#f59e0b" />
             <rect x="16" y="11" width="2" height="4" fill="#64748b" />
           </svg>
-          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32×32 RGB</span>
+          <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-amber-300/60">32Ã—32 RGB</span>
         </div>
       );
     case 'xray_normal':
@@ -296,365 +293,4 @@ export const RealImageIllustration: React.FC<{ type: CNNSampleImage['previewType
         </div>
       );
   }
-};
-
-interface CNNImageDigitizerProps {
-  dataSource?: DataSource;
-  onSelectSample: (sample: CNNSampleImage) => void;
-  selectedSample: CNNSampleImage;
-  hoveredCellIdx: number | null;
-  onHoverCell: (idx: number | null) => void;
-  isPlaying?: boolean;
-  step?: number;
-  onScanStateChange?: (isScanning: boolean) => void;
-}
-
-export const CNNImageDigitizer: React.FC<CNNImageDigitizerProps> = ({
-  dataSource,
-  onSelectSample,
-  selectedSample,
-  hoveredCellIdx,
-  onHoverCell,
-  isPlaying = false,
-  step = 0,
-  onScanStateChange,
-}) => {
-  const [isScanning, setIsScanning] = useState(false);
-  const [hasScanned, setHasScanned] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0); // 0 to 1
-  const scannedSampleIdRef = useRef<string | null>(null);
-  const onScanStateChangeRef = useRef(onScanStateChange);
-  onScanStateChangeRef.current = onScanStateChange;
-
-  const datasetKey = useMemo(() => {
-    if (dataSource?.includes('CIFAR')) return 'cifar';
-    if (dataSource?.includes('Medical')) return 'xray';
-    return 'mnist';
-  }, [dataSource]);
-
-  const samples = CNN_SAMPLES_BY_DATASET[datasetKey] || CNN_SAMPLES_BY_DATASET.mnist;
-
-  // Reset scan state when simulation is reset to step 0 while paused
-  useEffect(() => {
-    if (step === 0 && !isPlaying) {
-      scannedSampleIdRef.current = null;
-      setHasScanned(false);
-      setIsScanning(false);
-      setScanProgress(0);
-      onScanStateChangeRef.current?.(false);
-    }
-  }, [step, isPlaying]);
-
-  // If user selects a different sample while paused, mark it as needing scan on Play
-  useEffect(() => {
-    if (!isPlaying && scannedSampleIdRef.current !== selectedSample.id) {
-      setHasScanned(false);
-      setScanProgress(0);
-    }
-  }, [selectedSample.id, isPlaying]);
-
-  // Run the 1-pass optical scan when the user hits Play (or switches samples while playing)
-  useEffect(() => {
-    if (!isPlaying) {
-      setIsScanning(false);
-      onScanStateChangeRef.current?.(false);
-      return;
-    }
-
-    if (scannedSampleIdRef.current === selectedSample.id) {
-      // Already scanned this sample during the current run
-      setHasScanned(true);
-      setScanProgress(1);
-      onScanStateChangeRef.current?.(false);
-      return;
-    }
-
-    setIsScanning(true);
-    setHasScanned(false);
-    onScanStateChangeRef.current?.(true);
-    setScanProgress(0);
-
-    const start = performance.now();
-    const duration = 1100; // ms for clear column-by-column sweep
-    let rafId: number;
-    let cancelled = false;
-
-    const stepAnim = (time: number) => {
-      if (cancelled) return;
-      const elapsed = time - start;
-      const progress = Math.min(1, elapsed / duration);
-      setScanProgress(progress);
-
-      if (progress < 1) {
-        rafId = requestAnimationFrame(stepAnim);
-      } else {
-        scannedSampleIdRef.current = selectedSample.id;
-        setHasScanned(true);
-        setIsScanning(false);
-        onScanStateChangeRef.current?.(false);
-      }
-    };
-
-    rafId = requestAnimationFrame(stepAnim);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-    };
-  }, [isPlaying, selectedSample.id]);
-
-  // Active column index (0..5) being scanned right now
-  const activeScanCol = isScanning ? Math.min(5, Math.floor(scanProgress * 6)) : -1;
-
-  return (
-    <div className="bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 sm:p-4 backdrop-blur-md shadow-2xl flex flex-col gap-3 w-full max-w-5xl">
-      
-      {/* Header bar: Dataset sample selector + status badge */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-            <Scan className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-slate-200 block leading-tight">
-              Stage 1: Dataset Ingestion & Digitization Pipeline
-            </span>
-            <span className="text-[10px] text-slate-400">
-              Scans the selected image once on Play to quantize optical pixels into a 6×6 Float32 tensor
-            </span>
-          </div>
-        </div>
-
-        {isScanning ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 text-[10px] font-mono">
-            <Scan className="w-3 h-3 animate-spin" />
-            Scanning Image → Tensor ({Math.round(scanProgress * 100)}%)
-          </span>
-        ) : hasScanned ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-mono">
-            <Check className="w-3 h-3" />
-            Digitized · 6×6 Tensor Active
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/90 border border-slate-700 text-slate-400 text-[10px] font-mono">
-            Ready — Scans 1× on Play
-          </span>
-        )}
-      </div>
-
-      {/* Row of sample selector thumbnails */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-[10px] font-mono text-slate-400 uppercase shrink-0">Samples:</span>
-        {samples.map((s) => {
-          const isSelected = s.id === selectedSample.id;
-          return (
-            <button
-              key={s.id}
-              onClick={() => onSelectSample(s)}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all text-left shrink-0 ${
-                isSelected 
-                  ? 'bg-indigo-500/20 border-indigo-400 text-white shadow-[0_0_12px_rgba(99,102,241,0.25)]' 
-                  : 'bg-slate-800/80 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
-              }`}
-            >
-              <RealImageIllustration type={s.previewType} className="w-7 h-7" />
-              <div className="flex flex-col">
-                <span className="text-xs font-medium">{s.name}</span>
-                <span className="text-[9px] opacity-70 font-mono">{s.label}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Main Interactive Stage: [Real Image] -> [Laser Scan Animation] -> [2D Numerical Tensor] */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-slate-950/60 rounded-lg p-3 border border-slate-800/80">
-        
-        {/* Step 1: Raw Photometric Image (3 cols) */}
-        <div className="md:col-span-3 flex flex-col items-center text-center gap-1.5">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            1. Raw Image (Human View)
-          </span>
-
-          {/* Large image preview with animated laser scanner */}
-          <div className="relative w-28 h-28 rounded-lg overflow-hidden border-2 border-slate-700 shadow-lg group">
-            <RealImageIllustration type={selectedSample.previewType} className="w-full h-full" />
-            
-            {/* Laser scanning line */}
-            {isScanning && (
-              <div 
-                className="absolute top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,1)] z-20 pointer-events-none"
-                style={{ left: `${scanProgress * 100}%` }}
-              />
-            )}
-
-            {/* Glowing sweep overlay */}
-            {isScanning && (
-              <div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/25 to-transparent pointer-events-none z-10"
-                style={{ width: `${scanProgress * 100}%` }}
-              />
-            )}
-
-            {/* Highlight corresponding pixel cell on hover */}
-            {hoveredCellIdx !== null && (
-              <div 
-                className="absolute border-2 border-indigo-400 bg-indigo-500/40 pointer-events-none z-30 transition-all shadow-[0_0_8px_rgba(99,102,241,0.8)]"
-                style={{
-                  left: `${(hoveredCellIdx % 6) * (100 / 6)}%`,
-                  top: `${Math.floor(hoveredCellIdx / 6) * (100 / 6)}%`,
-                  width: `${100 / 6}%`,
-                  height: `${100 / 6}%`
-                }}
-              />
-            )}
-
-            {/* Interactive 6x6 pixel grid overlay for bidirectional hover: hovering image cell highlights 2D tensor grid */}
-            <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 z-25">
-              {Array.from({ length: 36 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  onMouseEnter={() => onHoverCell(idx)}
-                  onMouseLeave={() => onHoverCell(null)}
-                  className="cursor-crosshair w-full h-full transition-colors hover:bg-indigo-400/20"
-                  title={`Pixel [${Math.floor(idx / 6)}, ${idx % 6}]: ${selectedSample.grid[idx]?.toFixed(2) ?? '0.00'}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <span className="text-[10px] text-slate-400 leading-tight max-w-[180px]">
-            {selectedSample.description}
-          </span>
-        </div>
-
-        {/* Transition Bridge: Optical Photons -> Quantized Float32 Tensor Stream */}
-        <div className="md:col-span-2 flex flex-col items-center justify-center gap-1.5 text-center py-2 px-1">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] font-mono text-cyan-400 font-semibold tracking-wider uppercase">
-              Quantization
-            </span>
-          </div>
-          
-          {/* Directional Data Stream Pipeline (Image -> Tensor) */}
-          <div className="w-full flex items-center justify-center relative my-1.5 overflow-hidden h-5">
-            <div className="h-0.5 w-full bg-slate-800 rounded-full relative overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 rounded-full transition-none"
-                style={{ width: isScanning ? `${scanProgress * 100}%` : hasScanned ? '100%' : '35%' }}
-              />
-            </div>
-            <ArrowRight className={`absolute right-0 w-3 h-3 pointer-events-none transition-colors ${hasScanned || isScanning ? 'text-indigo-400' : 'text-slate-600'}`} />
-          </div>
-
-          {/* Formatted Mathematical & Scientific Normalization Badges */}
-          <div className="flex flex-col items-center gap-1 text-[10px] font-mono leading-tight">
-            <span className="text-slate-300 font-medium flex items-center gap-1">
-              Photons <span className="text-cyan-400 font-bold">→</span> Grayscale
-            </span>
-            <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 text-cyan-300 font-semibold text-[9.5px]">
-              Intensity <span className="text-slate-400 font-normal">I ∈</span> [0.00, 1.00]
-            </span>
-          </div>
-        </div>
-
-        {/* Step 2: 2D Numerical Tensor Grid (4 cols) */}
-        <div className="md:col-span-4 flex flex-col items-center text-center gap-1.5">
-          <div className="flex items-center justify-between w-full max-w-[210px]">
-            <span className="text-[10px] font-mono text-indigo-300 uppercase tracking-wider flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              2. 2D Tensor Grid (Model View)
-            </span>
-            <span className="text-[9px] font-mono text-slate-500">6×6 Float32</span>
-          </div>
-
-          {/* The 6x6 numeric grid */}
-          <div className="grid grid-cols-6 gap-1 p-1.5 bg-slate-900 rounded-lg border border-slate-700/80 shadow-inner w-52 h-52">
-            {selectedSample.grid.map((val, i) => {
-              const isHovered = hoveredCellIdx === i;
-              const x = i % 6;
-              const y = Math.floor(i / 6);
-              
-              // Reveal columns left-to-right during scan; fully revealed after scan; dimmed preview before scan
-              const cellProgress = (x + y * 0.15) / 6;
-              const isColumnActive = isScanning && x === activeScanCol;
-              const isRevealed = hasScanned || isHovered || (isScanning && scanProgress >= cellProgress);
-
-              return (
-                <motion.div
-                  key={i}
-                  onMouseEnter={() => onHoverCell(i)}
-                  onMouseLeave={() => onHoverCell(null)}
-                  className={`flex flex-col items-center justify-center rounded transition-colors cursor-crosshair relative ${
-                    isHovered 
-                      ? 'bg-indigo-500 text-white font-bold shadow-[0_0_8px_rgba(99,102,241,0.8)] z-20 scale-105 ring-1 ring-white' 
-                      : isColumnActive
-                        ? 'ring-1 ring-cyan-400/80 shadow-[0_0_6px_rgba(34,211,238,0.45)] z-10'
-                        : val > 0.5 
-                          ? 'bg-slate-800 text-slate-200 border border-slate-700' 
-                          : val > 0.1 
-                            ? 'bg-slate-900 text-slate-400 border border-slate-800/80' 
-                            : 'bg-slate-950 text-slate-600 border border-slate-900'
-                  }`}
-                  style={{
-                    backgroundColor: isHovered 
-                      ? undefined 
-                      : `rgba(99, 102, 241, ${val * 0.35 + 0.05})`
-                  }}
-                  animate={{
-                    opacity: isRevealed ? 1 : isScanning ? 0.15 : 0.45,
-                    scale: isColumnActive ? 1.04 : isRevealed ? 1 : 0.94
-                  }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <span className={`text-[8.5px] font-mono leading-none ${isHovered ? 'text-white' : val > 0.4 ? 'text-slate-100 font-semibold' : 'text-slate-400'}`}>
-                    {val.toFixed(2)}
-                  </span>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <span className="text-[9px] text-slate-400">
-            Hover over any numerical value to locate its pixel in the raw image
-          </span>
-        </div>
-
-        {/* Step 3: Explanation & Downstream Feeding (3 cols) */}
-        <div className="md:col-span-3 flex flex-col gap-2 p-2.5 bg-slate-900/80 rounded-lg border border-slate-800 text-left">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-300">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>How CNN "Sees"</span>
-          </div>
-
-          <p className="text-[10px] text-slate-300 leading-relaxed">
-            Neural networks do <strong>not</strong> see edges or colors directly. They ingest raw 2D numerical matrices where:
-          </p>
-
-          <ul className="text-[10px] text-slate-400 space-y-1 font-mono">
-            <li className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm bg-slate-950 border border-slate-700" />
-              <span>0.00 = Deep Black / Background</span>
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm bg-indigo-500/50 border border-indigo-400" />
-              <span>0.50 = Midtone / Boundary</span>
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-sm bg-indigo-400 border border-white" />
-              <span>1.00 = Peak White / Bone / Ink</span>
-            </li>
-          </ul>
-
-          <div className="mt-1 pt-1.5 border-t border-slate-800 flex items-center justify-between text-[10px]">
-            <span className="text-slate-400">Target Output:</span>
-            <span className="font-mono text-emerald-400 font-semibold">{selectedSample.label}</span>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  );
 };

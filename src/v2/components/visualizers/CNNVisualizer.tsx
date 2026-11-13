@@ -20,10 +20,8 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
   hyperparams,
   step,
   mode,
-  useCase,
   dataSource,
   isPlaying = false,
-  onOpenGlossary,
 }) => {
   const datasetKey = useMemo(() => {
     if (dataSource?.includes('CIFAR')) return 'cifar';
@@ -34,7 +32,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
   const defaultSamples = CNN_SAMPLES_BY_DATASET[datasetKey] || CNN_SAMPLES_BY_DATASET.mnist;
   const [selectedSample, setSelectedSample] = useState<CNNSampleImage>(defaultSamples[0]);
   const [hoveredCellIdx, setHoveredCellIdx] = useState<number | null>(null);
-  const [isStage1Scanning, setIsStage1Scanning] = useState(false);
+  const [, setIsStage1Scanning] = useState(false);
 
   // Update selected sample when dataset changes
   useEffect(() => {
@@ -107,7 +105,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 relative bg-slate-950 gap-6 pb-28">
+    <div className="w-full min-h-full flex flex-col items-center justify-center p-4 relative bg-slate-950 gap-6 pb-16">
       {/* Unified Stage 1: Optical Scan, Single 6×6 Tensor & 3×3 Live Convolution Arithmetic (AUDIT-01 & AUDIT-03) */}
       <div className="w-full flex justify-center relative z-20">
         <CNNUnifiedConvolution
@@ -120,7 +118,6 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
           step={step}
           stride={hyperparams.stride || 1}
           onScanStateChange={setIsStage1Scanning}
-          onOpenGlossary={onOpenGlossary}
         />
       </div>
 

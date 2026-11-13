@@ -1,6 +1,4 @@
 import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
-import { TrendingUp, TrendingDown, DollarSign, Wallet, Activity } from 'lucide-react';
 
 interface DQNMarketTradingProps {
   step: number;
@@ -10,8 +8,7 @@ interface DQNMarketTradingProps {
 
 export const DQNMarketTrading: React.FC<DQNMarketTradingProps> = ({
   step,
-  selectedAction,
-  isPoorExploration
+  selectedAction
 }) => {
   // Generate deterministic synthetic market price series
   const windowSize = 20;

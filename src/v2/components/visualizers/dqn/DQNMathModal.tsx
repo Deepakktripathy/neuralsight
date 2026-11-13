@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, BookOpen, Calculator, Target, Zap, ArrowRight, HelpCircle } from 'lucide-react';
+import { X, Calculator, Target, Zap } from 'lucide-react';
 
 interface DQNMathModalProps {
   isOpen: boolean;
@@ -12,8 +12,6 @@ interface DQNMathModalProps {
   qValues: { action: string; value: number }[];
   nextMaxQ: number;
   gamma?: number;
-  alpha?: number;
-  failureMode?: string;
 }
 
 export const DQNMathModal: React.FC<DQNMathModalProps> = ({
@@ -25,9 +23,7 @@ export const DQNMathModal: React.FC<DQNMathModalProps> = ({
   nextStateDesc,
   qValues,
   nextMaxQ,
-  gamma = 0.95,
-  alpha = 0.1,
-  failureMode
+  gamma = 0.95
 }) => {
   if (!isOpen) return null;
 
@@ -35,7 +31,6 @@ export const DQNMathModal: React.FC<DQNMathModalProps> = ({
   const discountedFuture = gamma * nextMaxQ;
   const targetY = reward + discountedFuture;
   const tdError = targetY - currentQ;
-  const updatedQ = currentQ + alpha * tdError;
   const loss = 0.5 * Math.pow(tdError, 2);
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+
 import { Hyperparameters, Mode, DataSource } from '../../types';
 import { DQNGridworld } from './dqn/DQNGridworld';
 import { DQNCartPole } from './dqn/DQNCartPole';
@@ -7,7 +7,7 @@ import { DQNMarketTrading } from './dqn/DQNMarketTrading';
 import { DQNNetworkView } from './dqn/DQNNetworkView';
 import { DQNReplayBuffer } from './dqn/DQNReplayBuffer';
 import { DQNMathModal } from './dqn/DQNMathModal';
-import { Play, RotateCcw, Database, Gamepad2, Zap, AlertTriangle, Layers } from 'lucide-react';
+import { Database, Gamepad2, Zap } from 'lucide-react';
 
 interface RLVisualizerProps {
   hyperparams: Hyperparameters;
@@ -26,7 +26,6 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
   mode,
   dataSource = 'Gridworld Maze',
   isSpotlightOpen = false,
-  onOpenGlossary,
 }) => {
   const [activeTab, setActiveTab] = useState<DQNViewTab>('environment');
   const [isMathModalOpen, setIsMathModalOpen] = useState(false);
@@ -189,7 +188,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
     : `(${nextGridPos.x}, ${nextGridPos.y})`;
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center justify-start p-4 sm:p-6 relative bg-slate-950 gap-6">
+    <div className="w-full min-h-full flex flex-col items-center justify-center p-4 sm:p-6 relative bg-slate-950 gap-6">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_65%)] pointer-events-none" />
@@ -320,8 +319,6 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
         qValues={qValues}
         nextMaxQ={0.88}
         gamma={discountFactor}
-        alpha={hyperparams.learningRate || 0.01}
-        failureMode={hyperparams.failureMode}
       />
 
     </div>

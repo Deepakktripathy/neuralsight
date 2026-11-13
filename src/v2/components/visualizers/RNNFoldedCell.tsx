@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, RefreshCw, Cpu, Layers, Sparkles, HelpCircle } from 'lucide-react';
-import { LayerTooltip } from '../LayerTooltip';
+import { ArrowRight, RefreshCw, Cpu, Layers } from 'lucide-react';
 
 interface RNNFoldedCellProps {
   tokens: string[];
@@ -21,14 +20,9 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
   tokens,
   currentTokenIdx,
   currentHidden,
-  prevHidden,
   inputVector,
   prediction,
-  step,
-  mode,
   onInspectMath,
-  isVanishing,
-  isExploding,
 }) => {
   const currentToken = tokens[currentTokenIdx] || tokens[0];
 
