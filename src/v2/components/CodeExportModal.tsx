@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Terminal, Download } from 'lucide-react';
+import { Copy, Check, Terminal, Download } from 'lucide-react';
 import { Architecture, Hyperparameters, UseCase, DataSource } from '../types';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
 interface CodeExportModalProps {
   architecture: Architecture;
@@ -145,7 +147,7 @@ print(f"Training {model.__class__.__name__} for ${epochs} epochs...")
     const lr = hyperparams.learningRate;
     const batchSize = hyperparams.batchSize;
     const epochs = hyperparams.epochs;
-    const opt = hyperparams.optimizer.toLowerCase();
+    
     const loss = hyperparams.lossFunction === 'Cross-Entropy' ? 'categorical_crossentropy' : (hyperparams.lossFunction === 'MSE' ? 'mean_squared_error' : 'huber');
 
     return `import tensorflow as tf
@@ -194,72 +196,48 @@ model.compile(
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
-              <Terminal className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-white">Export Model Code</h3>
-              <p className="text-xs text-slate-400">Generate native script matching your sandbox architecture</p>
-            </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl" aria-describedby={undefined}>
+        <DialogHeader className="flex-row items-center gap-2.5 pr-10">
+          <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-2 text-indigo-400">
+            <Terminal className="h-5 w-5" />
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          <div className="min-w-0">
+            <DialogTitle>Export model code</DialogTitle>
+            <DialogDescription>Generate a native script matching your sandbox architecture</DialogDescription>
+          </div>
+        </DialogHeader>
 
-        <div className="flex items-center justify-between px-6 py-3 bg-slate-950/50 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFramework('pytorch')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                framework === 'pytorch'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              PyTorch
-            </button>
-            <button
-              onClick={() => setFramework('keras')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                framework === 'keras'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              TensorFlow / Keras
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 bg-slate-950/50 px-5 py-3">
+          <Tabs value={framework} onValueChange={(value) => setFramework(value as 'pytorch' | 'keras')}>
+            <TabsList className="grid w-auto grid-cols-2">
+              <TabsTrigger value="pytorch">PyTorch</TabsTrigger>
+              <TabsTrigger value="keras">TensorFlow / Keras</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Copied' : 'Copy Code'}
+              {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? 'Copied' : 'Copy code'}
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors shadow-sm"
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="h-3.5 w-3.5" />
               Download .py
             </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-4 bg-slate-950/70 font-mono text-xs text-slate-300 leading-relaxed select-all">
+        <div className="flex-1 select-all overflow-auto bg-slate-950/70 p-4 font-mono text-xs leading-relaxed text-slate-300">
           <pre className="whitespace-pre-wrap">{code}</pre>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -1,8 +1,9 @@
 import React from 'react';
-import { X, Table, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { Table, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import { DataSource } from '../types';
 import { PREDEFINED_PROMPTS } from '../lib/prompts';
 import { GANSampleRenderer } from './visualizers/GANSampleRenderer';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface DatasetPreviewModalProps {
   dataSource: DataSource;
@@ -159,7 +160,7 @@ export const DatasetPreviewModal: React.FC<DatasetPreviewModalProps> = ({ dataSo
       ]);
     } else {
       headers = ['Feature 1', 'Feature 2', 'Target'];
-      rows = Array.from({length: 10}).map((_, i) => [
+      rows = Array.from({length: 10}).map(() => [
         Math.random().toFixed(2), Math.random().toFixed(2), Math.random() > 0.5 ? 'A' : 'B'
       ]);
     }
@@ -185,21 +186,19 @@ export const DatasetPreviewModal: React.FC<DatasetPreviewModalProps> = ({ dataSo
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[80vh] overflow-hidden transform transition-all">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-800/30">
-          <div className="flex items-center gap-2">
-            {dataSource.includes('MNIST') || dataSource.includes('CIFAR') ? <ImageIcon className="w-4 h-4 text-indigo-400" /> : dataSource === 'Text Prompt' ? <MessageSquare className="w-4 h-4 text-indigo-400" /> : <Table className="w-4 h-4 text-indigo-400" />}
-            <h3 className="text-sm font-semibold text-slate-200">DataSource Preview: {dataSource}</h3>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent aria-describedby={undefined}>
+        <DialogHeader className="flex-row items-center gap-2 pr-10">
+          {dataSource.includes('MNIST') || dataSource.includes('CIFAR') ? <ImageIcon className="h-4 w-4 text-indigo-400" /> : dataSource === 'Text Prompt' ? <MessageSquare className="h-4 w-4 text-indigo-400" /> : <Table className="h-4 w-4 text-indigo-400" />}
+          <div className="min-w-0">
+            <DialogTitle>Dataset preview</DialogTitle>
+            <DialogDescription className="truncate">{dataSource}</DialogDescription>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="p-4 overflow-y-auto">
+        </DialogHeader>
+        <div className="overflow-y-auto p-4">
           {renderPreview()}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

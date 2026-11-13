@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Sparkles, Layers, PlaySquare, Gauge, ShieldAlert, ArrowRight, ArrowLeft, X } from 'lucide-react';
+import { Sparkles, Layers, PlaySquare, Gauge, ShieldAlert, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from './ui/dialog';
 
 interface WelcomeTourProps {
   onClose: () => void;
@@ -17,7 +18,7 @@ const STEPS = [
     icon: Layers,
     color: 'indigo',
     title: 'Choose an architecture',
-    body: "The sidebar on the left lets you pick from six model types - from a simple Standard NN up to Transformers and GANs - along with the task, dataset, and hyperparameters that shape how it behaves.",
+    body: "The sidebar on the left lets you pick from seven model families - from a simple Standard NN up to Transformers and GANs - along with the task, dataset, and hyperparameters that shape how it behaves.",
   },
   {
     icon: PlaySquare,
@@ -34,8 +35,8 @@ const STEPS = [
   {
     icon: ShieldAlert,
     color: 'rose',
-    title: 'Guided Tour & Failure Sandbox',
-    body: "Turn on \"Guided Tour\" (top right) for a slowed-down, narrated walkthrough of one training step. Or open the Failure Sandbox in the sidebar to see what exploding gradients or overfitting actually look like.",
+    title: 'Spotlight tour & failure sandbox',
+    body: "Open Learn → Spotlight the canvas for a slowed-down, narrated walkthrough of the architecture. Or pick a failure mode in the sidebar to see what exploding gradients or overfitting actually look like.",
   },
 ];
 
@@ -83,42 +84,33 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
   const isLast = stepIdx === stepsToUse.length - 1;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
-      <div className="relative bg-slate-900/95 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-4 animate-in fade-in zoom-in-95 duration-300">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors"
-          title="Skip tour"
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className={`w-14 h-14 rounded-full ${colors.bg} ${colors.text} border ${colors.border} flex items-center justify-center`}>
-            <Icon className="w-7 h-7" />
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md" aria-describedby={undefined}>
+        <div className="flex flex-col items-center gap-3 p-5 pt-7 text-center">
+          <div className={`flex h-14 w-14 items-center justify-center rounded-full border ${colors.bg} ${colors.text} ${colors.border}`}>
+            <Icon className="h-7 w-7" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-white">{step.title}</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">{step.body}</p>
+            <DialogTitle className="text-lg">{step.title}</DialogTitle>
+            <DialogDescription className="text-sm text-slate-300">{step.body}</DialogDescription>
+          </div>
+
+          <div className="mt-3 flex items-center justify-center gap-1.5">
+            {stepsToUse.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === stepIdx ? 'w-6 bg-indigo-400' : 'w-1.5 bg-slate-700'
+                }`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Progress dots */}
-        <div className="flex items-center justify-center gap-1.5 mt-6">
-          {stepsToUse.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i === stepIdx ? 'w-6 bg-indigo-400' : 'w-1.5 bg-slate-700'
-              }`}
-            />
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center justify-between border-t border-slate-800 px-5 py-3">
           <button
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-slate-200 font-medium transition-colors"
+            className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-200"
           >
             Skip
           </button>
@@ -126,21 +118,21 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
           <div className="flex items-center gap-2">
             {stepIdx > 0 && (
               <button
-                onClick={() => setStepIdx(i => i - 1)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+                onClick={() => setStepIdx((i) => i - 1)}
+                className="flex items-center gap-1.5 rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700"
               >
-                <ArrowLeft className="w-3.5 h-3.5" /> Back
+                <ArrowLeft className="h-3.5 w-3.5" /> Back
               </button>
             )}
             <button
-              onClick={() => (isLast ? onClose() : setStepIdx(i => i + 1))}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold bg-indigo-500 text-white hover:bg-indigo-400 transition-colors shadow-md shadow-indigo-500/20"
+              onClick={() => (isLast ? onClose() : setStepIdx((i) => i + 1))}
+              className="flex items-center gap-1.5 rounded-md bg-indigo-500 px-4 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-colors hover:bg-indigo-400"
             >
-              {isLast ? "Let's go" : 'Next'} <ArrowRight className="w-3.5 h-3.5" />
+              {isLast ? "Let's go" : 'Next'} <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

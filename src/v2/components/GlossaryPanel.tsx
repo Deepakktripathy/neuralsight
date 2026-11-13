@@ -1,18 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  X,
-  BookOpen,
-  Search,
-  Sparkles,
-  Layers,
-  ChevronRight,
-  TrendingDown,
-  Activity,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-} from 'lucide-react';
+import { BookOpen, Search, Sparkles, Layers, TrendingDown, AlertTriangle, ArrowRight, X } from 'lucide-react';
 import { Architecture } from '../types';
 import {
   GENERAL_TRAINING_GLOSSARY,
@@ -24,12 +11,16 @@ import {
 } from '../lib/glossaryData';
 import { ARCHITECTURE_METADATA } from '../lib/architectureConfig';
 import { MathFormula } from './MathFormula';
+import { Dialog, SheetContent, SheetDescription, SheetTitle } from './ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 
 interface GlossaryPanelProps {
   onClose: () => void;
   architecture?: Architecture | string;
   initialTab?: 'docs' | 'tldr' | 'glossary';
 }
+
+type PanelTab = 'docs' | 'tldr' | 'glossary';
 
 export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
   onClose,
@@ -39,7 +30,7 @@ export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
   const currentArch = (architecture as Architecture) || 'CNN';
   const meta = ARCHITECTURE_METADATA[currentArch];
 
-  const [activeTab, setActiveTab] = useState<'docs' | 'tldr' | 'glossary'>(initialTab);
+  const [activeTab, setActiveTab] = useState<PanelTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [glossaryScope, setGlossaryScope] = useState<'all' | 'specific' | 'general'>('all');
 
@@ -54,7 +45,6 @@ export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
   const generalTerms: Record<string, GlossaryItem> = GENERAL_TRAINING_GLOSSARY;
   const trainingExpectation = TRAINING_EXPECTATIONS[currentArch] || TRAINING_EXPECTATIONS['CNN'];
 
-  // Filtered terms for Glossary tab
   const displayedTerms = useMemo(() => {
     let list: GlossaryItem[] = [];
     if (glossaryScope === 'all') {
@@ -77,160 +67,106 @@ export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
   }, [specificTerms, generalTerms, glossaryScope, searchQuery]);
 
   return (
-    <>
-      {/* Dimmed backdrop for click-outside dismissal */}
-      <div
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 transition-opacity duration-200"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Main Slide-Out Drawer */}
-      <aside
-        className="fixed inset-y-0 right-0 w-full sm:w-[500px] lg:w-[540px] max-w-full bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col z-50 animate-in slide-in-from-right duration-250 font-sans text-slate-100 select-text"
-        role="dialog"
-        aria-label="Training Documentation & Architecture Guide"
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <SheetContent
+        aria-describedby={undefined}
+        className="font-sans text-slate-100 select-text"
       >
-        {/* Header Section */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 shrink-0">
-          <div className="flex items-center justify-between gap-3 mb-3.5">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
-                <BookOpen className="w-4 h-4" />
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as PanelTab)}
+          className="flex h-full min-h-0 flex-col"
+        >
+          <div className="shrink-0 border-b border-slate-800 bg-slate-900/90 p-4 pr-14 sm:p-5 sm:pr-14">
+            <div className="mb-3 flex items-center gap-2.5">
+              <div className="shrink-0 rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-2 text-indigo-400">
+                <BookOpen className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-indigo-400 block">
-                  Training Companion & Docs
-                </span>
-                <h3 className="text-sm font-bold text-white truncate">
+                <SheetDescription className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
+                  Training companion &amp; docs
+                </SheetDescription>
+                <SheetTitle className="truncate text-sm">
                   {meta?.title || currentArch}
-                </h3>
+                </SheetTitle>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
-              aria-label="Close training guide"
-              title="Close guide"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <TabsList>
+              <TabsTrigger value="docs">
+                <Layers className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Architecture</span>
+              </TabsTrigger>
+              <TabsTrigger value="tldr">
+                <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">TLDR</span>
+              </TabsTrigger>
+              <TabsTrigger value="glossary">
+                <Search className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Glossary</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
-          {/* Symmetrical 3-Tab Segmented Switcher */}
-          <div className="grid grid-cols-3 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium">
-            <button
-              onClick={() => setActiveTab('docs')}
-              className={`py-1.5 px-2 rounded-lg text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'docs'
-                  ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">Architecture Docs</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('tldr')}
-              className={`py-1.5 px-2 rounded-lg text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'tldr'
-                  ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">Training TLDR</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('glossary')}
-              className={`py-1.5 px-2 rounded-lg text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                activeTab === 'glossary'
-                  ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Search className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">Glossary</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          {/* TAB 1: ARCHITECTURE DOCS */}
-          {activeTab === 'docs' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Architecture Overview Banner */}
-              <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/80">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-semibold block mb-1">
-                  Architecture Overview
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+            {/* TAB 1: ARCHITECTURE DOCS */}
+            <TabsContent value="docs" className="mt-0 space-y-4">
+              <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-3.5">
+                <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
+                  Architecture overview
                 </span>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs leading-relaxed text-slate-300">
                   {meta?.summary || 'Deep learning neural network architecture with interactive parameter exploration and real-time visualization.'}
                 </p>
-                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                   {meta?.domainTag && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                    <span className="rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-mono text-[11px] text-indigo-300">
                       {meta.domainTag}
                     </span>
                   )}
                   {meta?.keyMechanism && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800/80 text-slate-300 border border-slate-700/60">
+                    <span className="rounded border border-slate-700/60 bg-slate-800/80 px-2 py-0.5 font-mono text-[11px] text-slate-300">
                       {meta.keyMechanism}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Step-by-Step Architecture Pipeline */}
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-400 px-0.5">
-                  <span className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] font-mono">
-                    Pipeline Stages & Mathematical Mechanics
+                <div className="flex items-center justify-between px-0.5 text-xs text-slate-400">
+                  <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-200">
+                    Pipeline stages &amp; mechanics
                   </span>
-                  <span className="text-[10px] font-mono text-slate-500">
-                    {archDocs.length} Stages
-                  </span>
+                  <span className="font-mono text-[11px] text-slate-500">{archDocs.length} stages</span>
                 </div>
 
                 {archDocs.map((stage) => (
                   <div
                     key={stage.step}
-                    className="p-4 rounded-xl bg-slate-950/30 border border-slate-800/80 hover:border-slate-700/80 transition-colors space-y-2.5"
+                    className="space-y-2.5 rounded-xl border border-slate-800/80 bg-slate-950/30 p-4 transition-colors hover:border-slate-700/80"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-indigo-500/20 bg-indigo-500/10 font-mono text-[11px] font-bold text-indigo-400">
                         {stage.step}
                       </span>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-slate-100 truncate">
-                          {stage.title}
-                        </h4>
+                        <h4 className="truncate text-xs font-bold text-slate-100">{stage.title}</h4>
                         {stage.subtitle && (
-                          <span className="text-[10px] font-mono text-indigo-300 block">
-                            {stage.subtitle}
-                          </span>
+                          <span className="block font-mono text-[11px] text-indigo-300">{stage.subtitle}</span>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-300 leading-relaxed">
-                      {stage.body}
-                    </p>
+                    <p className="text-xs leading-relaxed text-slate-300">{stage.body}</p>
 
-                    {stage.formula && (
-                      <MathFormula formula={stage.formula} />
-                    )}
+                    {stage.formula && <MathFormula formula={stage.formula} />}
 
                     {stage.highlights && stage.highlights.length > 0 && (
-                      <ul className="space-y-1 pt-1 border-t border-slate-800/60">
-                        {stage.highlights.map((h, idx) => (
+                      <ul className="space-y-1 border-t border-slate-800/60 pt-1">
+                        {stage.highlights.map((highlight, idx) => (
                           <li key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-400">
-                            <span className="text-emerald-400 shrink-0">›</span>
-                            <span>{h}</span>
+                            <span className="shrink-0 text-emerald-400">›</span>
+                            <span>{highlight}</span>
                           </li>
                         ))}
                       </ul>
@@ -238,196 +174,155 @@ export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            </TabsContent>
 
-          {/* TAB 2: TRAINING TLDR NOTES */}
-          {activeTab === 'tldr' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Architecture TLDR Banner */}
-              <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/80">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-200">
-                    {trainingExpectation.title}
-                  </span>
+            {/* TAB 2: TRAINING TLDR NOTES */}
+            <TabsContent value="tldr" className="mt-0 space-y-4">
+              <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-3.5">
+                <div className="mb-1.5 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                  <span className="text-xs font-bold text-slate-200">{trainingExpectation.title}</span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {trainingExpectation.summary}
-                </p>
+                <p className="text-xs leading-relaxed text-slate-300">{trainingExpectation.summary}</p>
               </div>
 
-              {/* Forward vs. Backprop Concept */}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-3 rounded-xl bg-slate-950/30 border border-slate-800/80">
-                  <div className="flex items-center gap-1.5 font-bold text-indigo-400 text-[11px] uppercase tracking-wider mb-1">
-                    <ArrowRight className="w-3 h-3" /> Forward Pass
+                <div className="rounded-xl border border-slate-800/80 bg-slate-950/30 p-3">
+                  <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+                    <ArrowRight className="h-3 w-3" /> Forward pass
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] leading-relaxed text-slate-400">
                     Tensors stream from input to output calculating layer activations and loss.
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/30 border border-slate-800/80">
-                  <div className="flex items-center gap-1.5 font-bold text-rose-400 text-[11px] uppercase tracking-wider mb-1">
-                    <TrendingDown className="w-3 h-3" /> Backpropagation
+                <div className="rounded-xl border border-slate-800/80 bg-slate-950/30 p-3">
+                  <div className="mb-1 flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-wider text-rose-400">
+                    <TrendingDown className="h-3 w-3" /> Backprop
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] leading-relaxed text-slate-400">
                     Error gradients propagate backward via chain rule, updating layer weights.
                   </p>
                 </div>
               </div>
 
-              {/* Training Phases */}
               <div className="space-y-2.5">
-                <span className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] font-mono block px-0.5">
-                  Training Phases & Visual Cues
+                <span className="block px-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-200">
+                  Training phases &amp; visual cues
                 </span>
 
-                {trainingExpectation.phases.map((ph, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3.5 rounded-xl bg-slate-950/30 border border-slate-800/80 space-y-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                        {ph.phase}
-                      </span>
-                    </div>
+                {trainingExpectation.phases.map((phase, idx) => (
+                  <div key={idx} className="space-y-2 rounded-xl border border-slate-800/80 bg-slate-950/30 p-3.5">
+                    <span className="rounded border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-indigo-300">
+                      {phase.phase}
+                    </span>
 
                     <div className="space-y-1.5 text-xs">
                       <div>
-                        <span className="text-[10px] uppercase font-mono font-semibold text-slate-400 block mb-0.5">
-                          Metrics Pattern
+                        <span className="mb-0.5 block font-mono text-[11px] font-semibold uppercase text-slate-400">
+                          Metrics pattern
                         </span>
-                        <p className="text-slate-300 leading-relaxed">
-                          {ph.metricsExpectation}
-                        </p>
+                        <p className="leading-relaxed text-slate-300">{phase.metricsExpectation}</p>
                       </div>
 
-                      <div className="pt-1 border-t border-slate-800/60">
-                        <span className="text-[10px] uppercase font-mono font-semibold text-emerald-400 block mb-0.5">
-                          What to Watch on Canvas
+                      <div className="border-t border-slate-800/60 pt-1">
+                        <span className="mb-0.5 block font-mono text-[11px] font-semibold uppercase text-emerald-400">
+                          Watch on canvas
                         </span>
-                        <p className="text-slate-300 leading-relaxed">
-                          {ph.visualWhatToWatch}
-                        </p>
+                        <p className="leading-relaxed text-slate-300">{phase.visualWhatToWatch}</p>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Key Red Flags & Watchouts */}
-              <div className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/80 space-y-2">
-                <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs font-mono uppercase tracking-wider">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Key Watchouts & Red Flags
+              <div className="space-y-2 rounded-xl border border-slate-800/80 bg-slate-950/40 p-3.5">
+                <div className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  Watchouts &amp; red flags
                 </div>
                 <ul className="space-y-1.5 text-xs text-slate-300">
-                  {trainingExpectation.keyWatchouts.map((w, idx) => (
+                  {trainingExpectation.keyWatchouts.map((watchout, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="text-amber-400 font-bold shrink-0">!</span>
-                      <span className="leading-relaxed">{w}</span>
+                      <span className="shrink-0 font-bold text-amber-400">!</span>
+                      <span className="leading-relaxed">{watchout}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-            </div>
-          )}
+            </TabsContent>
 
-          {/* TAB 3: GLOSSARY CONTEXT */}
-          {activeTab === 'glossary' && (
-            <div className="space-y-3.5 animate-in fade-in duration-150">
-              {/* Search Bar */}
+            {/* TAB 3: GLOSSARY CONTEXT */}
+            <TabsContent value="glossary" className="mt-0 space-y-3.5">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search terminology, definitions, formulas..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8.5 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full rounded-xl border border-slate-800 bg-slate-950 py-2 pl-8.5 pr-8 text-xs text-slate-200 transition-colors placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="p-1 text-slate-500 hover:text-white absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer p-1 text-slate-500 hover:text-white"
+                    aria-label="Clear search"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Scope Switcher */}
               <div className="flex items-center gap-1.5 text-xs">
-                <button
-                  onClick={() => setGlossaryScope('all')}
-                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-[11px] ${
-                    glossaryScope === 'all'
-                      ? 'bg-indigo-600 text-white font-medium'
-                      : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
-                >
-                  All Terms
-                </button>
-                <button
-                  onClick={() => setGlossaryScope('specific')}
-                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-[11px] ${
-                    glossaryScope === 'specific'
-                      ? 'bg-indigo-600 text-white font-medium'
-                      : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
-                >
-                  {currentArch} Specific
-                </button>
-                <button
-                  onClick={() => setGlossaryScope('general')}
-                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-[11px] ${
-                    glossaryScope === 'general'
-                      ? 'bg-indigo-600 text-white font-medium'
-                      : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800'
-                  }`}
-                >
-                  Fundamentals
-                </button>
+                {([
+                  ['all', 'All terms'],
+                  ['specific', `${currentArch} specific`],
+                  ['general', 'Fundamentals'],
+                ] as const).map(([scope, label]) => (
+                  <button
+                    key={scope}
+                    onClick={() => setGlossaryScope(scope)}
+                    aria-pressed={glossaryScope === scope}
+                    className={`cursor-pointer rounded-lg px-2.5 py-1 text-[11px] transition-colors ${
+                      glossaryScope === scope
+                        ? 'bg-indigo-600 font-medium text-white'
+                        : 'border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
 
-              {/* Term Cards List */}
               <div className="space-y-2.5">
                 {displayedTerms.length > 0 ? (
                   displayedTerms.map((item) => (
                     <div
                       key={item.term}
-                      className="p-3.5 rounded-xl bg-slate-950/30 border border-slate-800/80 hover:border-slate-700/80 transition-colors space-y-1.5"
+                      className="space-y-1.5 rounded-xl border border-slate-800/80 bg-slate-950/30 p-3.5 transition-colors hover:border-slate-700/80"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-xs font-bold text-slate-100">
-                          {item.term}
-                        </h4>
+                        <h4 className="text-xs font-bold text-slate-100">{item.term}</h4>
                         {item.category && (
-                          <span className="text-[10px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60 shrink-0">
+                          <span className="shrink-0 rounded border border-slate-700/60 bg-slate-800/80 px-2 py-0.5 font-mono text-[11px] text-slate-400">
                             {item.category}
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-slate-300 leading-relaxed">
-                        {item.definition}
-                      </p>
+                      <p className="text-xs leading-relaxed text-slate-300">{item.definition}</p>
 
-                      {item.formula && (
-                        <MathFormula formula={item.formula} className="mt-2" />
-                      )}
+                      {item.formula && <MathFormula formula={item.formula} className="mt-2" />}
 
                       {item.tldrCues && item.tldrCues.length > 0 && (
-                        <div className="mt-2 pt-1.5 border-t border-slate-800/60">
-                          <span className="text-[10px] uppercase font-mono font-semibold text-emerald-400 block mb-1">
-                            Live Training Cue:
+                        <div className="mt-2 border-t border-slate-800/60 pt-1.5">
+                          <span className="mb-1 block font-mono text-[11px] font-semibold uppercase text-emerald-400">
+                            Live training cue
                           </span>
                           <ul className="space-y-0.5">
                             {item.tldrCues.map((cue, idx) => (
-                              <li key={idx} className="text-[11px] text-slate-400 flex items-start gap-1.5">
-                                <span className="text-emerald-400 shrink-0">›</span>
+                              <li key={idx} className="flex items-start gap-1.5 text-[11px] text-slate-400">
+                                <span className="shrink-0 text-emerald-400">›</span>
                                 <span>{cue}</span>
                               </li>
                             ))}
@@ -437,37 +332,36 @@ export const GlossaryPanel: React.FC<GlossaryPanelProps> = ({
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center rounded-xl bg-slate-950/20 border border-slate-800/60 text-slate-500 space-y-2">
-                    <Search className="w-6 h-6 mx-auto text-slate-600" />
+                  <div className="space-y-2 rounded-xl border border-slate-800/60 bg-slate-950/20 p-8 text-center text-slate-500">
+                    <Search className="mx-auto h-6 w-6 text-slate-600" />
                     <p className="text-xs">No matching glossary terms found.</p>
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="text-xs text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                      className="cursor-pointer text-xs text-indigo-400 underline hover:text-indigo-300"
                     >
                       Clear search query
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-          )}
-        </div>
+            </TabsContent>
+          </div>
 
-        {/* Footer Bar */}
-        <div className="py-2.5 px-4 sm:px-5 border-t border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs text-slate-500 shrink-0 font-mono">
-          <span className="text-[11px]">
-            {activeTab === 'docs'
-              ? `${archDocs.length} Architecture Stages`
-              : activeTab === 'tldr'
-              ? `${trainingExpectation.phases.length} Training Phases`
-              : `${displayedTerms.length} Terms Available`}
-          </span>
-          <span className="text-[10px] text-slate-600 uppercase tracking-wider font-mono">
-            Training Companion
-          </span>
-        </div>
-      </aside>
-    </>
+          <div className="flex shrink-0 items-center justify-between border-t border-slate-800 bg-slate-900/90 px-4 py-2.5 font-mono text-xs text-slate-500 sm:px-5">
+            <span className="text-[11px]">
+              {activeTab === 'docs'
+                ? `${archDocs.length} architecture stages`
+                : activeTab === 'tldr'
+                ? `${trainingExpectation.phases.length} training phases`
+                : `${displayedTerms.length} terms available`}
+            </span>
+            <span className="font-mono text-[11px] uppercase tracking-wider text-slate-600">
+              Training companion
+            </span>
+          </div>
+        </Tabs>
+      </SheetContent>
+    </Dialog>
   );
 };
 
