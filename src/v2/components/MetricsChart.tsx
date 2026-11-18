@@ -15,11 +15,11 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center justify-between mb-1 px-2 flex-wrap gap-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
             {isGAN ? "Adversarial Metrics" : "Live Metrics"}
           </h3>
           {isGAN && (
-            <div className="flex items-center gap-1.5 text-[9px] font-mono">
+            <div className="flex items-center gap-1.5 text-[11px] font-mono">
               <span className="flex items-center gap-1 text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#818cf8]" />
                 L_G (Gen Loss)
@@ -30,17 +30,17 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
               </span>
               <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#34d399]" />
-                D(G(z)) Fake Score
+                D(G(z)) Fake
               </span>
-              <span className="flex items-center gap-1 text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
-                D(x) Real Score
+              <span className="flex items-center gap-1 text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fbbf24]" />
+                D(x) Real
               </span>
             </div>
           )}
         </div>
         {isGAN && (
-          <span className="text-[9px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60" title="When G perfectly mimics the dataset, D cannot distinguish real from fake and outputs 50% for both.">
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60" title="When G perfectly mimics the dataset, D cannot distinguish real from fake and outputs 50% for both.">
             Nash Equilibrium: <strong className="text-amber-300">50% / 50%</strong>
           </span>
         )}
@@ -50,10 +50,10 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
         {isOverfitting && data.length > 10 && (
           <div className="absolute top-2 right-4 z-10 bg-slate-950/80 border border-slate-800/80 px-2.5 py-1.5 rounded-lg pointer-events-none shadow-md backdrop-blur-xs">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-              <span className="text-[9px] font-bold text-rose-400 uppercase tracking-wide">Memorization</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wide">Memorization</span>
             </div>
-            <div className="text-[10px] text-slate-400 flex items-center gap-2">
+            <div className="text-[11px] text-slate-400 flex items-center gap-2">
               <span>Train: <strong className="text-indigo-300 font-mono">{data[data.length-1].loss.toFixed(3)}</strong></span>
               <span>Val: <strong className="text-rose-400 font-mono">{(data[data.length-1].valLoss || 0).toFixed(3)}</strong></span>
             </div>
@@ -62,8 +62,8 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-            <XAxis dataKey="step" stroke="#64748b" fontSize={10} tickLine={false} />
-            <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+            <XAxis dataKey="step" stroke="#94a3b8" fontSize={11} tickLine={false} />
+            <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '11px', color: '#f8fafc', padding: '6px 10px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
               itemStyle={{ color: '#818cf8', padding: '1px 0' }}
@@ -113,7 +113,7 @@ export const MetricsChart: React.FC<MetricsChartProps> = ({ data, isOverfitting,
                 type="monotone" 
                 name={isGAN ? "D(x) Real Score" : "Validation Accuracy"}
                 dataKey="valAccuracy" 
-                stroke="#38bdf8" 
+                stroke="#fbbf24" 
                 strokeWidth={1.5} 
                 strokeDasharray={isGAN ? undefined : "4 4"}
                 dot={false} 

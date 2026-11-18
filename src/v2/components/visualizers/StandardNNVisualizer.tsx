@@ -11,10 +11,9 @@ interface StandardNNVisualizerProps {
   mode: Mode;
   useCase: UseCase;
   dataSource: DataSource;
-  onOpenGlossary?: () => void;
 }
 
-export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource, onOpenGlossary }) => {
+export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hyperparams, step, mode, useCase, dataSource }) => {
   const [inspectedNode, setInspectedNode] = useState<{lIdx: number, nIdx: number, act: number, bias: number} | null>(null);
   const [isDecisionSpaceMinimized, setIsDecisionSpaceMinimized] = useState(false);
   const numHiddenLayers = Math.max(1, hyperparams.layers - 2);
@@ -88,25 +87,27 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
         isDecisionSpaceMinimized ? (
           <button
             onClick={() => setIsDecisionSpaceMinimized(false)}
-            className="absolute top-4 left-4 sm:left-6 z-30 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md flex items-center gap-2 text-xs font-mono text-slate-300 transition-all hover:scale-105"
+            className="absolute top-4 left-4 sm:left-6 z-30 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-xl backdrop-blur-md flex items-center gap-2 text-xs font-mono text-slate-300 transition-all hover:scale-105 cursor-pointer"
             title="Expand 2D Decision Space"
+            aria-label="Expand 2D Decision Space"
           >
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-indigo-400" />
             <span>Decision Space</span>
             <Maximize2 className="w-3.5 h-3.5 text-slate-400" />
           </button>
         ) : (
           <div className="absolute top-4 left-4 sm:left-6 w-40 h-40 bg-slate-900/90 border border-slate-700/80 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md flex flex-col z-20 transition-all">
             <div className="px-2.5 py-1.5 bg-slate-800/90 border-b border-slate-700 flex justify-between items-center">
-              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-wider font-semibold">Decision Space</span>
+              <span className="text-[11px] font-mono text-slate-300 uppercase tracking-wider font-semibold">Decision Space</span>
               <div className="flex items-center gap-1.5">
                 {hyperparams.failureMode === 'Overfitting' && (
-                  <span className="text-[9px] text-rose-400 font-bold animate-pulse">Overfit!</span>
+                  <span className="text-[11px] text-rose-400 font-bold">Overfit!</span>
                 )}
                 <button
                   onClick={() => setIsDecisionSpaceMinimized(true)}
-                  className="text-slate-400 hover:text-slate-200 transition-colors p-0.5"
+                  className="text-slate-400 hover:text-slate-200 transition-colors p-0.5 cursor-pointer"
                   title="Minimize Decision Space"
+                  aria-label="Minimize Decision Space"
                 >
                   <Minimize2 className="w-3 h-3" />
                 </button>
@@ -209,11 +210,11 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
         {hyperparams.failureMode === 'Vanishing Gradients' && mode === 'Train' && (
           <div className="absolute bottom-2 left-2 right-2 flex justify-between pointer-events-none z-10">
             <div className="bg-slate-900/90 border border-rose-500/50 rounded-lg p-2 shadow-lg">
-              <span className="text-[9px] font-bold text-rose-400 font-mono block mb-1">LAYER 1 GRADIENT</span>
+              <span className="text-[11px] font-bold text-rose-400 font-mono block mb-1">LAYER 1 GRADIENT</span>
               <span className="text-xs text-slate-200 font-mono">{(0.00000001 + Math.random() * 0.00000001).toExponential(2)}</span>
             </div>
             <div className="bg-slate-900/90 border border-emerald-500/50 rounded-lg p-2 shadow-lg">
-              <span className="text-[9px] font-bold text-emerald-400 font-mono block mb-1">LAST LAYER GRADIENT</span>
+              <span className="text-[11px] font-bold text-emerald-400 font-mono block mb-1">LAST LAYER GRADIENT</span>
               <span className="text-xs text-slate-200 font-mono">{(1.24 + Math.sin(step) * 0.1).toFixed(4)}</span>
             </div>
           </div>
@@ -222,7 +223,7 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
         {hyperparams.failureMode === 'Exploding Gradients' && mode === 'Train' && (
           <div className="absolute bottom-2 right-2 pointer-events-none z-10">
             <div className="bg-slate-900/90 border border-rose-500/50 rounded-lg p-2 shadow-lg">
-              <span className="text-[9px] font-bold text-rose-400 font-mono block mb-1">WEIGHT (NODE 1)</span>
+              <span className="text-[11px] font-bold text-rose-400 font-mono block mb-1">WEIGHT (NODE 1)</span>
               <span className="text-xs text-slate-200 font-mono">
                 {step < 5 ? (0.5 * step).toFixed(2) : step < 10 ? (Math.pow(2, step-5)).toFixed(1) : step < 15 ? (Math.pow(10, step-8)).toFixed(0) : "NaN"}
               </span>
@@ -310,7 +311,7 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
                     
                     {/* Interactive Node Tooltip */}
                     <div className={`absolute ${isOutput ? 'right-full mr-3' : 'left-full ml-3'} top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap`}>
-                      <div className="text-[10px] text-slate-300 font-mono flex flex-col gap-1">
+                      <div className="text-[11px] text-slate-300 font-mono flex flex-col gap-1">
                         <div className="flex justify-between gap-4">
                           <span>Value:</span>
                           <span className={isNaN ? "text-rose-400 font-bold" : (isOutput ? "text-emerald-300" : "text-indigo-300")}>{isNaN ? 'NaN' : act.toFixed(4)}</span>
@@ -334,12 +335,12 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
         <div className="absolute bottom-6 right-6 w-64 bg-slate-900/95 border border-indigo-500/40 rounded-xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
           <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-slate-800 bg-slate-800/50">
             <h3 className="text-xs font-medium text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-indigo-500" />
               Neuron Inspection
             </h3>
             <button 
               onClick={() => setInspectedNode(null)}
-              className="text-slate-400 hover:text-slate-200 transition-colors p-0.5"
+              className="text-slate-400 hover:text-slate-200 transition-colors p-0.5 cursor-pointer"
               aria-label="Close inspection"
             >
               <X className="w-3.5 h-3.5" />
@@ -348,42 +349,42 @@ export const StandardNNVisualizer: React.FC<StandardNNVisualizerProps> = ({ hype
           
           <div className="p-3.5 space-y-3">
             <div className="space-y-1">
-              <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Location</div>
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Location</div>
               <div className="text-xs font-mono text-indigo-300">
                 Layer {inspectedNode.lIdx + 1}, Neuron {inspectedNode.nIdx + 1}
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Mathematics</div>
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Mathematics</div>
               <div className="bg-slate-950 rounded-md p-3 font-mono text-[11px] space-y-2">
                 <div className="flex justify-between text-slate-300">
                   <span>z = ∑(w·x) + b</span>
-                  <span className="text-slate-500">Summation</span>
+                  <span className="text-slate-400">Summation</span>
                 </div>
                 <div className="flex justify-between text-slate-300 border-t border-slate-800 pt-2">
                   <span>a = σ(z)</span>
-                  <span className="text-slate-500">Activation</span>
+                  <span className="text-slate-400">Activation</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Current State</div>
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Current State</div>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div className="bg-slate-950 rounded border border-slate-800 p-2 flex flex-col gap-1">
-                  <span className="text-slate-500 text-[10px]">Bias (b)</span>
+                  <span className="text-slate-400 text-[11px]">Bias (b)</span>
                   <span className="text-amber-400 font-semibold">{inspectedNode.bias.toFixed(4)}</span>
                 </div>
                 <div className="bg-slate-950 rounded border border-slate-800 p-2 flex flex-col gap-1">
-                  <span className="text-slate-500 text-[10px]">Output (a)</span>
+                  <span className="text-slate-400 text-[11px]">Output (a)</span>
                   <span className="text-emerald-400 font-semibold">{Number.isNaN(inspectedNode.act) ? 'NaN' : inspectedNode.act.toFixed(4)}</span>
                 </div>
               </div>
             </div>
             
             <div className="pt-2 border-t border-slate-800">
-              <p className="text-[10px] text-slate-400 leading-relaxed">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
                 This neuron takes inputs from the previous layer, multiplies them by weights, adds a bias, and passes the result through an activation function to determine its output.
               </p>
             </div>

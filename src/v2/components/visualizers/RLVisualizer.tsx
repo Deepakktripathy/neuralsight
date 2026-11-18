@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Hyperparameters, Mode, DataSource } from '../../types';
 import { DQNGridworld } from './dqn/DQNGridworld';
 import { DQNCartPole } from './dqn/DQNCartPole';
@@ -7,7 +6,7 @@ import { DQNMarketTrading } from './dqn/DQNMarketTrading';
 import { DQNNetworkView } from './dqn/DQNNetworkView';
 import { DQNReplayBuffer } from './dqn/DQNReplayBuffer';
 import { DQNMathModal } from './dqn/DQNMathModal';
-import { Play, RotateCcw, Database, Gamepad2, Zap, AlertTriangle, Layers } from 'lucide-react';
+import { Database, Gamepad2, Zap } from 'lucide-react';
 
 interface RLVisualizerProps {
   hyperparams: Hyperparameters;
@@ -15,7 +14,6 @@ interface RLVisualizerProps {
   mode: Mode;
   dataSource?: DataSource;
   isSpotlightOpen?: boolean;
-  onOpenGlossary?: () => void;
 }
 
 type DQNViewTab = 'environment' | 'mechanics';
@@ -26,7 +24,6 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
   mode,
   dataSource = 'Gridworld Maze',
   isSpotlightOpen = false,
-  onOpenGlossary,
 }) => {
   const [activeTab, setActiveTab] = useState<DQNViewTab>('environment');
   const [isMathModalOpen, setIsMathModalOpen] = useState(false);
@@ -199,7 +196,7 @@ export const RLVisualizer: React.FC<RLVisualizerProps> = ({
         
         {/* Left: View Tabs */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold mr-1 hidden sm:inline">
+          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold mr-1 hidden sm:inline">
             View:
           </span>
 

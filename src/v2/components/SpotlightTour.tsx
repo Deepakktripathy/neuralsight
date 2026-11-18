@@ -105,6 +105,17 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
     }
   }, [currentStepIdx, rect]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onComplete();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onComplete]);
+
   const handleNext = () => {
     if (currentStepIdx < steps.length - 1) {
       setCurrentStepIdx(prev => prev + 1);
@@ -144,7 +155,6 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
     const tWidth = tooltipDim.width;
     const tHeight = tooltipDim.height;
 
-    // Available space in each cardinal direction:
     const spaceBelow = (winH - BOTTOM_BAR_CLEARANCE) - (spotTop + spotHeight);
     const spaceAbove = spotTop - TOP_BAR_CLEARANCE;
     const spaceRight = winW - (spotLeft + spotWidth) - 16;
@@ -153,12 +163,6 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
     let computedTop = 0;
     let computedLeft = 0;
 
-    // Smart priority:
-    // 1. Below (if sufficient room)
-    // 2. Above (if sufficient room)
-    // 3. To the Right (ideal for wide screens and zoomed out layouts like 75% zoom)
-    // 4. To the Left
-    // 5. Clamped fallback
     if (spaceBelow >= tHeight + margin) {
       computedTop = spotTop + spotHeight + margin;
       computedLeft = spotLeft + (spotWidth - tWidth) / 2;
@@ -172,7 +176,6 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
       computedLeft = spotLeft - margin - tWidth;
       computedTop = spotTop + Math.max(0, (spotHeight - tHeight) / 2);
     } else {
-      // If neither full top nor bottom fits, choose the one with more clearance
       if (spaceBelow >= spaceAbove) {
         computedTop = spotTop + spotHeight + 8;
       } else {
@@ -181,7 +184,6 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
       computedLeft = spotLeft + (spotWidth - tWidth) / 2;
     }
 
-    // Strict boundary enforcement: NEVER overflow the viewport or bottom playback controls
     const maxTop = Math.max(TOP_BAR_CLEARANCE + 8, winH - BOTTOM_BAR_CLEARANCE - tHeight - 8);
     const finalTop = Math.max(TOP_BAR_CLEARANCE + 8, Math.min(maxTop, computedTop));
     const finalLeft = Math.max(16, Math.min(winW - tWidth - 16, computedLeft));
@@ -193,20 +195,25 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
   };
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none">
+    <div
+      className="fixed inset-0 z-[100] pointer-events-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label={currentStep ? `Spotlight tour: ${currentStep.title}` : 'Spotlight tour'}
+    >
       <AnimatePresence>
         {rect && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: 1, 
-              top: spotTop, 
-              left: spotLeft, 
-              width: spotWidth, 
-              height: spotHeight 
+            animate={{
+              opacity: 1,
+              top: spotTop,
+              left: spotLeft,
+              width: spotWidth,
+              height: spotHeight,
             }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
             className="absolute rounded-2xl border-2 border-indigo-500 shadow-[0_0_0_9999px_rgba(15,23,42,0.85)] pointer-events-auto"
           />
         )}
@@ -231,7 +238,7 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className="absolute z-[101] pointer-events-auto max-w-sm w-80 sm:w-[340px]"
             style={getTooltipStyle()}
           >
@@ -243,21 +250,22 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ steps, onComplete,
                   </span>
                   {currentStep.title}
                 </h3>
-                <button 
+                <button
                   onClick={handleSkip}
-                  className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors"
+                  className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors cursor-pointer"
                   title="Close tour"
+                  aria-label="Close spotlight tour"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              
+
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {currentStep.description}
               </p>
 
               <div className="flex justify-between items-center mt-1 pt-2 border-t border-slate-800">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold font-mono">
+                <span className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold font-mono">
                   Step {currentStepIdx + 1} of {steps.length}
                 </span>
                 <button

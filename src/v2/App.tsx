@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { PlaybackControls } from './components/PlaybackControls';
-import { MetricsChart } from './components/MetricsChart';
 import { MetricsHUD } from './components/MetricsHUD';
 import { CNNVisualizer } from './components/visualizers/CNNVisualizer';
 import { TransformerVisualizer } from './components/visualizers/TransformerVisualizer';
@@ -9,27 +8,50 @@ import { RLVisualizer } from './components/visualizers/RLVisualizer';
 import { StandardNNVisualizer } from './components/visualizers/StandardNNVisualizer';
 import { GANVisualizer } from './components/visualizers/GANVisualizer';
 import { RNNVisualizer } from './components/visualizers/RNNVisualizer';
-import { CustomModelVisualizer } from './components/visualizers/CustomModelVisualizer';
 import { Architecture, Mode, UseCase, Hyperparameters, DataSource } from './types';
 import {
-  X,
   HelpCircle,
-  Menu,
   Code2,
-  Check,
   Eye,
   BookOpen,
   PanelLeftOpen,
+  ChevronDown,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { DatasetPreviewModal } from './components/DatasetPreviewModal';
 import { CodeExportModal } from './components/CodeExportModal';
 import { WelcomeTour } from './components/WelcomeTour';
-import { GlossaryPanel } from './components/GlossaryPanel';
 import { SpotlightTour, TourStep } from './components/SpotlightTour';
 import { ArchitectureSelectionHub } from './components/ArchitectureSelectionHub';
 import { ModelConfigurationPage } from './components/ModelConfigurationPage';
 import { ARCHITECTURE_METADATA } from './lib/architectureConfig';
+import type { ChatMessage, SimulationContextSnapshot } from './components/AIChatDrawer';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from './components/ui/dropdown-menu';
+
+const CustomModelVisualizer = lazy(() =>
+  import('./components/visualizers/CustomModelVisualizer').then((m) => ({
+    default: m.CustomModelVisualizer,
+  }))
+);
+
+const GlossaryPanel = lazy(() =>
+  import('./components/GlossaryPanel').then((m) => ({
+    default: m.GlossaryPanel,
+  }))
+);
+
+const AIChatDrawer = lazy(() =>
+  import('./components/AIChatDrawer').then((m) => ({
+    default: m.AIChatDrawer,
+  }))
+);
 
 // Rough relative convergence speed by architecture, purely for illustrating
 // *why* different architectures learn at different rates in Comparison Mode -
@@ -87,15 +109,17 @@ export default function App() {
     return fallback;
   };
 
-  // Start on the Architecture Selection Hub unless deep-linked via URL params
+  // Start on the Architecture Selection Hub unless deep-linked via URL params.
+  // `view` wins over `arch` so ?arch=CNN&view=configure reaches Setup rather than Studio.
   const [viewStage, setViewStage] = useState<ViewStage>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.has('arch') || params.get('view') === 'studio') {
-        return 'studio';
-      }
-      if (params.get('view') === 'configure') {
+      const view = params.get('view');
+      if (view === 'configure') {
         return 'configure';
+      }
+      if (view === 'studio' || params.has('arch')) {
+        return 'studio';
       }
     }
     return 'select-arch';
@@ -111,7 +135,6 @@ export default function App() {
     }
     return true;
   });
-
 
   const [mode, setMode] = useState<Mode>('Train');
 
@@ -163,6 +186,8 @@ export default function App() {
 
   const [showWelcome, setShowWelcome] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatThreads, setChatThreads] = useState<Record<string, ChatMessage[]>>({});
   const [activeSpotlightArch, setActiveSpotlightArch] = useState<Architecture | null>(null);
 
   const closeSpotlight = useCallback(() => {
@@ -183,6 +208,20 @@ export default function App() {
       setMetricsData([{ step: 0, loss: 2.5, accuracy: 0.1, valLoss: 2.5, valAccuracy: 0.1 }]);
     }
   }, [architecture]);
+
+  const handleRunScenario = useCallback(
+    (patch: Partial<Hyperparameters>, autoPlay = true) => {
+      setHyperparams((prev) => ({ ...prev, ...patch }));
+      setStep(0);
+      if (architecture === 'GAN') {
+        setMetricsData([{ step: 0, loss: 2.8, accuracy: 0.05, valLoss: 0.4, valAccuracy: 0.95 }]);
+      } else {
+        setMetricsData([{ step: 0, loss: 2.5, accuracy: 0.1, valLoss: 2.5, valAccuracy: 0.1 }]);
+      }
+      setIsPlaying(autoPlay);
+    },
+    [architecture]
+  );
 
   // Handler when user picks an architecture card on Stage 1
   const handleSelectArchitectureFromHub = (newArch: Architecture) => {
@@ -330,30 +369,6 @@ export default function App() {
     hyperparams.failureMode,
   ]);
 
-  const handleExportResults = () => {
-    const isOverfitting = hyperparams.failureMode === 'Overfitting';
-    const header = isOverfitting
-      ? 'Step,Train Loss,Train Accuracy,Validation Loss,Validation Accuracy\n'
-      : 'Step,Loss,Accuracy\n';
-    const rows = metricsData
-      .map((e) => {
-        const base = `${e.step},${e.loss.toFixed(4)},${e.accuracy.toFixed(4)}`;
-        if (!isOverfitting) return base;
-        const vLoss = e.valLoss !== undefined ? e.valLoss.toFixed(4) : '';
-        const vAcc = e.valAccuracy !== undefined ? e.valAccuracy.toFixed(4) : '';
-        return `${base},${vLoss},${vAcc}`;
-      })
-      .join('\n');
-    const csvContent = 'data:text/csv;charset=utf-8,' + header + rows;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `metrics_${architecture.toLowerCase()}_${step}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const renderVisualizer = () => {
     switch (architecture) {
       case 'CNN':
@@ -365,7 +380,6 @@ export default function App() {
             useCase={useCase}
             dataSource={dataSource}
             isPlaying={isPlaying}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Transformer':
@@ -375,7 +389,6 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'DQN':
@@ -386,7 +399,6 @@ export default function App() {
             mode={mode}
             dataSource={dataSource}
             isSpotlightOpen={activeSpotlightArch !== null}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Standard NN':
@@ -397,7 +409,6 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'GAN':
@@ -408,7 +419,6 @@ export default function App() {
             mode={mode}
             useCase={useCase}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'RNN':
@@ -418,15 +428,58 @@ export default function App() {
             step={step}
             mode={mode}
             dataSource={dataSource}
-            onOpenGlossary={() => setShowGlossary(true)}
           />
         );
       case 'Custom Model':
-        return <CustomModelVisualizer file={customModelFile} setFile={setCustomModelFile} />;
+        return (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full text-xs text-slate-400">
+                Loading Graph Inspector...
+              </div>
+            }
+          >
+            <CustomModelVisualizer file={customModelFile} setFile={setCustomModelFile} />
+          </Suspense>
+        );
       default:
         return null;
     }
   };
+
+  const simulationContext: SimulationContextSnapshot = React.useMemo(() => {
+    const latest = metricsData.length > 0 ? metricsData[metricsData.length - 1] : null;
+    const first = metricsData.length > 2 ? metricsData[0] : null;
+    let recentTrend = '';
+    if (latest) {
+      if (Number.isNaN(latest.loss)) {
+        recentTrend = 'loss diverged to NaN';
+      } else if (first && !Number.isNaN(first.loss)) {
+        recentTrend = `over last ${metricsData.length} points: loss ${first.loss.toFixed(2)} -> ${latest.loss.toFixed(2)}, accuracy ${(first.accuracy * 100).toFixed(1)}% -> ${(latest.accuracy * 100).toFixed(1)}%`;
+      }
+    }
+    return {
+      architecture,
+      mode,
+      useCase,
+      dataSource,
+      step,
+      hyperparams,
+      latestMetrics: latest,
+      recentTrend,
+    };
+  }, [architecture, mode, useCase, dataSource, step, hyperparams, metricsData]);
+
+  const handleChatMessagesChange = useCallback<React.Dispatch<React.SetStateAction<ChatMessage[]>>>(
+    (updater) => {
+      setChatThreads((prev) => {
+        const current = prev[architecture] ?? [];
+        const next = typeof updater === 'function' ? updater(current) : updater;
+        return { ...prev, [architecture]: next };
+      });
+    },
+    [architecture]
+  );
 
   // Global modals available across all stages
   const renderGlobalModals = () => (
@@ -438,15 +491,16 @@ export default function App() {
         />
       )}
       {showGlossary && (
-        <GlossaryPanel onClose={() => setShowGlossary(false)} architecture={architecture} />
+        <Suspense fallback={null}>
+          <GlossaryPanel onClose={() => setShowGlossary(false)} architecture={architecture} />
+        </Suspense>
       )}
       {showCodeExport && (
         <CodeExportModal
-          isOpen={showCodeExport}
           onClose={() => setShowCodeExport(false)}
           architecture={architecture}
           hyperparams={hyperparams}
-          mode={mode}
+          useCase={useCase}
           dataSource={dataSource}
         />
       )}
@@ -460,7 +514,6 @@ export default function App() {
         <ArchitectureSelectionHub
           selectedArchitecture={architecture}
           onSelectArchitecture={handleSelectArchitectureFromHub}
-          onQuickLaunchStudio={() => setViewStage('studio')}
           onOpenGlossary={() => setShowGlossary(true)}
         />
         {renderGlobalModals()}
@@ -529,6 +582,7 @@ export default function App() {
           hyperparams={hyperparams}
           setHyperparams={setHyperparams}
           resetSimulation={resetSimulation}
+          onRunScenario={handleRunScenario}
           onPreviewDataSource={(d) => setPreviewDataSource(d)}
           customModelFile={customModelFile}
           setCustomModelFile={setCustomModelFile}
@@ -540,7 +594,6 @@ export default function App() {
             setIsPlaying(false);
             setViewStage('configure');
           }}
-          onOpenGlossary={() => setShowGlossary(true)}
         />
       </div>
 
@@ -561,7 +614,7 @@ export default function App() {
             )}
 
             <div className="flex items-center gap-2 text-xs font-medium text-slate-400 min-w-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
               <span className="text-white font-semibold tracking-tight text-sm shrink-0">
                 {ARCHITECTURE_METADATA[architecture]?.title || architecture}
               </span>
@@ -578,55 +631,76 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Studio Action Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right Studio Action Controls: Grouped Learn Menu + AI Tutor + Primary Code Action */}
+          <div className="flex items-center gap-2 shrink-0">
+            {architecture !== 'Custom Model' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
+                      showGlossary || activeSpotlightArch !== null
+                        ? "bg-indigo-600/20 text-indigo-200 border-indigo-500/50"
+                        : "bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700/90 border-slate-700/80"
+                    )}
+                    aria-label="Open learning resources menu"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Learn</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setShowChat(false);
+                      setShowGlossary(true);
+                    }}
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Docs, TLDR &amp; Glossary</span>
+                  </DropdownMenuItem>
+                  {TOUR_STEPS[architecture] && (
+                    <DropdownMenuItem onSelect={() => setActiveSpotlightArch(architecture)}>
+                      <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Canvas Spotlight Tour</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setShowWelcome(true)}>
+                    <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Quick-Start Guide</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <button
-              onClick={() => setShowWelcome(true)}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Open Quick-Start Guide"
+              onClick={() => {
+                setShowGlossary(false);
+                setShowChat(true);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
+                showChat
+                  ? "bg-indigo-600/20 text-indigo-200 border-indigo-500/50"
+                  : "bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700/90 border-slate-700/80"
+              )}
+              aria-label="Open AI Tutor chat"
+              title="Ask AI Tutor about this simulation"
             >
-              <HelpCircle className="w-4 h-4" />
+              <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+              <span>AI Tutor</span>
             </button>
 
             <button
               onClick={() => setShowCodeExport(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800/90 hover:bg-slate-700 hover:text-white transition-all border border-slate-700/80 shadow-sm cursor-pointer whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-sm cursor-pointer whitespace-nowrap"
               title="Export PyTorch / Keras / ONNX Code"
             >
-              <Code2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="hidden sm:inline">Code</span>
+              <Code2 className="w-3.5 h-3.5" />
+              <span>Code</span>
             </button>
-
-            {architecture !== 'Custom Model' && (
-              <>
-                <div className="h-5 w-px bg-slate-800 mx-0.5 hidden sm:block" />
-
-                {TOUR_STEPS[architecture] && (
-                  <button
-                    onClick={() => setActiveSpotlightArch(architecture)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 transition-all border border-indigo-500/30 cursor-pointer whitespace-nowrap"
-                    title="Interactive step-by-step canvas spotlight highlights"
-                  >
-                    <Eye className="w-3.5 h-3.5 text-indigo-400" />
-                    <span className="hidden sm:inline">Spotlight</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setShowGlossary(true)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border cursor-pointer whitespace-nowrap",
-                    showGlossary
-                      ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-950/40"
-                      : "bg-slate-800/90 text-slate-300 hover:text-white hover:bg-slate-700/90 border-slate-700/80"
-                  )}
-                  title="Open Unified Training Documentation, TLDR Notes & Glossary"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Docs & Guide</span>
-                </button>
-              </>
-            )}
           </div>
         </header>
 
@@ -637,9 +711,7 @@ export default function App() {
           </div>
         </div>
 
-
-
-        {/* Bottom Panel: Compact Playback Controls & Floating Metrics HUD (AUDIT-11) */}
+        {/* Bottom Panel: Compact Playback Controls & Floating Metrics HUD */}
         {architecture !== 'Custom Model' && (
           <>
             <MetricsHUD
@@ -650,7 +722,6 @@ export default function App() {
               step={step}
               mode={mode}
               epochs={hyperparams.epochs}
-              onOpenGlossary={() => setShowGlossary(true)}
             />
 
             <div className="h-16 flex items-center justify-center bg-slate-900/95 border-t border-slate-800/80 z-20 shrink-0 shadow-[0_-4px_25px_rgba(2,6,23,0.7)] px-4">
@@ -663,7 +734,6 @@ export default function App() {
                   reset={resetSimulation}
                   speed={speed}
                   setSpeed={setSpeed}
-                  onExportResults={handleExportResults}
                 />
               </div>
             </div>
@@ -672,6 +742,17 @@ export default function App() {
       </div>
 
       {renderGlobalModals()}
+
+      {showChat && (
+        <Suspense fallback={null}>
+          <AIChatDrawer
+            onClose={() => setShowChat(false)}
+            simulationContext={simulationContext}
+            messages={chatThreads[architecture] ?? []}
+            onMessagesChange={handleChatMessagesChange}
+          />
+        </Suspense>
+      )}
 
       <SpotlightTour
         steps={activeSpotlightArch ? TOUR_STEPS[activeSpotlightArch] || [] : []}

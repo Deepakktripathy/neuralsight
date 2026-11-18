@@ -1,17 +1,14 @@
 import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
-import { TrendingUp, TrendingDown, DollarSign, Wallet, Activity } from 'lucide-react';
 
 interface DQNMarketTradingProps {
   step: number;
   selectedAction: string;
-  isPoorExploration: boolean;
+  isPoorExploration?: boolean;
 }
 
 export const DQNMarketTrading: React.FC<DQNMarketTradingProps> = ({
   step,
   selectedAction,
-  isPoorExploration
 }) => {
   // Generate deterministic synthetic market price series
   const windowSize = 20;
@@ -64,14 +61,14 @@ export const DQNMarketTrading: React.FC<DQNMarketTradingProps> = ({
       {/* Header Info */}
       <div className="flex items-center justify-between w-full px-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
             Market Trading (Asset: NVDA/USD)
           </span>
         </div>
 
         <div className="flex items-center gap-1 font-mono text-xs">
           <span className="text-white font-bold">${currentPrice.toFixed(2)}</span>
-          <span className={`text-[10px] flex items-center ${priceChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className={`text-[11px] flex items-center ${priceChange >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}
           </span>
         </div>
@@ -117,15 +114,15 @@ export const DQNMarketTrading: React.FC<DQNMarketTradingProps> = ({
           {/* Current Price Head Dot */}
           {visiblePrices.length > 0 && (
             <g transform={`translate(${getSvgX(visiblePrices.length - 1)}, ${getSvgY(currentPrice)})`}>
-              <circle r="5" fill="#818cf8" stroke="#ffffff" strokeWidth="2" className="animate-pulse" />
+              <circle r="5" fill="#818cf8" stroke="#ffffff" strokeWidth="2" />
             </g>
           )}
         </svg>
 
         {/* Action badge overlay */}
         <div className="absolute top-2.5 right-3 bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1 flex items-center gap-2 shadow-lg">
-          <span className="text-[9px] font-mono text-slate-400">Trading Signal:</span>
-          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+          <span className="text-[11px] font-mono text-slate-400">Trading Signal:</span>
+          <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
             selectedAction === 'BUY' 
               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
               : selectedAction === 'SELL' 
@@ -140,24 +137,24 @@ export const DQNMarketTrading: React.FC<DQNMarketTradingProps> = ({
       {/* State & Portfolio Readout */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full text-xs font-mono">
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Position Size</span>
+          <span className="text-[11px] text-slate-400">Position Size</span>
           <span className="text-indigo-300 font-bold mt-0.5">{sharesHeld} Shares</span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Portfolio Total</span>
+          <span className="text-[11px] text-slate-400">Portfolio Total</span>
           <span className="text-white font-bold mt-0.5">${portfolioVal.toFixed(0)}</span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Cumulative PnL</span>
+          <span className="text-[11px] text-slate-400">Cumulative PnL</span>
           <span className={`font-bold mt-0.5 ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {pnl >= 0 ? `+$${pnl.toFixed(1)}` : `-$${Math.abs(pnl).toFixed(1)}`}
           </span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">RSI Indicator</span>
+          <span className="text-[11px] text-slate-400">RSI Indicator</span>
           <span className="text-amber-300 font-bold mt-0.5">58.4 (Neutral)</span>
         </div>
       </div>

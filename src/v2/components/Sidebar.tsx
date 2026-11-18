@@ -20,7 +20,7 @@ import {
   Gauge,
   ChevronDown,
   PanelLeftClose,
-  BookOpen,
+  Play,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FAILURE_MODES_BY_ARCH } from '../lib/failureModes';
@@ -39,40 +39,118 @@ interface SidebarProps {
   hyperparams: Hyperparameters;
   setHyperparams: (h: Hyperparameters) => void;
   resetSimulation: () => void;
+  onRunScenario?: (patch: Partial<Hyperparameters>, autoPlay?: boolean) => void;
   onPreviewDataSource: (d: DataSource, file: File | null) => void;
   onClose?: () => void;
   customModelFile: File | null;
   setCustomModelFile: (f: File | null) => void;
   onOpenArchHub?: () => void;
   onOpenConfigPage?: () => void;
-  onOpenGlossary?: () => void;
 }
+
+interface ScenarioPreset {
+  label: string;
+  description: string;
+  patch: Partial<Hyperparameters>;
+}
+
+const SCENARIO_PRESETS_BY_ARCH: Partial<Record<Architecture, ScenarioPreset[]>> = {
+  GAN: [
+    {
+      label: 'Mode collapse',
+      description: 'Generator locks onto one repeated sample',
+      patch: { failureMode: 'Mode Collapse', learningRate: 0.01 },
+    },
+    {
+      label: 'D overpowers G',
+      description: 'Discriminator hits ~100% and starves G',
+      patch: { failureMode: 'Discriminator Overpowering', learningRate: 0.01 },
+    },
+  ],
+  Transformer: [
+    {
+      label: 'Attention collapse',
+      description: 'Weights flatten into uniform 1/N blur',
+      patch: { failureMode: 'Attention Collapse', attentionHeads: 2 },
+    },
+    {
+      label: '4-Head comparison',
+      description: 'Inspect specialized syntactic & semantic heads',
+      patch: { failureMode: 'None', attentionHeads: 4 },
+    },
+  ],
+  RNN: [
+    {
+      label: 'Vanishing gradients (5 steps)',
+      description: 'Vanilla RNN forgets early context tokens',
+      patch: { failureMode: 'Vanishing Gradients', rnnCellType: 'Vanilla RNN', rnnUnrollSteps: 5 },
+    },
+    {
+      label: 'LSTM 8-step stability',
+      description: 'Cell gates preserve long-range memory',
+      patch: { failureMode: 'None', rnnCellType: 'LSTM', rnnUnrollSteps: 8 },
+    },
+  ],
+  DQN: [
+    {
+      label: 'Poor exploration',
+      description: 'Greedy agent loops on suboptimal path',
+      patch: { failureMode: 'Poor Exploration', dqnExplorationSchedule: 'Fast (Greedy)' },
+    },
+    {
+      label: 'High exploration',
+      description: 'Balanced state-space discovery',
+      patch: { failureMode: 'None', dqnExplorationSchedule: 'High Exploration' },
+    },
+  ],
+  CNN: [
+    {
+      label: 'Overfitting curve',
+      description: 'Validation loss rises as train loss drops',
+      patch: { failureMode: 'Overfitting', learningRate: 0.01 },
+    },
+    {
+      label: 'Exploding LR (0.1)',
+      description: 'Aggressive step size destabilizes loss',
+      patch: { failureMode: 'Exploding Gradients', learningRate: 0.1 },
+    },
+  ],
+  'Standard NN': [
+    {
+      label: 'Overfitting curve',
+      description: 'Memorizes training split while val diverges',
+      patch: { failureMode: 'Overfitting', learningRate: 0.01 },
+    },
+    {
+      label: 'Vanishing gradients',
+      description: 'Early hidden layers freeze near zero gradient',
+      patch: { failureMode: 'Vanishing Gradients', layers: 5 },
+    },
+  ],
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   className,
   architecture,
-  mode,
-  setMode,
   useCase,
-  setUseCase,
   dataSource,
-  setDataSource,
   hyperparams,
   setHyperparams,
   resetSimulation,
+  onRunScenario,
   onPreviewDataSource,
   onClose,
   customModelFile,
   setCustomModelFile,
   onOpenArchHub,
   onOpenConfigPage,
-  onOpenGlossary,
 }) => {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const [modelDragActive, setModelDragActive] = useState(false);
   const [openSection, setOpenSection] = useState<'data' | 'hyperparams' | 'topology' | 'failure' | null>('hyperparams');
 
   const meta = ARCHITECTURE_METADATA[architecture];
+  const scenarioPresets = SCENARIO_PRESETS_BY_ARCH[architecture] || [];
 
   const handleModelDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -126,50 +204,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Stage Navigation Stepper: [01. Models] [02. Setup] [03. Studio] */}
+      {/* Unified Stage Stepper: [01. Arch] [02. Config] [03. Studio] */}
       <div className="mb-3.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800/80 grid grid-cols-3 gap-1 text-[11px] font-medium">
         <button
           onClick={onOpenArchHub}
           className="px-1 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer text-center group"
-          title="Go to Stage 1: Architecture Selection Hub"
+          title="Stage 1: Architecture"
         >
-          <span className="text-[9px] font-mono text-slate-500 group-hover:text-indigo-400 leading-none">01</span>
-          <span className="font-semibold truncate">Models</span>
+          <span className="text-[11px] font-mono text-slate-400 group-hover:text-indigo-400 leading-none">01</span>
+          <span className="font-semibold truncate">Arch</span>
         </button>
         <button
           onClick={onOpenConfigPage}
           className="px-1 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer text-center group"
-          title="Go to Stage 2: Problem Setup & Dataset Preview"
+          title="Stage 2: Configure"
         >
-          <span className="text-[9px] font-mono text-slate-500 group-hover:text-indigo-400 leading-none">02</span>
-          <span className="font-semibold truncate">Setup</span>
+          <span className="text-[11px] font-mono text-slate-400 group-hover:text-indigo-400 leading-none">02</span>
+          <span className="font-semibold truncate">Config</span>
         </button>
         <div
           className="px-1 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold flex flex-col items-center justify-center gap-0.5 text-center shadow-sm ring-1 ring-indigo-400/40 select-none cursor-default"
-          title="Stage 3: Interactive Simulation Studio (Active)"
+          title="Stage 3: Studio (Active)"
         >
-          <span className="text-[9px] font-mono text-indigo-200 leading-none">03</span>
+          <span className="text-[11px] font-mono text-indigo-200 leading-none">03</span>
           <span className="font-semibold truncate">Studio</span>
         </div>
       </div>
-
-      {/* Quick Architecture Glossary & Training TLDR Launcher */}
-      {onOpenGlossary && (
-        <button
-          onClick={onOpenGlossary}
-          className="mb-3.5 py-1.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs text-slate-300 hover:text-indigo-300 flex items-center justify-between transition-all group cursor-pointer shadow-xs"
-          title={`Open ${architecture} Glossary & Training TLDR`}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
-            <span className="font-semibold text-[11px] truncate">{architecture} Glossary & TLDR</span>
-          </div>
-          <span className="text-[10px] font-mono text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0">
-            Open ↗
-          </span>
-        </button>
-      )}
-
 
       {/* Custom Model File Inspector */}
       {architecture === 'Custom Model' && (
@@ -207,7 +267,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <p className="text-xs font-medium text-slate-200">
                 Drop ONNX or JSON file
               </p>
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[11px] text-slate-400 mt-1">
                 Click to browse local file
               </p>
               <input
@@ -226,7 +286,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="text-xs font-medium text-slate-200 truncate">
                     {customModelFile.name}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-[11px] text-slate-400 font-mono">
                     {(customModelFile.size / 1024).toFixed(1)} KB
                   </span>
                 </div>
@@ -236,7 +296,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setCustomModelFile(null);
                   resetSimulation();
                 }}
-                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0"
+                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors shrink-0 cursor-pointer"
+                aria-label="Remove uploaded model file"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -248,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Collapsible Live Tuning Sections for Non-Custom Models */}
       {architecture !== 'Custom Model' && (
         <div className="space-y-2.5 flex-1">
-          {/* 1. Task & Target Distribution */}
+          {/* 1. Active Setup Summary (Read-Only link back to Stage 2) */}
           <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 overflow-hidden">
             <button
               onClick={() => toggleSection('data')}
@@ -256,7 +317,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <span className="text-xs font-semibold text-slate-200 flex items-center gap-2">
                 <Database className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Task & Dataset</span>
+                <span>Active Setup</span>
               </span>
               <ChevronDown
                 className={cn(
@@ -267,48 +328,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
 
             {openSection === 'data' && (
-              <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-800/60">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-medium text-slate-400">
-                    Use Case
-                  </label>
-                  <select
-                    value={useCase}
-                    onChange={(e) => setUseCase(e.target.value as UseCase)}
-                    className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
-                  >
-                    {meta.useCases.map((uc) => (
-                      <option key={uc.id} value={uc.id}>
-                        {uc.id}
-                      </option>
-                    ))}
-                  </select>
+              <div className="px-3.5 pb-3.5 pt-2 space-y-2.5 border-t border-slate-800/60 text-xs">
+                <div>
+                  <span className="block text-[11px] text-slate-400">Task Objective</span>
+                  <span className="font-medium text-slate-200 block truncate">{useCase}</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-[11px] font-medium text-slate-400">
-                      {meta.dataSourceCategoryLabel}
-                    </label>
-                    <button
-                      onClick={() => onPreviewDataSource(dataSource, customModelFile)}
-                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 cursor-pointer"
-                    >
-                      <Eye className="w-3 h-3" />
-                      <span>Preview</span>
-                    </button>
-                  </div>
-                  <select
-                    value={dataSource}
-                    onChange={(e) => setDataSource(e.target.value as DataSource)}
-                    className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                <div>
+                  <span className="block text-[11px] text-slate-400">
+                    {meta.dataSourceCategoryLabel}
+                  </span>
+                  <span className="font-medium text-slate-200 block truncate">{dataSource}</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => onPreviewDataSource(dataSource, customModelFile)}
+                    className="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[11px] font-medium text-indigo-300 flex items-center justify-center gap-1 cursor-pointer transition-colors"
                   >
-                    {meta.dataSources.map((ds) => (
-                      <option key={ds.id} value={ds.id}>
-                        {ds.id}
-                      </option>
-                    ))}
-                  </select>
+                    <Eye className="w-3 h-3" />
+                    <span>Preview</span>
+                  </button>
+                  {onOpenConfigPage && (
+                    <button
+                      onClick={onOpenConfigPage}
+                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-[11px] font-medium text-slate-300 hover:text-white cursor-pointer transition-colors"
+                    >
+                      Edit setup
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -417,6 +465,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     min="10"
                     max="500"
                     step="10"
+                    aria-label={architecture === 'DQN' ? 'Episodes' : 'Epochs'}
                     value={hyperparams.epochs || 100}
                     onChange={(e) =>
                       setHyperparams({
@@ -443,6 +492,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     min="8"
                     max="256"
                     step="8"
+                    aria-label="Batch Size"
                     value={hyperparams.batchSize || 32}
                     onChange={(e) =>
                       setHyperparams({
@@ -484,7 +534,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <label className="text-[11px] font-medium text-slate-300">
                           Attention Heads
                         </label>
-                        <span className="text-[10px] text-indigo-400 font-mono">
+                        <span className="text-[11px] text-indigo-400 font-mono">
                           {hyperparams.attentionHeads || 2} Heads
                         </span>
                       </div>
@@ -516,7 +566,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Conv Depth
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             {hyperparams.convLayers || 2} Layers
                           </span>
                         </div>
@@ -573,7 +623,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Stride (S)
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             S={hyperparams.stride || 1}
                           </span>
                         </div>
@@ -630,7 +680,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Unrolled Steps
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             {hyperparams.rnnUnrollSteps || 5} Steps
                           </span>
                         </div>
@@ -674,7 +724,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                   })
                                 }
                                 className={cn(
-                                  "py-1.5 text-[10px] font-medium rounded-lg border transition-colors text-center truncate px-1 cursor-pointer",
+                                  "py-1.5 text-[11px] font-medium rounded-lg border transition-colors text-center truncate px-1 cursor-pointer",
                                   (hyperparams.dqnExplorationSchedule || 'Standard') ===
                                     sched
                                     ? "bg-indigo-500/20 border-indigo-500 text-indigo-300 font-semibold"
@@ -693,7 +743,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Discount Factor (γ)
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             {hyperparams.dqnDiscountFactor ?? 0.9}
                           </span>
                         </div>
@@ -729,7 +779,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Hidden Layers
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             {Math.max(1, (hyperparams.layers || 4) - 2)} Layers
                           </span>
                         </div>
@@ -758,7 +808,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <label className="text-[11px] font-medium text-slate-300">
                             Neurons / Layer
                           </label>
-                          <span className="text-[10px] text-indigo-400 font-mono">
+                          <span className="text-[11px] text-indigo-400 font-mono">
                             {hyperparams.mlpNeuronsPerLayer || 8} Nodes
                           </span>
                         </div>
@@ -788,7 +838,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
 
-          {/* 4. Failure Sandbox */}
+          {/* 4. Inject Failure Mode & Scenarios */}
           <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 overflow-hidden">
             <button
               onClick={() => toggleSection('failure')}
@@ -796,7 +846,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <span className="text-xs font-semibold text-rose-300 flex items-center gap-2">
                 <Activity className="w-3.5 h-3.5 text-rose-400" />
-                <span>Failure Sandbox</span>
+                <span>Inject Failure Mode</span>
               </span>
               <ChevronDown
                 className={cn(
@@ -807,32 +857,64 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
 
             {openSection === 'failure' && (
-              <div className="px-3.5 pb-3.5 pt-2 space-y-2 border-t border-slate-800/60">
-                {(FAILURE_MODES_BY_ARCH[architecture] || []).map((fm) => {
-                  const active = (hyperparams.failureMode || 'None') === fm.name;
-                  return (
-                    <button
-                      key={fm.name}
-                      onClick={() => {
-                        setHyperparams({ ...hyperparams, failureMode: fm.name as any });
-                        resetSimulation();
-                      }}
-                      className={cn(
-                        "w-full p-2.5 rounded-xl text-left transition-all border flex justify-between items-center cursor-pointer",
-                        active
-                          ? "bg-rose-500/15 border-rose-500/50 text-rose-200 shadow-sm"
-                          : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
-                      )}
-                    >
-                      <div className="min-w-0 pr-2">
-                        <div className="text-xs font-semibold truncate">{fm.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">
-                          {fm.desc}
+              <div className="px-3.5 pb-3.5 pt-2 space-y-2.5 border-t border-slate-800/60">
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Trigger a training defect here and observe its effect in the live canvas & telemetry HUD.
+                </p>
+
+                {scenarioPresets.length > 0 && onRunScenario && (
+                  <div className="space-y-1.5 pb-1 border-b border-slate-800/70">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-indigo-300 block">
+                      Quick Scenarios
+                    </span>
+                    {scenarioPresets.map((preset) => (
+                      <button
+                        key={preset.label}
+                        onClick={() => onRunScenario(preset.patch, true)}
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-left flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                        title={preset.description}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-semibold text-indigo-200 truncate">
+                            {preset.label}
+                          </div>
+                          <div className="text-[11px] text-slate-400 truncate">
+                            {preset.description}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                        <Play className="w-3 h-3 text-indigo-300 shrink-0 fill-current" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  {(FAILURE_MODES_BY_ARCH[architecture] || []).map((fm) => {
+                    const active = (hyperparams.failureMode || 'None') === fm.name;
+                    return (
+                      <button
+                        key={fm.name}
+                        onClick={() => {
+                          setHyperparams({ ...hyperparams, failureMode: fm.name as any });
+                          resetSimulation();
+                        }}
+                        className={cn(
+                          "w-full p-2.5 rounded-xl text-left transition-all border flex justify-between items-center cursor-pointer",
+                          active
+                            ? "bg-rose-500/15 border-rose-500/50 text-rose-200 shadow-sm"
+                            : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+                        )}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <div className="text-xs font-semibold truncate">{fm.name}</div>
+                          <div className="text-[11px] text-slate-400 truncate">
+                            {fm.desc}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
