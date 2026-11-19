@@ -6,7 +6,7 @@ import {
   CNNSampleImage,
   CNN_SAMPLES_BY_DATASET,
   RealImageIllustration,
-} from './CNNImageDigitizer';
+} from './cnnSamples';
 
 interface CNNUnifiedConvolutionProps {
   dataSource?: DataSource;
@@ -18,7 +18,6 @@ interface CNNUnifiedConvolutionProps {
   step: number;
   stride?: 1 | 2 | 3;
   onScanStateChange?: (isScanning: boolean) => void;
-  onOpenGlossary?: () => void;
 }
 
 export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
@@ -31,7 +30,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
   step: globalStep,
   stride = 1,
   onScanStateChange,
-  onOpenGlossary,
 }) => {
   // Determine sample list based on dataset
   const datasetKey = useMemo(() => {
@@ -209,8 +207,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
     return out;
   }, [selectedSample.grid, kernel, outputDim, totalSteps, validOffsets]);
 
-  const activeScanCol = isScanning ? Math.min(5, Math.floor(scanProgress * 6)) : -1;
-
   return (
     <div
       id="tour-cnn-filter"
@@ -219,7 +215,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
       {/* Unified Header (AUDIT-10: Zero-Pill Discipline for Stage Headers & Static Metadata) */}
       <div className="flex flex-wrap items-center justify-between border-b border-slate-800/90 pb-3 gap-3">
         <div className="flex items-center gap-2 flex-wrap font-mono">
-          <span className={`w-2 h-2 rounded-full bg-indigo-400 ${isPlaying ? 'animate-pulse' : ''}`} />
           <h4 className="text-xs font-bold text-slate-200 tracking-wide uppercase">
             01. Optical Scan & 3×3 Convolution
           </h4>
@@ -237,16 +232,16 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
           </span>
         </div>
 
-        {/* Clean unboxed inline status indicator (Zero decorative pill boxes) */}
+        {/* Clean unboxed inline status indicator */}
         <div className="flex items-center gap-2 font-mono text-[11px]">
           {isScanning ? (
-            <span className="text-cyan-400 flex items-center gap-1.5 font-medium">
+            <span className="text-indigo-300 flex items-center gap-1.5 font-medium">
               <Scan className="w-3.5 h-3.5 animate-spin" />
               Scanning Optical Pixels ({Math.round(scanProgress * 100)}%)
             </span>
           ) : isPlaying ? (
             <span className="text-indigo-300 flex items-center gap-1.5 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
               Training Synced · Step {activeCycle + 1}/{totalSteps}
             </span>
           ) : (
@@ -260,7 +255,7 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
 
       {/* Dataset Sample Selector Thumbnails */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-[10px] font-mono text-slate-400 uppercase shrink-0">Input Sample:</span>
+        <span className="text-[11px] font-mono text-slate-400 uppercase shrink-0">Input Sample:</span>
         {samples.map((s) => {
           const isSelected = s.id === selectedSample.id;
           return (
@@ -276,19 +271,19 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
               <RealImageIllustration type={s.previewType} className="w-7 h-7" />
               <div className="flex flex-col">
                 <span className="text-xs font-medium">{s.name}</span>
-                <span className="text-[9px] opacity-70 font-mono">{s.label}</span>
+                <span className="text-[11px] opacity-80 font-mono">{s.label}</span>
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* Unified Horizontal Flow (AUDIT-01 & AUDIT-09: Single Outer Card with 1px Hairline Dividers) */}
+      {/* Unified Horizontal Flow */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-0 lg:divide-x lg:divide-slate-800/70 items-center py-2">
         
         {/* Step 1: Raw Optical Sensor (3 cols) */}
         <div className="lg:col-span-3 flex flex-col items-center text-center gap-2 px-3">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             1. Optical Sensor
           </span>
@@ -300,7 +295,7 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
             {/* Laser scanning line */}
             {isScanning && (
               <div
-                className="absolute top-0 bottom-0 w-1 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,1)] z-20 pointer-events-none"
+                className="absolute top-0 bottom-0 w-1 bg-indigo-400 shadow-[0_0_12px_rgba(129,140,248,1)] z-20 pointer-events-none"
                 style={{ left: `${scanProgress * 100}%` }}
               />
             )}
@@ -308,7 +303,7 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
             {/* Glowing sweep overlay */}
             {isScanning && (
               <div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/25 to-transparent pointer-events-none z-10"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500/25 to-transparent pointer-events-none z-10"
                 style={{ width: `${scanProgress * 100}%` }}
               />
             )}
@@ -341,21 +336,17 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
               ))}
             </div>
           </div>
-
-          <span className="text-[9.5px] text-slate-400 leading-tight max-w-[190px]">
-            {selectedSample.description}
-          </span>
         </div>
 
         {/* Step 2: SINGLE 6×6 Tensor Grid + Live 3×3 Sliding Window + Integrated Quantization (5 cols) */}
         <div className="lg:col-span-5 flex flex-col items-center text-center gap-2 px-3">
-          <div className="flex items-center justify-between w-full max-w-[210px]">
-            <span className="text-[10px] font-mono text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="flex items-center justify-between w-full max-w-[230px]">
+            <span className="text-[11px] font-mono text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-              2. 6×6 Tensor + 3×3 Window
+              2. 6×6 Tensor
             </span>
-            <span className="text-[9px] font-mono text-cyan-400">
-              Quantized [0, 1]
+            <span className="text-[11px] font-mono text-indigo-300">
+              [0, 1]
             </span>
           </div>
 
@@ -368,7 +359,6 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
                 const x = i % 6;
                 const y = Math.floor(i / 6);
                 const cellProgress = (x + y * 0.15) / 6;
-                const isColumnActive = isScanning && x === activeScanCol;
                 const isRevealed = hasScanned || isHovered || (isScanning && scanProgress >= cellProgress);
 
                 return (
@@ -380,17 +370,17 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
                       isHovered
                         ? 'bg-indigo-500 text-white font-bold ring-1 ring-white z-30'
                         : isActiveInWindow
-                        ? 'bg-indigo-600/90 text-white font-bold ring-1 ring-cyan-400/50 z-10'
+                        ? 'bg-indigo-600/90 text-white font-bold ring-1 ring-amber-400/60 z-10'
                         : val > 0.5
                         ? 'bg-slate-800 text-slate-300'
-                        : 'bg-slate-950/90 text-slate-600'
+                        : 'bg-slate-950/90 text-slate-500'
                     }`}
                     style={{
                       opacity: isRevealed ? 1 : isScanning ? 0.2 : 0.45,
                     }}
                     title={`Tensor cell [${y}, ${x}]: ${val.toFixed(2)}`}
                   >
-                    <span className="text-[8px] font-mono">
+                    <span className="text-[9px] font-mono">
                       {val.toFixed(1)}
                     </span>
                   </div>
@@ -400,7 +390,7 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
 
             {/* Smooth Spring Sliding Window Box over the 3x3 active receptive field */}
             <motion.div
-              className="absolute border-2 border-cyan-400 bg-cyan-400/15 rounded pointer-events-none z-20 shadow-[0_0_12px_rgba(34,211,238,0.7)] ring-1 ring-white/50"
+              className="absolute border-2 border-amber-400 bg-amber-400/15 rounded pointer-events-none z-20 shadow-[0_0_12px_rgba(251,191,36,0.5)] ring-1 ring-white/40"
               animate={{
                 left: `${(kx / 6) * 100}%`,
                 top: `${(ky / 6) * 100}%`,
@@ -413,19 +403,19 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400">
-            <span className="w-2 h-2 rounded-sm bg-cyan-400/40 border border-cyan-400 inline-block" />
-            <span>Active Window: [X: {kx}..{kx + 2}, Y: {ky}..{ky + 2}]</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+            <span className="w-2 h-2 rounded-sm bg-amber-400/40 border border-amber-400 inline-block" />
+            <span>Window: [X: {kx}..{kx + 2}, Y: {ky}..{ky + 2}]</span>
           </div>
         </div>
 
-        {/* Step 3: Kernel & Live Dot Product (2 cols - AUDIT-09: Direct Hairline Column, Zero Inner Card) */}
+        {/* Step 3: Kernel & Live Dot Product */}
         <div className="lg:col-span-2 flex flex-col items-center gap-2.5 px-3 w-full">
           <div className="flex items-center justify-between w-full border-b border-slate-800/80 pb-1">
-            <span className="text-[10px] font-semibold text-slate-300">
-              3. Filter Kernel
+            <span className="text-[11px] font-semibold text-slate-300">
+              3. Kernel
             </span>
-            <span className="text-[8.5px] font-mono text-cyan-400">3×3 W</span>
+            <span className="text-[11px] font-mono text-indigo-300">3×3 W</span>
           </div>
 
           {/* 3x3 Filter Kernel */}
@@ -433,7 +423,7 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
             {kernel.map((w, idx) => (
               <div
                 key={idx}
-                className="w-4 h-4 flex items-center justify-center text-[8px] font-mono font-bold bg-slate-800 text-indigo-300 rounded-[2px]"
+                className="w-5 h-5 flex items-center justify-center text-[10px] font-mono font-bold bg-slate-800 text-indigo-300 rounded-[2px]"
               >
                 {w}
               </div>
@@ -442,10 +432,10 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
 
           {/* Live Calculated Dot Product */}
           <div className="w-full text-center bg-indigo-500/10 px-2 py-1.5 rounded-lg border border-indigo-500/25">
-            <span className="text-slate-400 text-[8.5px] block font-mono">Dot Product Σ:</span>
+            <span className="text-slate-400 text-[11px] block font-mono">Dot Product Σ:</span>
             <motion.span
               key={`${sum.toFixed(2)}-${activeCycle}`}
-              initial={{ scale: 1.2, color: '#38bdf8' }}
+              initial={{ scale: 1.2, color: '#fbbf24' }}
               animate={{ scale: 1, color: '#34d399' }}
               transition={{ duration: 0.15 }}
               className="text-emerald-400 font-bold text-sm inline-block font-mono"
@@ -454,20 +444,20 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
             </motion.span>
           </div>
 
-          <div className="flex items-center gap-1 text-[9px] font-mono text-slate-400">
+          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400">
             <span>Cell ({ox}, {oy})</span>
             <ArrowRight className="w-3 h-3 text-indigo-400" />
           </div>
         </div>
 
-        {/* Step 4: Output Feature Map (2 cols) */}
+        {/* Step 4: Output Feature Map */}
         <div className="lg:col-span-2 flex flex-col items-center gap-2 px-3 w-full">
           <div className="flex items-center justify-between w-full">
-            <span className="text-[10px] font-medium text-emerald-400 flex items-center gap-1">
+            <span className="text-[11px] font-medium text-emerald-400 flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              4. Feature Map
+              4. Map
             </span>
-            <span className="text-[8.5px] font-mono text-slate-500">
+            <span className="text-[11px] font-mono text-slate-400">
               {activeCycle + 1}/{totalSteps}
             </span>
           </div>
@@ -490,27 +480,27 @@ export const CNNUnifiedConvolution: React.FC<CNNUnifiedConvolutionProps> = ({
                   onClick={() => setWindowStep(i)}
                   title={`Feature cell [${Math.floor(i / outputDim)}, ${i % outputDim}]: ${val.toFixed(2)} (Click to jump)`}
                   className={`flex items-center justify-center font-mono font-bold rounded cursor-pointer transition-all duration-150 select-none ${
-                    outputDim === 2 ? 'text-xs' : 'text-[9.5px]'
+                    outputDim === 2 ? 'text-xs' : 'text-[10px]'
                   } ${
                     isCurrent
                       ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.8)] z-10 scale-105 ring-2 ring-emerald-300'
                       : isComputed
                       ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/35'
-                      : 'bg-slate-950/80 text-slate-700 hover:bg-slate-900'
+                      : 'bg-slate-950/80 text-slate-600 hover:bg-slate-900'
                   }`}
                 >
                   {isComputed ? (
                     val.toFixed(1)
                   ) : (
-                    <span className="text-slate-800 text-[8px]">·</span>
+                    <span className="text-slate-600 text-[10px]">·</span>
                   )}
                 </div>
               );
             })}
           </div>
 
-          <span className="text-[8.5px] text-slate-500 font-mono text-center">
-            Click any cell to inspect
+          <span className="text-[11px] text-slate-400 font-mono text-center">
+            Click cell to inspect
           </span>
         </div>
 

@@ -13,7 +13,6 @@ interface TransformerVisualizerProps {
   step: number;
   mode: Mode;
   dataSource: DataSource;
-  onOpenGlossary?: () => void;
 }
 
 type ConceptView = 'concept_a' | 'concept_b';
@@ -23,7 +22,6 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
   step, 
   mode, 
   dataSource,
-  onOpenGlossary,
 }) => {
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
   const [showIngestion, setShowIngestion] = useState(true);
@@ -81,7 +79,7 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
         {/* Concept Switcher Segmented Control */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
+            <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
               View:
             </span>
             <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
@@ -124,7 +122,7 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
         <div className="flex flex-col items-start md:items-end gap-1 w-full md:w-auto">
           {dataSource === 'Text Prompt' ? (
             <>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
+              <label className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold">
                 Active Prompt
               </label>
               <select
@@ -139,7 +137,7 @@ export const TransformerVisualizer: React.FC<TransformerVisualizerProps> = ({
             </>
           ) : (
             <div className="flex flex-col items-start md:items-end">
-              <span className="text-[10px] text-slate-400 font-mono">Dataset Stream</span>
+              <span className="text-[11px] text-slate-400 font-mono">Dataset Stream</span>
               <span className="text-xs text-indigo-300 font-mono font-medium truncate max-w-[280px]">
                 "{inputText}"
               </span>

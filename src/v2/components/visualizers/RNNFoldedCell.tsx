@@ -1,34 +1,28 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, RefreshCw, Cpu, Layers, Sparkles, HelpCircle } from 'lucide-react';
-import { LayerTooltip } from '../LayerTooltip';
+import { ArrowRight, RefreshCw, Cpu, Layers } from 'lucide-react';
 
 interface RNNFoldedCellProps {
   tokens: string[];
   currentTokenIdx: number;
   currentHidden: number[];
-  prevHidden: number[];
+  prevHidden?: number[];
   inputVector: number[];
   prediction: string;
-  step: number;
-  mode: string;
+  step?: number;
+  mode?: string;
   onInspectMath: () => void;
-  isVanishing: boolean;
-  isExploding: boolean;
+  isVanishing?: boolean;
+  isExploding?: boolean;
 }
 
 export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
   tokens,
   currentTokenIdx,
   currentHidden,
-  prevHidden,
   inputVector,
   prediction,
-  step,
-  mode,
   onInspectMath,
-  isVanishing,
-  isExploding,
 }) => {
   const currentToken = tokens[currentTokenIdx] || tokens[0];
 
@@ -84,12 +78,12 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/60 scale-105 shadow-md shadow-emerald-500/20 ring-1 ring-emerald-400'
                       : isPast
                       ? 'bg-slate-800/80 text-slate-400 border-slate-700/80'
-                      : 'bg-slate-950 text-slate-600 border-slate-800'
+                      : 'bg-slate-950 text-slate-400 border-slate-800'
                   }`}
                 >
-                  <span className="text-[10px] text-slate-400 font-mono">t={idx}</span>
+                  <span className="text-[11px] text-slate-400 font-mono">t={idx}</span>
                   <span>"{t}"</span>
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
                 </div>
               );
             })}
@@ -101,7 +95,7 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
 
           {/* Left: Input Vector Injection */}
           <div className="flex flex-col items-center gap-2 z-10">
-            <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-semibold">
+            <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider font-semibold">
               Current Input x<sub>t</sub>
             </span>
             <div className="bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3 flex flex-col items-center gap-2 shadow-lg">
@@ -110,8 +104,8 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
               </span>
               <div className="flex gap-1.5">
                 {inputVector.map((val, i) => (
-                  <div key={i} className="flex flex-col items-center text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
-                    <span className="text-[9px] text-slate-400">x{i}</span>
+                  <div key={i} className="flex flex-col items-center text-[11px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                    <span className="text-[10px] text-slate-400">x{i}</span>
                     <span className="font-semibold text-emerald-300">{val.toFixed(2)}</span>
                   </div>
                 ))}
@@ -135,7 +129,7 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
                 <linearGradient id="loopGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#818cf8" />
                   <stop offset="50%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#f59e0b" />
                 </linearGradient>
                 <marker id="loopArrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
                   <polygon points="0 1, 8 4, 0 7" fill="#818cf8" />
@@ -155,8 +149,8 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
               {/* Particle travelling along loop */}
               <motion.circle
                 r="4"
-                fill="#a855f7"
-                filter="drop-shadow(0 0 4px #a855f7)"
+                fill="#818cf8"
+                filter="drop-shadow(0 0 4px #818cf8)"
                 animate={{
                   offsetDistance: ['0%', '100%'],
                 }}
@@ -172,8 +166,8 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
             </svg>
 
             {/* Loop Feedback Label (AUDIT-10: Zero-Pill Discipline) */}
-            <div className="absolute -top-8 text-[11px] font-mono text-purple-300 z-20 flex items-center gap-1.5 font-medium">
-              <RefreshCw className="w-3 h-3 text-purple-400" />
+            <div className="absolute -top-8 text-[11px] font-mono text-indigo-300 z-20 flex items-center gap-1.5 font-medium">
+              <RefreshCw className="w-3 h-3 text-indigo-400" />
               <span>Feedback Memory: h<sub>t-1</sub> → h<sub>t</sub></span>
             </div>
 
@@ -206,22 +200,22 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
 
                 <div className="flex items-center justify-between bg-slate-950/70 border border-slate-800 rounded-lg p-2 text-xs font-mono">
                   <span className="text-slate-400">Activation:</span>
-                  <span className="text-purple-300 font-semibold">tanh( · )</span>
+                  <span className="text-indigo-300 font-semibold">tanh( · )</span>
                 </div>
               </div>
 
               {/* Vector Output inside cell */}
               <div className="pt-2 border-t border-indigo-500/30">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-mono text-slate-400">Memory Vector h<sub>t</sub>:</span>
-                  <span className="text-[10px] font-mono text-indigo-400 group-hover:underline flex items-center gap-0.5">
+                  <span className="text-[11px] font-mono text-slate-400">Memory Vector h<sub>t</sub>:</span>
+                  <span className="text-[11px] font-mono text-indigo-400 group-hover:underline flex items-center gap-0.5">
                     Click to inspect math &rarr;
                   </span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
                   {currentHidden.map((val, idx) => (
                     <div key={idx} className="bg-slate-950 border border-indigo-500/30 rounded p-1 text-center">
-                      <span className="block text-[8px] text-slate-400 font-mono">h[{idx}]</span>
+                      <span className="block text-[10px] text-slate-400 font-mono">h[{idx}]</span>
                       <span className="text-[11px] font-mono font-bold text-white">{val.toFixed(2)}</span>
                     </div>
                   ))}
@@ -233,14 +227,14 @@ export const RNNFoldedCell: React.FC<RNNFoldedCellProps> = ({
 
           {/* Right: Output Prediction Head */}
           <div className="flex flex-col items-center gap-2 z-10">
-            <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider font-semibold">
+            <span className="text-[11px] font-mono text-rose-400 uppercase tracking-wider font-semibold">
               Output Token Prediction y<sub>t</sub>
             </span>
             <div className="bg-rose-950/30 border border-rose-500/40 rounded-xl p-3 flex flex-col items-center gap-2 shadow-lg">
               <span className="text-sm font-mono font-bold text-white px-3 py-1 bg-rose-900/40 border border-rose-500/30 rounded-lg">
                 "{prediction}"
               </span>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[11px] font-mono text-slate-400">
                 W<sub>hy</sub> · h<sub>t</sub> → Softmax
               </span>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Flag, Skull, ShieldAlert, Compass, Eye, Sparkles } from 'lucide-react';
+import { Flag, Skull } from 'lucide-react';
 
 interface DQNGridworldProps {
   agentX: number;
@@ -21,7 +21,6 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
   targetX,
   targetY,
   gridSize = 6,
-  selectedAction,
   isPoorExploration,
   onSelectCell,
   selectedCell,
@@ -85,22 +84,24 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
     <div className="flex flex-col items-center gap-3">
       {/* View Toggle Bar */}
       <div className="flex items-center justify-between w-full max-w-[340px] px-1">
-        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+        <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
           Gridworld State (6×6)
         </span>
 
         <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
           <button
+            type="button"
             onClick={() => setDisplayMode('policy')}
-            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors ${
+            className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors ${
               displayMode === 'policy' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Policy π(s)
           </button>
           <button
+            type="button"
             onClick={() => setDisplayMode('heatmap')}
-            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors ${
+            className={`px-2 py-0.5 rounded text-[11px] font-mono transition-colors ${
               displayMode === 'heatmap' ? 'bg-amber-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -131,7 +132,6 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
           } else if (hazard) {
             cellBg = 'bg-rose-950/40 border-rose-500/40';
           } else if (displayMode === 'heatmap') {
-            const intensity = Math.max(0, Math.min(1, val));
             cellBg = `border-slate-800`;
           }
 
@@ -150,14 +150,14 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
             >
               {/* Wall Tile */}
               {wall && (
-                <span className="text-[9px] font-mono text-slate-600 font-semibold select-none">WALL</span>
+                <span className="text-[10px] font-mono text-slate-400 font-semibold select-none">WALL</span>
               )}
 
               {/* Hazard Tile */}
               {hazard && !isAgent && (
                 <div className="flex flex-col items-center text-rose-400">
-                  <Skull className="w-4 h-4 text-rose-500 animate-pulse" />
-                  <span className="text-[8px] font-mono text-rose-400 font-bold -mt-0.5">-0.5</span>
+                  <Skull className="w-4 h-4 text-rose-500" />
+                  <span className="text-[10px] font-mono text-rose-400 font-bold -mt-0.5">-0.5</span>
                 </div>
               )}
 
@@ -165,7 +165,7 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
               {isTarget && !isAgent && (
                 <div className="flex flex-col items-center text-emerald-400">
                   <Flag className="w-5 h-5 text-emerald-400" />
-                  <span className="text-[8px] font-mono text-emerald-400 font-bold -mt-0.5">+1.0</span>
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold -mt-0.5">+1.0</span>
                 </div>
               )}
 
@@ -185,7 +185,7 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
               {!wall && !hazard && !isTarget && !isAgent && (
                 <div className="flex flex-col items-center justify-center pointer-events-none select-none">
                   {displayMode === 'policy' ? (
-                    <span className="text-xs font-mono font-bold text-slate-500">
+                    <span className="text-xs font-mono font-bold text-slate-400">
                       {dir === 'UP' && '↑'}
                       {dir === 'DOWN' && '↓'}
                       {dir === 'LEFT' && '←'}
@@ -200,7 +200,7 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
               )}
 
               {/* Coordinates Pill */}
-              <span className="absolute bottom-0.5 right-1 text-[7px] font-mono text-slate-500/70 select-none">
+              <span className="absolute bottom-0.5 right-1 text-[8px] font-mono text-slate-400/70 select-none">
                 {x},{y}
               </span>
             </div>
@@ -209,7 +209,7 @@ export const DQNGridworld: React.FC<DQNGridworldProps> = ({
       </div>
 
       {/* Grid Legend & Status */}
-      <div className="flex items-center justify-between w-full max-w-[340px] text-[10px] text-slate-400 px-1">
+      <div className="flex items-center justify-between w-full max-w-[340px] text-[11px] text-slate-400 px-1">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />

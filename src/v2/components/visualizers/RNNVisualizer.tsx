@@ -1,19 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Hyperparameters, Mode, DataSource } from '../../types';
 import { PREDEFINED_PROMPTS } from '../../lib/prompts';
 import { RNNUnrolledSequence } from './RNNUnrolledSequence';
 import { RNNFoldedCell } from './RNNFoldedCell';
 import { RNNCellMathModal } from './RNNCellMathModal';
 import { RNNComparisonModal } from './RNNComparisonModal';
-import { RefreshCw, AlignLeft, Cpu, Zap, ArrowRightLeft, BookOpen, AlertTriangle } from 'lucide-react';
+import { RefreshCw, AlignLeft, ArrowRightLeft } from 'lucide-react';
 
 interface RNNVisualizerProps {
   hyperparams: Hyperparameters;
   step: number;
   mode: Mode;
   dataSource: DataSource;
-  onOpenGlossary?: () => void;
 }
 
 type RNNViewMode = 'unrolled' | 'folded';
@@ -23,7 +21,6 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
   step, 
   mode, 
   dataSource,
-  onOpenGlossary,
 }) => {
   const [viewMode, setViewMode] = useState<RNNViewMode>('unrolled');
   const [selectedPromptIdx, setSelectedPromptIdx] = useState(0);
@@ -137,7 +134,7 @@ export const RNNVisualizer: React.FC<RNNVisualizerProps> = ({
         
         {/* Left: View Mode Segmented Control (Unrolled vs Folded) */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
+          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold hidden sm:inline">
             View:
           </span>
 

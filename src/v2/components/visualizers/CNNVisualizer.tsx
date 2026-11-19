@@ -4,7 +4,7 @@ import { Hyperparameters, Mode, UseCase, DataSource } from '../../types';
 import { LayerTooltip } from '../LayerTooltip';
 import { getArchitectureTooltip } from '../../utils/tooltips';
 import { CNNUnifiedConvolution } from './CNNUnifiedConvolution';
-import { CNN_SAMPLES_BY_DATASET, CNNSampleImage } from './CNNImageDigitizer';
+import { CNN_SAMPLES_BY_DATASET, CNNSampleImage } from './cnnSamples';
 
 interface CNNVisualizerProps {
   hyperparams: Hyperparameters;
@@ -13,17 +13,14 @@ interface CNNVisualizerProps {
   useCase: UseCase;
   dataSource?: DataSource;
   isPlaying?: boolean;
-  onOpenGlossary?: () => void;
 }
 
 export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
   hyperparams,
   step,
   mode,
-  useCase,
   dataSource,
   isPlaying = false,
-  onOpenGlossary,
 }) => {
   const datasetKey = useMemo(() => {
     if (dataSource?.includes('CIFAR')) return 'cifar';
@@ -34,7 +31,6 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
   const defaultSamples = CNN_SAMPLES_BY_DATASET[datasetKey] || CNN_SAMPLES_BY_DATASET.mnist;
   const [selectedSample, setSelectedSample] = useState<CNNSampleImage>(defaultSamples[0]);
   const [hoveredCellIdx, setHoveredCellIdx] = useState<number | null>(null);
-  const [isStage1Scanning, setIsStage1Scanning] = useState(false);
 
   // Update selected sample when dataset changes
   useEffect(() => {
@@ -119,8 +115,6 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
           isPlaying={isPlaying}
           step={step}
           stride={hyperparams.stride || 1}
-          onScanStateChange={setIsStage1Scanning}
-          onOpenGlossary={onOpenGlossary}
         />
       </div>
 
@@ -128,7 +122,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
       <div className="w-full max-w-5xl bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm relative z-20 mb-8">
         <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 mb-6 gap-3">
           <div className="flex items-center gap-2 font-mono">
-            <span className={`w-2 h-2 rounded-full bg-indigo-500 ${isPlaying ? 'animate-pulse' : ''}`} />
+            <span className="w-2 h-2 rounded-full bg-indigo-500" />
             <span className="text-xs font-bold text-slate-200 uppercase tracking-wide">
               02. Deep Feature Hierarchy & Classification
             </span>
@@ -224,14 +218,14 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
 
                           {/* Hover Tooltip */}
                           <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-slate-800 border border-slate-600 rounded-md shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap">
-                            <div className="text-[10px] text-slate-300 flex flex-col gap-1">
+                            <div className="text-[11px] text-slate-300 flex flex-col gap-1">
                               <div className="flex justify-between gap-3">
                                 <span>Activation</span>
                                 <span className={`font-mono ${isNaN ? "text-rose-400 font-medium" : "text-indigo-300"}`}>
                                   {isNaN ? 'NaN' : act.toFixed(4)}
                                 </span>
                               </div>
-                              <div className="text-slate-500 text-[9px]">
+                              <div className="text-slate-400 text-[11px]">
                                 {lIdx === 0 ? 'Ingested pixel scalar' : (lIdx < 3 ? 'Edge filter map' : 'High-level texture feature')}
                               </div>
                             </div>
@@ -248,11 +242,11 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
                       const isPredicted = act > 0.5;
                       return (
                         <div key={lbl} className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between text-[10px] font-mono">
+                          <div className="flex items-center justify-between text-[11px] font-mono">
                             <span className={isPredicted ? 'text-emerald-300 font-bold' : 'text-slate-400'}>
                               {lbl}
                             </span>
-                            <span className={isPredicted ? 'text-emerald-400 font-bold' : 'text-slate-500'}>
+                            <span className={isPredicted ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
                               {(act * 100).toFixed(1)}%
                             </span>
                           </div>
@@ -294,7 +288,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
         {/* Failure Mode Diagnostics Probes */}
         {hyperparams.failureMode === 'Vanishing Gradients' && mode === 'Train' && (
           <div className="absolute bottom-3 left-4 z-10 bg-slate-950/90 border border-rose-500/50 rounded-lg px-3 py-1.5 shadow-lg flex items-center gap-3">
-            <span className="text-[10px] font-bold text-rose-400 font-mono">CONV1 GRADIENT</span>
+            <span className="text-[11px] font-bold text-rose-400 font-mono">CONV1 GRADIENT</span>
             <span className="text-xs text-slate-200 font-mono">
               {(0.00000001 + Math.random() * 0.00000001).toExponential(2)}
             </span>
@@ -303,7 +297,7 @@ export const CNNVisualizer: React.FC<CNNVisualizerProps> = ({
         
         {hyperparams.failureMode === 'Exploding Gradients' && mode === 'Train' && (
           <div className="absolute bottom-3 right-4 z-10 bg-slate-950/90 border border-rose-500/50 rounded-lg px-3 py-1.5 shadow-lg flex items-center gap-3">
-            <span className="text-[10px] font-bold text-rose-400 font-mono">POOL GRADIENT</span>
+            <span className="text-[11px] font-bold text-rose-400 font-mono">POOL GRADIENT</span>
             <span className="text-xs text-slate-200 font-mono">
               {step < 5 ? (0.5 * step).toFixed(2) : step < 10 ? (Math.pow(2, step-5)).toFixed(1) : step < 15 ? (Math.pow(10, step-8)).toFixed(0) : "NaN"}
             </span>

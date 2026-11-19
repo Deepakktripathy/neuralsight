@@ -6,15 +6,21 @@ coverage/
 *.log
 .env*
 !.env.example
+.aistudio/
+public/
+
 # Python
 venv/
 .venv/
 __pycache__/
 *.pyc
 
-#Screenshots
-docs/
+# Screenshots: keep the README set in docs/screenshots, ignore local review captures.
+docs/*
+!docs/screenshots/
+
+# Only the guide images referenced by TransformerGuideModal are tracked.
+src/assets/images/*
+!src/assets/images/transformer_concept*_guide_*.jpg
+src/v2/assets/
 CHANGELOG.md
-# public/
-src/assets/images/
-src/v2/assets/images/

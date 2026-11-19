@@ -11,12 +11,11 @@ interface Props {
 
 export const SandboxDiagnosticsPanel: React.FC<Props> = ({ 
   failureMode, 
-  architecture,
   isEmbedded = true 
 }) => {
   if (failureMode === 'None') return null;
 
-  const content = getDiagnosticsContent(failureMode, architecture);
+  const content = getDiagnosticsContent(failureMode);
   if (!content) return null;
 
   if (isEmbedded) {
@@ -28,8 +27,8 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-rose-400">
-                Diagnostic Fault
+              <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-rose-400">
+                Observed Fault Effect
               </span>
               <span className="text-slate-600">·</span>
               <h4 className="text-xs font-bold text-slate-100">
@@ -40,7 +39,7 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
               {content.explanation}
             </p>
             <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-400">
-              <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
+              <span className="text-[11px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
                 Watch for:
               </span>
               <span className="truncate">{content.watch}</span>
@@ -66,8 +65,8 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-rose-400">
-                  Diagnostic:
+                <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-rose-400">
+                  Observed Fault:
                 </span>
                 <h4 className="text-xs font-bold text-slate-100">{failureMode}</h4>
               </div>
@@ -75,7 +74,7 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
                 {content.explanation}
               </p>
               <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-400">
-                <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
+                <span className="text-[11px] uppercase font-bold text-emerald-400 font-mono tracking-wider shrink-0">
                   Watch for:
                 </span>
                 <span>{content.watch}</span>
@@ -88,7 +87,7 @@ export const SandboxDiagnosticsPanel: React.FC<Props> = ({
   );
 };
 
-function getDiagnosticsContent(failureMode: FailureMode, architecture: Architecture) {
+function getDiagnosticsContent(failureMode: FailureMode) {
   switch (failureMode) {
     case 'Vanishing Gradients':
       return {

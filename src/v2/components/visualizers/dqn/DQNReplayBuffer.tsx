@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Database, RefreshCw, Layers, Zap, Shuffle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Database, RefreshCw, Shuffle } from 'lucide-react';
 
 interface Transition {
   id: number;
@@ -14,13 +14,12 @@ interface Transition {
 interface DQNReplayBufferProps {
   step: number;
   currentTransition: { s: string; a: string; r: number; sPrime: string };
-  isPoorExploration: boolean;
+  isPoorExploration?: boolean;
 }
 
 export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
   step,
   currentTransition,
-  isPoorExploration
 }) => {
   // Target network updates every 20 steps
   const syncInterval = 20;
@@ -48,7 +47,7 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
       {/* Top Banner: The Two DeepMind Innovations */}
       <div className="p-4 bg-gradient-to-r from-indigo-950/50 via-slate-900 to-amber-950/40 border border-indigo-500/30 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-semibold block mb-1">
+          <span className="text-[11px] font-mono text-indigo-400 uppercase tracking-wider font-semibold block mb-1">
             DeepMind (2015) Landmark Innovations
           </span>
           <h3 className="text-base font-bold text-white">
@@ -61,11 +60,11 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
 
         <div className="flex items-center gap-2 shrink-0">
           <div className="px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-center">
-            <span className="text-[9px] font-mono text-slate-400 block uppercase">Buffer Capacity</span>
+            <span className="text-[11px] font-mono text-slate-400 block uppercase">Buffer Capacity</span>
             <span className="text-xs font-bold text-indigo-300 font-mono">100,000 tuples</span>
           </div>
           <div className="px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-center">
-            <span className="text-[9px] font-mono text-slate-400 block uppercase">Mini-Batch Size</span>
+            <span className="text-[11px] font-mono text-slate-400 block uppercase">Mini-Batch Size</span>
             <span className="text-xs font-bold text-amber-300 font-mono">32 samples</span>
           </div>
         </div>
@@ -83,7 +82,7 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                 Replay Memory Buffer (D)
               </h4>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-2 py-0.5 rounded-full">
               <Shuffle className="w-3 h-3" />
               <span>Random Mini-Batch Sampling</span>
             </div>
@@ -98,12 +97,12 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
             <table className="w-full text-left text-xs font-mono">
               <thead className="bg-slate-900 text-slate-400 border-b border-slate-800">
                 <tr>
-                  <th className="p-2 text-[10px]">Index</th>
-                  <th className="p-2 text-[10px]">State (s)</th>
-                  <th className="p-2 text-[10px]">Action (a)</th>
-                  <th className="p-2 text-[10px]">Reward (r)</th>
-                  <th className="p-2 text-[10px]">Next (s')</th>
-                  <th className="p-2 text-[10px] text-right">Batch Status</th>
+                  <th className="p-2 text-[11px]">Index</th>
+                  <th className="p-2 text-[11px]">State (s)</th>
+                  <th className="p-2 text-[11px]">Action (a)</th>
+                  <th className="p-2 text-[11px]">Reward (r)</th>
+                  <th className="p-2 text-[11px]">Next (s')</th>
+                  <th className="p-2 text-[11px] text-right">Batch Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-[11px]">
@@ -116,7 +115,7 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                         : 'text-slate-300 hover:bg-slate-900/50'
                     }`}
                   >
-                    <td className="p-2 text-slate-500 font-mono text-[10px]">#{t.id}</td>
+                    <td className="p-2 text-slate-400 font-mono text-[11px]">#{t.id}</td>
                     <td className="p-2 text-indigo-300 font-semibold">{t.s}</td>
                     <td className="p-2 text-amber-300 font-semibold">{t.a}</td>
                     <td className="p-2">
@@ -127,11 +126,11 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                     <td className="p-2 text-indigo-300 font-semibold">{t.sPrime}</td>
                     <td className="p-2 text-right">
                       {t.isSampled ? (
-                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold">
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold">
                           SAMPLED
                         </span>
                       ) : (
-                        <span className="text-slate-600 text-[9px]">QUEUED</span>
+                        <span className="text-slate-400 text-[10px]">QUEUED</span>
                       )}
                     </td>
                   </tr>
@@ -152,7 +151,7 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                   Target Network (θ⁻)
                 </h4>
               </div>
-              <span className="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+              <span className="text-[11px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
                 Sync every {syncInterval} steps
               </span>
             </div>
@@ -167,14 +166,14 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
               <div className="p-3 bg-slate-950 border border-indigo-500/40 rounded-xl flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-indigo-400" />
                     <span className="text-xs font-bold text-indigo-300 font-mono">Online Network (θ)</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
+                  <span className="text-[11px] text-slate-400 font-mono block mt-0.5">
                     Updates continuously via SGD/Adam
                   </span>
                 </div>
-                <span className="text-[10px] font-mono bg-indigo-950/80 text-indigo-300 px-2 py-1 rounded border border-indigo-500/30">
+                <span className="text-[11px] font-mono bg-indigo-950/80 text-indigo-300 px-2 py-1 rounded border border-indigo-500/30">
                   Active
                 </span>
               </div>
@@ -186,11 +185,11 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                     <div className="w-2 h-2 rounded-full bg-amber-400" />
                     <span className="text-xs font-bold text-amber-300 font-mono">Target Network (θ⁻)</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
+                  <span className="text-[11px] text-slate-400 font-mono block mt-0.5">
                     Frozen weights to stabilize targets
                   </span>
                 </div>
-                <span className="text-[10px] font-mono bg-amber-950/80 text-amber-300 px-2 py-1 rounded border border-amber-500/30">
+                <span className="text-[11px] font-mono bg-amber-950/80 text-amber-300 px-2 py-1 rounded border border-amber-500/30">
                   Frozen
                 </span>
               </div>
@@ -210,13 +209,13 @@ export const DQNReplayBuffer: React.FC<DQNReplayBufferProps> = ({
                 />
               </div>
 
-              <span className="text-[10px] text-slate-500 font-mono">
+              <span className="text-[11px] text-slate-400 font-mono">
                 θ⁻ ← θ copies weights periodically (or soft Polyak update τ = 0.005)
               </span>
             </div>
           </div>
 
-          <div className="text-[10px] text-slate-400 font-mono bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+          <div className="text-[11px] text-slate-400 font-mono bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
             Loss: <strong className="text-white">Huber( y - Q(s, a; θ) )</strong> with clipped gradients for outlier stability.
           </div>
 

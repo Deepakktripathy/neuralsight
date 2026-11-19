@@ -2,17 +2,15 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Hyperparameters, Mode, UseCase, DataSource } from '../../types';
 import { LayerTooltip } from '../LayerTooltip';
-import { getArchitectureTooltip } from '../../utils/tooltips';
 import { GANSampleRenderer } from './GANSampleRenderer';
-import { Shuffle, Sliders, Eye, Grid3X3, Zap, ShieldAlert, Sparkles, Scale, Info } from 'lucide-react';
+import { Shuffle, Sliders, Eye, Grid3X3, Sparkles, Scale } from 'lucide-react';
 
 interface GANVisualizerProps {
   hyperparams: Hyperparameters;
   step: number;
   mode: Mode;
-  useCase: UseCase;
+  useCase?: UseCase;
   dataSource?: DataSource;
-  onOpenGlossary?: () => void;
 }
 
 // Deterministic pseudo-random helper
@@ -25,9 +23,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   hyperparams,
   step,
   mode,
-  useCase,
   dataSource = 'Celebrity Faces (CelebA)',
-  onOpenGlossary,
 }) => {
   const isModeCollapse = mode === 'Train' && hyperparams.failureMode === 'Mode Collapse';
   const isDiscOverpowered = mode === 'Train' && hyperparams.failureMode === 'Discriminator Overpowering';
@@ -35,7 +31,6 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   // Interactive state for Latent Walk & View Mode
   const [interactiveLatent, setInteractiveLatent] = useState<number[]>([0.2, -0.5, 0.8, -0.1, 0.4, -0.3, 0.6, -0.7]);
   const [viewMode, setViewMode] = useState<'single' | 'batch' | 'walk'>('single');
-  const [inspectDiscTarget, setInspectDiscTarget] = useState<'real' | 'fake'>('fake');
   const [interpolationAlpha, setInterpolationAlpha] = useState<number>(0.5);
   const [latentSeedA, setLatentSeedA] = useState<number>(10);
   const [latentSeedB, setLatentSeedB] = useState<number>(50);
@@ -44,7 +39,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
   const latentVector = useMemo(() => {
     if (viewMode === 'walk' || mode === 'Inference') {
       // Interpolate between vector A and B based on slider
-      return interactiveLatent.map((val, i) => {
+      return interactiveLatent.map((_, i) => {
         const vA = (seededRandom(latentSeedA + i) * 2 - 1);
         const vB = (seededRandom(latentSeedB + i) * 2 - 1);
         return Number((vA * (1 - interpolationAlpha) + vB * interpolationAlpha).toFixed(2));
@@ -173,7 +168,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
       </div>
 
       {/* Main Adversarial Pipeline Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch min-h-[440px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         
         {/* Left Col (Generator Network G): Latent vector -> Transposed Conv -> Fake Output */}
         <div
@@ -181,9 +176,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           className="lg:col-span-6 bg-slate-900/60 border border-indigo-500/30 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative backdrop-blur-sm"
         >
           {/* Header (AUDIT-10: Zero-Pill Discipline) */}
-          <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
+          <div className="flex items-center justify-between mb-2 border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 font-mono flex-wrap">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
               <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-300">
                 01. Generator G(z; θ_g)
               </h3>
@@ -203,18 +197,18 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           {/* Generator Sub-Components Pipeline (AUDIT-09: Direct Hairline Dividers, Zero Nested Boxes) */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center my-auto py-2">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-0 sm:divide-x sm:divide-slate-800/70 items-center py-2">
             
             {/* Latent Vector Stage (4 cols) */}
             <div id="tour-gan-latent" className="sm:col-span-4 flex flex-col items-center gap-1.5 sm:pr-3 w-full">
-              <div className="flex items-center justify-between w-full max-w-[140px] text-[10px] font-mono text-slate-400">
+              <div className="flex items-center justify-between w-full max-w-[140px] text-[11px] font-mono text-slate-400">
                 <span>Latent z ~ N(0, I)</span>
               </div>
 
               {/* In Latent Walk: Show Sliders & Interpolator */}
               {viewMode === 'walk' ? (
                 <div className="w-full max-w-[150px] p-2 bg-slate-950/70 rounded-xl border border-slate-800/80 flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-[10px] text-slate-300 font-medium">
+                  <div className="flex items-center justify-between text-[11px] text-slate-300 font-medium">
                     <span className="flex items-center gap-1"><Sliders className="w-3 h-3 text-indigo-400" /> Morph</span>
                     <span className="font-mono text-indigo-400">{Math.round(interpolationAlpha * 100)}%</span>
                   </div>
@@ -223,18 +217,19 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
                     min="0"
                     max="1"
                     step="0.02"
+                    aria-label="Latent space interpolation morph"
                     value={interpolationAlpha}
                     onChange={(e) => setInterpolationAlpha(parseFloat(e.target.value))}
                     className="w-full h-1.5 accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer"
                   />
-                  <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+                  <div className="flex justify-between text-[11px] text-slate-400 font-mono">
                     <span>A ({latentSeedA})</span>
                     <span>B ({latentSeedB})</span>
                   </div>
 
                   <div className="pt-1.5 border-t border-slate-800/80 grid grid-cols-2 gap-1">
                     {latentVector.slice(0, 4).map((val, idx) => (
-                      <div key={idx} className="flex flex-col text-[9px] font-mono text-slate-400">
+                      <div key={idx} className="flex flex-col text-[11px] font-mono text-slate-400">
                         <span>z[{idx}]: <span className="text-slate-200">{val}</span></span>
                       </div>
                     ))}
@@ -264,8 +259,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
             {/* Transposed Convolutions / Upsampling Architecture Graphic (4 cols) */}
             <div className="sm:col-span-4 flex items-center justify-center gap-1.5 text-slate-500 sm:px-3 py-1 sm:py-0 w-full">
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">Dense</div>
-                <div className="w-8 h-14 bg-indigo-500/20 border border-indigo-500/40 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-indigo-300 text-center px-0.5">
+                <div className="text-[11px] font-mono text-slate-400">Dense</div>
+                <div className="w-9 h-14 bg-indigo-500/20 border border-indigo-500/40 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-indigo-300 text-center px-0.5">
                   4x4<br/>64ch
                 </div>
               </div>
@@ -273,8 +268,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
               <div className="w-2.5 h-0.5 bg-indigo-500/40" />
 
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">ConvT</div>
-                <div className="w-10 h-18 bg-indigo-500/25 border border-indigo-500/50 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-indigo-200 text-center px-0.5">
+                <div className="text-[11px] font-mono text-slate-400">ConvT</div>
+                <div className="w-11 h-18 bg-indigo-500/25 border border-indigo-500/50 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-indigo-200 text-center px-0.5">
                   8x8<br/>32ch
                 </div>
               </div>
@@ -282,8 +277,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
               <div className="w-2.5 h-0.5 bg-indigo-500/40" />
 
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">Tanh</div>
-                <div className="w-12 h-22 bg-indigo-500/30 border border-indigo-500/60 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-indigo-100 text-center px-0.5">
+                <div className="text-[11px] font-mono text-slate-400">Tanh</div>
+                <div className="w-12 h-22 bg-indigo-500/30 border border-indigo-500/60 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-indigo-100 text-center px-0.5">
                   12x12<br/>RGB
                 </div>
               </div>
@@ -304,7 +299,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
                 />
               ) : (
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-[10px] font-mono text-slate-400">Batch (4 Seeds)</span>
+                  <span className="text-[11px] font-mono text-slate-400">Batch (4 Seeds)</span>
                   <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950/70 rounded-xl border border-indigo-500/30">
                     {[0, 1, 2, 3].map((seed) => (
                       <GANSampleRenderer
@@ -327,7 +322,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           {/* Generator Footer Details */}
-          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
             <span>Activation: <strong className="text-indigo-300">ReLU + Tanh</strong></span>
             <span>Gradient Flow ∇_G: <strong className="text-indigo-300">{gameStats.gradientGNorm}</strong></span>
           </div>
@@ -339,9 +334,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           className="lg:col-span-6 bg-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 flex flex-col justify-between shadow-xl relative backdrop-blur-sm"
         >
           {/* Header (AUDIT-10: Zero-Pill Discipline) */}
-          <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-2">
+          <div className="flex items-center justify-between mb-2 border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 font-mono flex-wrap">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300">
                 02. Discriminator D(x; θ_d)
               </h3>
@@ -378,10 +372,10 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
             </div>
 
             {/* Discriminator Downsampling Convolutions (4 cols) */}
-            <div className="sm:col-span-4 flex items-center justify-center gap-1.5 text-slate-500 sm:px-3 py-1 sm:py-0 w-full">
+            <div className="sm:col-span-4 flex items-center justify-center gap-1.5 text-slate-400 sm:px-3 py-1 sm:py-0 w-full">
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">Conv2D</div>
-                <div className="w-12 h-22 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-emerald-300 text-center px-0.5">
+                <div className="text-[11px] font-mono text-slate-400">Conv2D</div>
+                <div className="w-12 h-22 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-emerald-300 text-center px-0.5">
                   6x6<br/>32ch
                 </div>
               </div>
@@ -389,8 +383,8 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
               <div className="w-2.5 h-0.5 bg-emerald-500/40" />
 
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">Conv2D</div>
-                <div className="w-10 h-18 bg-emerald-500/25 border border-emerald-500/50 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-emerald-200 text-center px-0.5">
+                <div className="text-[11px] font-mono text-slate-400">Conv2D</div>
+                <div className="w-11 h-18 bg-emerald-500/25 border border-emerald-500/50 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-emerald-200 text-center px-0.5">
                   3x3<br/>64ch
                 </div>
               </div>
@@ -398,19 +392,18 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
               <div className="w-2.5 h-0.5 bg-emerald-500/40" />
 
               <div className="flex flex-col items-center gap-1">
-                <div className="text-[9px] font-mono text-slate-400">Sigmoid</div>
-                <div className="w-8 h-14 bg-emerald-500/30 border border-emerald-500/60 rounded-lg flex flex-col items-center justify-center text-[8px] font-mono text-emerald-100 text-center px-0.5 font-semibold">
+                <div className="text-[11px] font-mono text-slate-400">Sigmoid</div>
+                <div className="w-9 h-14 bg-emerald-500/30 border border-emerald-500/60 rounded-lg flex flex-col items-center justify-center text-[10px] font-mono text-emerald-100 text-center px-0.5 font-semibold">
                   D(x)<br/>[0, 1]
                 </div>
               </div>
             </div>
 
-            {/* Discriminator Unified Prediction Panel (4 cols - AUDIT-09: Single clean container without nested double boxes) */}
+            {/* Discriminator Unified Prediction Panel */}
             <div className="sm:col-span-4 flex flex-col gap-2.5 sm:pl-3 w-full">
               <div className="p-2.5 bg-slate-950/70 rounded-xl border border-slate-800/80 flex flex-col gap-2.5">
-                {/* Score on Real */}
                 <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[10px] font-mono">
+                  <div className="flex justify-between text-[11px] font-mono">
                     <span className="text-slate-400">D(x_real)</span>
                     <span className="text-emerald-400 font-bold">{(gameStats.probReal * 100).toFixed(1)}%</span>
                   </div>
@@ -420,14 +413,13 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
                       style={{ width: `${gameStats.probReal * 100}%` }}
                     />
                   </div>
-                  <span className="text-[8px] text-emerald-300/80 font-mono text-right">Target: 100% (Real)</span>
+                  <span className="text-[11px] text-emerald-300/80 font-mono text-right">Target: 100% (Real)</span>
                 </div>
 
                 <div className="h-px bg-slate-800/80" />
 
-                {/* Score on Fake */}
                 <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[10px] font-mono">
+                  <div className="flex justify-between text-[11px] font-mono">
                     <span className="text-slate-400">D(G(z)_fake)</span>
                     <span className="text-rose-400 font-bold">{(gameStats.probFake * 100).toFixed(1)}%</span>
                   </div>
@@ -437,7 +429,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
                       style={{ width: `${gameStats.probFake * 100}%` }}
                     />
                   </div>
-                  <span className="text-[8px] text-rose-300/80 font-mono text-right">
+                  <span className="text-[11px] text-rose-300/80 font-mono text-right">
                     Target: 0% D | 100% G
                   </span>
                 </div>
@@ -447,7 +439,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           {/* Discriminator Footer Details */}
-          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
             <span>Activation: <strong className="text-emerald-300">LeakyReLU(0.2) + Sigmoid</strong></span>
             <span>Target Distribution: <strong className="text-slate-200">{dataSource}</strong></span>
           </div>
@@ -468,7 +460,7 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
             </h4>
           </div>
 
-          <div className="text-[10px] font-mono text-slate-400 flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="text-[11px] font-mono text-slate-400 flex flex-wrap items-center gap-2 sm:gap-3">
             <span>Formula: <code className="text-amber-300 font-semibold">min_G max_D V(D, G)</code></span>
             <span className="text-slate-600 hidden sm:inline">|</span>
             <span>Ideal Balance: <strong className="text-emerald-400">D(x) = D(G(z)) = 0.50</strong></span>
@@ -477,12 +469,12 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
 
         {/* Tug-of-war Bar */}
         <div className="space-y-2">
-          <div className="flex justify-between items-center text-[10px] font-mono px-1">
+          <div className="flex justify-between items-center text-[11px] font-mono px-1">
             <span className="text-indigo-400 font-medium flex items-center gap-1">
               <span>Generator Fools D</span>
               <span className="text-indigo-300/80 font-mono">(D(G(z)) → 1.0)</span>
             </span>
-            <span className="text-amber-400 font-bold bg-amber-400/10 px-2.5 py-0.5 rounded border border-amber-400/30 text-[9px] tracking-wide">
+            <span className="text-amber-400 font-bold bg-amber-400/10 px-2.5 py-0.5 rounded border border-amber-400/30 text-[11px] tracking-wide">
               Nash Equilibrium (50/50)
             </span>
             <span className="text-emerald-400 font-medium flex items-center gap-1">
@@ -492,37 +484,34 @@ export const GANVisualizer: React.FC<GANVisualizerProps> = ({
           </div>
 
           <div className="relative h-5 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-700/80 shadow-inner">
-            {/* Equilibrium Center Marker */}
             <div className="absolute top-0 bottom-0 left-1/2 w-0.5 -translate-x-1/2 bg-amber-400 z-20 shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
 
-            {/* Generator side */}
             <motion.div
               className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-400 flex items-center justify-start pl-2"
               animate={{ width: `${100 - gameStats.equilibriumBalance}%` }}
               transition={{ duration: 0.3 }}
             >
               {100 - gameStats.equilibriumBalance > 18 && (
-                <span className="text-[9px] font-mono text-white font-bold drop-shadow">
+                <span className="text-[11px] font-mono text-white font-bold drop-shadow">
                   G: {(100 - gameStats.equilibriumBalance).toFixed(0)}%
                 </span>
               )}
             </motion.div>
 
-            {/* Discriminator side */}
             <motion.div
               className="absolute top-0 bottom-0 right-0 bg-gradient-to-l from-emerald-600 via-emerald-500 to-emerald-400 flex items-center justify-end pr-2"
               animate={{ width: `${gameStats.equilibriumBalance}%` }}
               transition={{ duration: 0.3 }}
             >
               {gameStats.equilibriumBalance > 18 && (
-                <span className="text-[9px] font-mono text-white font-bold drop-shadow">
+                <span className="text-[11px] font-mono text-white font-bold drop-shadow">
                   D: {gameStats.equilibriumBalance.toFixed(0)}%
                 </span>
               )}
             </motion.div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between text-[9px] font-mono text-slate-400 pt-0.5 px-1 gap-1">
+          <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 pt-0.5 px-1 gap-1">
             <span className="text-indigo-400/90">L_G = -log(D(G(z))): {gameStats.lossG.toFixed(3)}</span>
             <span className="px-2 py-0.5 bg-slate-800/90 border border-slate-700 rounded text-slate-300 font-medium">
               Current Game Balance: {gameStats.equilibriumBalance > 60 ? 'Discriminator Winning' : gameStats.equilibriumBalance < 40 ? 'Generator Winning' : 'Near Nash Equilibrium'}

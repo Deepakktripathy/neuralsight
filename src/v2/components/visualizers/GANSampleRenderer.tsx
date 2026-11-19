@@ -320,10 +320,10 @@ export const GANSampleRenderer: React.FC<GANSampleRendererProps> = ({
   return (
     <div className={`flex flex-col items-center gap-1.5 ${className}`}>
       {label && (
-        <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+        <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
           {label}
           {!isReal && failureMode === 'Mode Collapse' && (
-            <span className="text-[9px] px-1 py-0.2 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40 animate-pulse">
+            <span className="text-[10px] px-1 py-0.2 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40">
               COLLAPSED
             </span>
           )}
@@ -356,7 +356,7 @@ export const GANSampleRenderer: React.FC<GANSampleRendererProps> = ({
 
         {/* Hover Inspector Tooltip */}
         {showPixelInspector && hoveredPixel && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-slate-700 px-2 py-0.5 rounded text-[9px] font-mono text-indigo-300 pointer-events-none z-30 whitespace-nowrap shadow-lg">
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-slate-700 px-2 py-0.5 rounded text-[11px] font-mono text-indigo-300 pointer-events-none z-30 whitespace-nowrap shadow-lg">
             [{hoveredPixel.x}, {hoveredPixel.y}]: {hoveredPixel.val}
           </div>
         )}

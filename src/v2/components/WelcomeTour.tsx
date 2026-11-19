@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Sparkles, Layers, PlaySquare, Gauge, ShieldAlert, ArrowRight, ArrowLeft, X } from 'lucide-react';
+import {
+  Sparkles,
+  Layers,
+  PlaySquare,
+  Gauge,
+  ShieldAlert,
+  ArrowRight,
+  ArrowLeft,
+} from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog';
 
 interface WelcomeTourProps {
   onClose: () => void;
@@ -11,31 +20,31 @@ const STEPS = [
     icon: Sparkles,
     color: 'indigo',
     title: 'Welcome to NeuralSight',
-    body: "This is a visual playground for how machine learning models actually work. Pick an architecture, hit play, and watch data flow through it in real time - no math background required to get the intuition.",
+    body: 'This is a visual playground for how machine learning models actually work. Pick an architecture, hit play, and watch data flow through it in real time.',
   },
   {
     icon: Layers,
     color: 'indigo',
-    title: 'Choose an architecture',
-    body: "The sidebar on the left lets you pick from six model types - from a simple Standard NN up to Transformers and GANs - along with the task, dataset, and hyperparameters that shape how it behaves.",
+    title: 'Tune the architecture',
+    body: 'The sidebar on the left lets you tune hyperparameters, switch layer topologies, and return to Setup to change tasks or datasets.',
   },
   {
     icon: PlaySquare,
     color: 'emerald',
     title: 'Watch it think',
-    body: "The main canvas animates the model itself. Indigo shows the forward pass carrying data through the network; rose shows backpropagation carrying error back. Hover any node or connection for its exact value.",
+    body: 'The main canvas animates the model itself. Indigo shows the forward pass carrying data through the network; rose shows backpropagation carrying error back.',
   },
   {
     icon: Gauge,
     color: 'amber',
     title: 'Control the pace',
-    body: "Use the playback bar at the bottom to play, pause, step frame-by-frame, or slow things down. The chart next to it tracks loss and accuracy live as training progresses.",
+    body: 'Use the playback bar at the bottom to play, pause, step frame-by-frame, or adjust speed. Expand the dashboard in the bottom right to inspect loss and accuracy curves.',
   },
   {
     icon: ShieldAlert,
     color: 'rose',
-    title: 'Guided Tour & Failure Sandbox',
-    body: "Turn on \"Guided Tour\" (top right) for a slowed-down, narrated walkthrough of one training step. Or open the Failure Sandbox in the sidebar to see what exploding gradients or overfitting actually look like.",
+    title: 'Spotlight & Failure Sandbox',
+    body: 'Open Spotlight from the Learn menu for interactive canvas callouts, or inject exploding gradients, vanishing gradients, and overfitting from the Failure Sandbox.',
   },
 ];
 
@@ -52,30 +61,29 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
       icon: Sparkles,
       color: 'indigo',
       title: 'Welcome to Custom Model View',
-      body: "This mode lets you visualize your own real-world machine learning models. You can upload an ONNX file exported from PyTorch, TensorFlow, or JAX.",
+      body: 'Visualize your own machine learning models by uploading an ONNX or JSON graph exported from PyTorch, TensorFlow, or JAX.',
     },
     {
       icon: Layers,
       color: 'emerald',
       title: 'Explore the Graph',
-      body: "The canvas renders the computational graph of your model. You can pan, zoom, and explore the precise sequence of operations.",
+      body: 'The canvas renders the computational graph of your model. Pan, zoom, and explore the sequence of operations.',
     },
     {
       icon: Gauge,
       color: 'amber',
       title: 'Inspect Properties',
-      body: "Click on any node to open the properties panel on the right. This shows detailed attributes like kernel sizes, strides, activation types, and tensor connections.",
+      body: 'Click any node to open the properties panel on the right and inspect kernel sizes, strides, activations, and tensor shapes.',
     },
     {
       icon: PlaySquare,
       color: 'rose',
       title: 'Get Started',
-      body: "Try uploading your own .onnx file using the upload button, or click \"Use Sample Model\" to explore an example ResNet-18 architecture.",
-    }
+      body: 'Upload your own .onnx file or load the sample ResNet-18 architecture directly on the canvas.',
+    },
   ];
-  
-  const stepsToUse = architecture === 'Custom Model' ? CUSTOM_STEPS : STEPS;
 
+  const stepsToUse = architecture === 'Custom Model' ? CUSTOM_STEPS : STEPS;
   const [stepIdx, setStepIdx] = useState(0);
   const step = stepsToUse[stepIdx];
   const Icon = step.icon;
@@ -83,27 +91,22 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
   const isLast = stepIdx === stepsToUse.length - 1;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
-      <div className="relative bg-slate-900/95 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-4 animate-in fade-in zoom-in-95 duration-300">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors"
-          title="Skip tour"
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className={`w-14 h-14 rounded-full ${colors.bg} ${colors.text} border ${colors.border} flex items-center justify-center`}>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md p-6">
+        <div className="flex flex-col items-center text-center gap-3 pt-2">
+          <div
+            className={`w-14 h-14 rounded-full ${colors.bg} ${colors.text} border ${colors.border} flex items-center justify-center`}
+          >
             <Icon className="w-7 h-7" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-white">{step.title}</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">{step.body}</p>
+            <DialogTitle className="text-lg font-semibold text-white">{step.title}</DialogTitle>
+            <DialogDescription className="text-sm text-slate-300 leading-relaxed">
+              {step.body}
+            </DialogDescription>
           </div>
         </div>
 
-        {/* Progress dots */}
         <div className="flex items-center justify-center gap-1.5 mt-6">
           {stepsToUse.map((_, i) => (
             <div
@@ -118,7 +121,7 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
         <div className="flex items-center justify-between mt-6">
           <button
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-slate-200 font-medium transition-colors"
+            className="text-xs text-slate-400 hover:text-slate-200 font-medium transition-colors cursor-pointer"
           >
             Skip
           </button>
@@ -126,21 +129,21 @@ export const WelcomeTour: React.FC<WelcomeTourProps> = ({ onClose, architecture 
           <div className="flex items-center gap-2">
             {stepIdx > 0 && (
               <button
-                onClick={() => setStepIdx(i => i - 1)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+                onClick={() => setStepIdx((i) => i - 1)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Back
               </button>
             )}
             <button
-              onClick={() => (isLast ? onClose() : setStepIdx(i => i + 1))}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold bg-indigo-500 text-white hover:bg-indigo-400 transition-colors shadow-md shadow-indigo-500/20"
+              onClick={() => (isLast ? onClose() : setStepIdx((i) => i + 1))}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors shadow-md shadow-indigo-950/50 cursor-pointer"
             >
               {isLast ? "Let's go" : 'Next'} <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

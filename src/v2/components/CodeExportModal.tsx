@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Terminal, Download } from 'lucide-react';
+import { Copy, Check, Terminal, Download } from 'lucide-react';
 import { Architecture, Hyperparameters, UseCase, DataSource } from '../types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
 interface CodeExportModalProps {
   architecture: Architecture;
@@ -29,10 +31,18 @@ export const CodeExportModal: React.FC<CodeExportModalProps> = ({
     const lossFnName = hyperparams.lossFunction;
 
     let modelDefinition = '';
-    let criterion = lossFnName === 'MSE' ? 'nn.MSELoss()' : (lossFnName === 'Huber' ? 'nn.SmoothL1Loss()' : 'nn.CrossEntropyLoss()');
-    let optimizerStr = optimizerName === 'Adam' 
-      ? `optim.Adam(model.parameters(), lr=${lr})` 
-      : (optimizerName === 'RMSprop' ? `optim.RMSprop(model.parameters(), lr=${lr})` : `optim.SGD(model.parameters(), lr=${lr}, momentum=0.9)`);
+    const criterion =
+      lossFnName === 'MSE'
+        ? 'nn.MSELoss()'
+        : lossFnName === 'Huber'
+        ? 'nn.SmoothL1Loss()'
+        : 'nn.CrossEntropyLoss()';
+    const optimizerStr =
+      optimizerName === 'Adam'
+        ? `optim.Adam(model.parameters(), lr=${lr})`
+        : optimizerName === 'RMSprop'
+        ? `optim.RMSprop(model.parameters(), lr=${lr})`
+        : `optim.SGD(model.parameters(), lr=${lr}, momentum=0.9)`;
 
     if (architecture === 'CNN') {
       modelDefinition = `class ConvNet(nn.Module):
@@ -111,7 +121,6 @@ model = NeuralNet()`;
     return `import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
 
 # ==========================================
 # NeuralSight Export: ${architecture}
@@ -128,16 +137,8 @@ model = model.to(device)
 criterion = ${criterion}
 optimizer = ${optimizerStr}
 
-# 3. Training Loop Simulation (${epochs} Epochs, Batch Size ${batchSize})
+# 3. Training Loop (${epochs} Epochs, Batch Size ${batchSize})
 print(f"Training {model.__class__.__name__} for ${epochs} epochs...")
-# for epoch in range(${epochs}):
-#     for inputs, targets in dataloader:
-#         inputs, targets = inputs.to(device), targets.to(device)
-#         optimizer.zero_grad()
-#         outputs = model(inputs)
-#         loss = criterion(outputs, targets)
-#         loss.backward()
-#         optimizer.step()
 `;
   };
 
@@ -145,8 +146,12 @@ print(f"Training {model.__class__.__name__} for ${epochs} epochs...")
     const lr = hyperparams.learningRate;
     const batchSize = hyperparams.batchSize;
     const epochs = hyperparams.epochs;
-    const opt = hyperparams.optimizer.toLowerCase();
-    const loss = hyperparams.lossFunction === 'Cross-Entropy' ? 'categorical_crossentropy' : (hyperparams.lossFunction === 'MSE' ? 'mean_squared_error' : 'huber');
+    const loss =
+      hyperparams.lossFunction === 'Cross-Entropy'
+        ? 'categorical_crossentropy'
+        : hyperparams.lossFunction === 'MSE'
+        ? 'mean_squared_error'
+        : 'huber';
 
     return `import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
@@ -188,67 +193,51 @@ model.compile(
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `neuralsight_${architecture.toLowerCase().replace(/\s+/g, '_')}.${framework === 'pytorch' ? 'py' : 'py'}`;
+    link.download = `neuralsight_${architecture.toLowerCase().replace(/\s+/g, '_')}.py`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl flex flex-col max-h-[85vh] p-0">
+        <DialogHeader className="pr-12">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
               <Terminal className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-white">Export Model Code</h3>
-              <p className="text-xs text-slate-400">Generate native script matching your sandbox architecture</p>
+              <DialogTitle>Export Model Code</DialogTitle>
+              <DialogDescription>
+                Generate native script matching your sandbox architecture
+              </DialogDescription>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        </DialogHeader>
 
-        <div className="flex items-center justify-between px-6 py-3 bg-slate-950/50 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFramework('pytorch')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                framework === 'pytorch'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              PyTorch
-            </button>
-            <button
-              onClick={() => setFramework('keras')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                framework === 'keras'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              TensorFlow / Keras
-            </button>
-          </div>
+        <div className="flex items-center justify-between px-6 py-3 bg-slate-950/50 border-b border-slate-800 gap-3 flex-wrap">
+          <Tabs value={framework} onValueChange={(v) => setFramework(v as 'pytorch' | 'keras')}>
+            <TabsList>
+              <TabsTrigger value="pytorch">PyTorch</TabsTrigger>
+              <TabsTrigger value="keras">TensorFlow / Keras</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
               {copied ? 'Copied' : 'Copy Code'}
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition-colors shadow-sm cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Download .py
@@ -259,7 +248,7 @@ model.compile(
         <div className="flex-1 overflow-auto p-4 bg-slate-950/70 font-mono text-xs text-slate-300 leading-relaxed select-all">
           <pre className="whitespace-pre-wrap">{code}</pre>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

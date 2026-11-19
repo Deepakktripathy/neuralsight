@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Gauge, Activity, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface DQNCartPoleProps {
   step: number;
@@ -56,11 +55,11 @@ export const DQNCartPole: React.FC<DQNCartPoleProps> = ({
     <div className="flex flex-col items-center gap-3 w-full max-w-[420px]">
       {/* Header Info */}
       <div className="flex items-center justify-between w-full px-1">
-        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
+        <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider font-semibold">
           CartPole-v1 Benchmark
         </span>
         <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+          <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full border ${
             isFallen 
               ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' 
               : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
@@ -92,9 +91,9 @@ export const DQNCartPole: React.FC<DQNCartPoleProps> = ({
           {/* Limit stops */}
           <line x1="25" y1={trackY - 10} x2="25" y2={trackY + 10} stroke="#ef4444" strokeWidth="3" />
           <line x1="335" y1={trackY - 10} x2="335" y2={trackY + 10} stroke="#ef4444" strokeWidth="3" />
-          <text x="30" y={trackY + 22} fill="#64748b" fontSize="8" fontFamily="monospace">-2.4m</text>
-          <text x="172" y={trackY + 22} fill="#64748b" fontSize="8" fontFamily="monospace">0m</text>
-          <text x="310" y={trackY + 22} fill="#64748b" fontSize="8" fontFamily="monospace">+2.4m</text>
+          <text x="30" y={trackY + 22} fill="#94a3b8" fontSize="9" fontFamily="monospace">-2.4m</text>
+          <text x="172" y={trackY + 22} fill="#94a3b8" fontSize="9" fontFamily="monospace">0m</text>
+          <text x="310" y={trackY + 22} fill="#94a3b8" fontSize="9" fontFamily="monospace">+2.4m</text>
 
           {/* Cart Wheels */}
           <circle cx={cartSvgX - 20} cy={trackY - 6} r="6" fill="#1e293b" stroke="#64748b" strokeWidth="2" />
@@ -116,11 +115,11 @@ export const DQNCartPole: React.FC<DQNCartPoleProps> = ({
           {/* Applied Force Arrow */}
           {activeForce === 'LEFT' ? (
             <g transform={`translate(${cartSvgX - cartWidth / 2 - 25}, ${trackY - 26})`}>
-              <polygon points="0,6 12,0 12,4 20,4 20,8 12,8 12,12" fill="#38bdf8" className="animate-pulse" />
+              <polygon points="0,6 12,0 12,4 20,4 20,8 12,8 12,12" fill="#818cf8" />
             </g>
           ) : (
             <g transform={`translate(${cartSvgX + cartWidth / 2 + 5}, ${trackY - 26})`}>
-              <polygon points="20,6 8,0 8,4 0,4 0,8 8,8 8,12" fill="#38bdf8" className="animate-pulse" />
+              <polygon points="20,6 8,0 8,4 0,4 0,8 8,8 8,12" fill="#818cf8" />
             </g>
           )}
 
@@ -150,8 +149,8 @@ export const DQNCartPole: React.FC<DQNCartPoleProps> = ({
 
         {/* Action badge overlay */}
         <div className="absolute top-2.5 right-3 bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1 flex items-center gap-1.5 shadow-lg">
-          <span className="text-[9px] font-mono text-slate-400">Action:</span>
-          <span className="text-[10px] font-mono font-bold text-amber-300 flex items-center gap-1">
+          <span className="text-[11px] font-mono text-slate-400">Action:</span>
+          <span className="text-[11px] font-mono font-bold text-amber-300 flex items-center gap-1">
             {activeForce === 'LEFT' ? <ArrowLeft className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
             PUSH {activeForce}
           </span>
@@ -161,24 +160,24 @@ export const DQNCartPole: React.FC<DQNCartPoleProps> = ({
       {/* 4D State Vector Readout Gauges */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full text-xs font-mono">
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Position (x)</span>
+          <span className="text-[11px] text-slate-400">Position (x)</span>
           <span className="text-indigo-300 font-bold mt-0.5">{cartX.toFixed(2)}m</span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Velocity (ẋ)</span>
+          <span className="text-[11px] text-slate-400">Velocity (ẋ)</span>
           <span className="text-indigo-300 font-bold mt-0.5">{cartVelocity.toFixed(2)}m/s</span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Angle (θ)</span>
+          <span className="text-[11px] text-slate-400">Angle (θ)</span>
           <span className={`font-bold mt-0.5 ${Math.abs(angleDeg) > 10 ? 'text-rose-400' : 'text-amber-300'}`}>
             {angleDeg.toFixed(1)}°
           </span>
         </div>
 
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
-          <span className="text-[9px] text-slate-400">Angular Vel (θ̇)</span>
+          <span className="text-[11px] text-slate-400">Angular Vel (θ̇)</span>
           <span className="text-amber-300 font-bold mt-0.5">{angularVel.toFixed(2)}r/s</span>
         </div>
       </div>

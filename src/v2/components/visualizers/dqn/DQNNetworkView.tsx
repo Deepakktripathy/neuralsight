@@ -1,8 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Cpu, Dice5, Zap, Award, AlertTriangle, ArrowRight } from 'lucide-react';
-import { LayerTooltip } from '../../LayerTooltip';
-import { getArchitectureTooltip } from '../../../utils/tooltips';
+import { Cpu, Dice5, Zap, ArrowRight } from 'lucide-react';
 
 interface DQNNetworkViewProps {
   stateVector: { label: string; value: number }[];
@@ -10,7 +8,7 @@ interface DQNNetworkViewProps {
   epsilon: number;
   isExploring: boolean;
   selectedAction: string;
-  isPoorExploration: boolean;
+  isPoorExploration?: boolean;
   numHiddenLayers?: number;
   step: number;
   onInspectMath: () => void;
@@ -22,7 +20,6 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
   epsilon,
   isExploring,
   selectedAction,
-  isPoorExploration,
   numHiddenLayers = 2,
   step,
   onInspectMath
@@ -56,30 +53,30 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
           
           {/* 1. Input State Nodes */}
           <div className="flex flex-col gap-2 shrink-0">
-            <span className="text-[9px] font-mono text-slate-400 uppercase text-center mb-0.5">
+            <span className="text-[11px] font-mono text-slate-400 uppercase text-center mb-0.5">
               Input State (s)
             </span>
             <div className="flex flex-col gap-1.5">
               {stateVector.map((s, idx) => (
                 <div
                   key={idx}
-                  className="px-2 py-1 bg-slate-950 border border-indigo-500/30 rounded-lg flex items-center justify-between gap-2 shadow-inner w-24"
+                  className="px-2 py-1 bg-slate-950 border border-indigo-500/30 rounded-lg flex items-center justify-between gap-2 shadow-inner w-28"
                 >
-                  <span className="text-[9px] font-mono text-slate-400 truncate">{s.label}</span>
-                  <span className="text-[10px] font-mono font-bold text-indigo-300">{s.value.toFixed(2)}</span>
+                  <span className="text-[11px] font-mono text-slate-400 truncate">{s.label}</span>
+                  <span className="text-[11px] font-mono font-bold text-indigo-300">{s.value.toFixed(2)}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Connection Arrows 1 */}
-          <div className="flex flex-col items-center justify-center text-slate-600">
+          <div className="flex flex-col items-center justify-center text-slate-400">
             <ArrowRight className="w-4 h-4" />
           </div>
 
           {/* 2. Hidden Layers Stack */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-[9px] font-mono text-slate-400 uppercase text-center mb-0.5">
+            <span className="text-[11px] font-mono text-slate-400 uppercase text-center mb-0.5">
               Hidden Layers
             </span>
             <div className="flex items-center gap-2 p-2 bg-slate-950/70 border border-slate-800 rounded-xl shadow-inner">
@@ -103,13 +100,13 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
           </div>
 
           {/* Connection Arrows 2 */}
-          <div className="flex flex-col items-center justify-center text-slate-600">
+          <div className="flex flex-col items-center justify-center text-slate-400">
             <ArrowRight className="w-4 h-4" />
           </div>
 
           {/* 3. Output Q-Values */}
           <div id="tour-dqn-qvals" className="flex flex-col gap-1.5 flex-1 min-w-[130px]">
-            <span className="text-[9px] font-mono text-slate-400 uppercase text-center mb-0.5">
+            <span className="text-[11px] font-mono text-slate-400 uppercase text-center mb-0.5">
               Q(s, a) Outputs
             </span>
             <div className="flex flex-col gap-1.5">
@@ -129,9 +126,9 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-mono font-bold">{q.action}</span>
+                      <span className="text-[11px] font-mono font-bold">{q.action}</span>
                       {isGreedy && (
-                        <span className="text-[8px] font-mono uppercase px-1 py-0.2 rounded bg-amber-500/30 text-amber-300 font-bold">
+                        <span className="text-[10px] font-mono uppercase px-1 py-0.2 rounded bg-amber-500/30 text-amber-300 font-bold">
                           max
                         </span>
                       )}
@@ -161,10 +158,10 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
 
           <div className="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${isExploring ? 'bg-sky-400 animate-ping' : 'bg-amber-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${isExploring ? 'bg-indigo-400' : 'bg-amber-400'}`} />
               <span className="text-[11px] font-mono">
                 {isExploring ? (
-                  <span className="text-sky-300 font-semibold">
+                  <span className="text-indigo-300 font-semibold">
                     EXPLORATION (Random Exploration)
                   </span>
                 ) : (
@@ -175,7 +172,7 @@ export const DQNNetworkView: React.FC<DQNNetworkViewProps> = ({
               </span>
             </div>
 
-            <div className="text-[10px] font-mono bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-slate-300">
+            <div className="text-[11px] font-mono bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-slate-300">
               Action: <strong className="text-white">{selectedAction}</strong>
             </div>
           </div>

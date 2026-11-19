@@ -1,65 +1,39 @@
 # NeuralSight — Interactive Deep Learning Architecture & Dynamics Visualizer
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8+-3178c6.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19+-61dafb.svg)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6-646cff.svg)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38bdf8.svg)](https://tailwindcss.com/)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38bdf8.svg)](https://tailwindcss.com/)
+[![Express](https://img.shields.io/badge/Express-5-000000.svg)](https://expressjs.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An interactive, browser-native exploratory simulator designed to make deep learning architectures, tensor flows, backpropagation gradients, and adversarial game equilibria **tangible, visual, and intuitive**.
-
-The app uses a guided three-stage flow — **01. Architecture Selection → 02. Problem Setup → 03. Interactive Studio** — so you can pick a model family, define the task and dataset, then tune the simulation live without losing the mathematical context.
+An interactive, browser-native deep learning simulator and visual mental-model studio that makes neural network architectures, tensor flows, backpropagation gradients, adversarial game equilibria, and failure pathologies **tangible, interactive, and intuitive**—complete with a context-aware **Gemini AI Tutor** and **PyTorch / Keras** code export.
 
 ---
 
 ## Table of Contents
 
 1. [What is NeuralSight?](#what-is-neuralsight)
-2. [Why NeuralSight? (Philosophy & Motivation)](#why-neuralsight-philosophy--motivation)
-3. [What It Is vs. What It Is Not](#what-it-is-vs-what-it-is-not)
-4. [Visual Tour & Architectural Screenshots](#visual-tour--architectural-screenshots)
-5. [Supported Architectures](#supported-architectures)
-   - [1. Generative Adversarial Networks (GAN)](#1-generative-adversarial-networks-gan)
-   - [2. Convolutional Neural Networks (CNN)](#2-convolutional-neural-networks-cnn)
-   - [3. Transformer (Multi-Head Self-Attention)](#3-transformer-multi-head-self-attention)
-   - [4. Deep Q-Networks (DQN / Reinforcement Learning)](#4-deep-q-networks-dqn--reinforcement-learning)
-   - [5. Recurrent Neural Networks (RNN / LSTM)](#5-recurrent-neural-networks-rnn--lstm)
-   - [6. Standard Multilayer Perceptrons (MLP)](#6-standard-multilayer-perceptrons-mlp)
-   - [7. Custom Model Architect](#7-custom-model-architect)
-6. [Interactive Controls & Navigation](#interactive-controls--navigation)
-   - [3-Stage Guided Workflow](#3-stage-guided-workflow)
-   - [Top Navigation Bar](#top-navigation-bar)
-   - [Hyperparameter & Diagnostics Sidebar](#hyperparameter--diagnostics-sidebar)
-   - [Playback & Floating Metrics HUD](#playback--floating-metrics-hud)
-   - [Training Companion & Glossary](#training-companion--glossary)
+2. [What It Is vs. What It Is Not](#what-it-is-vs-what-it-is-not)
+3. [3-Stage Studio Workflow](#3-stage-studio-workflow)
+4. [Supported Architectures](#supported-architectures)
+5. [Studio Interface, Controls & Telemetry](#studio-interface-controls--telemetry)
+6. [NeuralSight AI Tutor (Server-Side Gemini SSE)](#neuralsight-ai-tutor-server-side-gemini-sse)
 7. [How to Read & Interpret Every Graphic](#how-to-read--interpret-every-graphic)
-   - [GAN: Scores, Losses & Nash Equilibrium](#gan-scores-losses--nash-equilibrium)
-   - [GAN: Batch Diversity & Mode Collapse](#gan-batch-diversity--mode-collapse)
-   - [CNN: Kernels, Stride & Feature Hierarchy](#cnn-kernels-stride--feature-hierarchy)
-   - [Transformer: Attention Matrices & Heatmaps](#transformer-attention-matrices--heatmaps)
-   - [DQN: State Grid, Q-Values & Policy Arrows](#dqn-state-grid-q-values--policy-arrows)
-   - [Live Metrics Dashboard & Overfitting Alerts](#live-metrics-dashboard--overfitting-alerts)
-8. [Code Export (PyTorch / TensorFlow / JAX)](#code-export-pytorch--tensorflow--jax)
-9. [Getting Started (Local Development)](#getting-started-local-development)
-10. [Technology Stack](#technology-stack)
+8. [Code Export (PyTorch & TensorFlow / Keras)](#code-export-pytorch--tensorflow--keras)
+9. [Visual Tour](#visual-tour)
+10. [Getting Started (Local Development)](#getting-started-local-development)
+11. [Technology Stack](#technology-stack)
 
 ---
 
 ## What is NeuralSight?
 
-**NeuralSight** is an open-source, zero-install visualization engine for neural network architectures. It renders internal mathematical operations—forward tensor activations, sliding convolutional kernels, self-attention matrices, policy Q-value fields, and adversarial minimax tug-of-wars—as live, interactive graphics.
+**NeuralSight** bridges the gap between abstract deep learning equations and opaque framework calls like `loss.backward()`:
 
-Users can modify hyperparameters (learning rate, optimizer, activation function, batch size), inject pathological failure modes (vanishing gradients, mode collapse, dead neurons), single-step through forward and backward passes, and inspect live pixel-level activations in real time.
-
----
-
-## Why NeuralSight? (Philosophy & Motivation)
-
-Deep learning education is often split between two extremes:
-1. **Abstract Mathematical Formulas:** Equations like $\min_G \max_D V(D, G)$ or $\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$ explain the theory, but fail to convey how tensors flow or why models destabilize.
-2. **Code Implementation:** Writing `loss.backward()` or `torch.nn.Conv2d` hides internal matrix multiplications behind opaque C++ binaries.
-
-**NeuralSight bridges this divide.** It gives students, engineers, and researchers an interactive microscope to watch weights adjust, gradients diminish, latent spaces morph, and adversarial networks battle toward equilibrium.
+* **Interactive Architecture Microscopes:** Inspect forward activations, 2D sliding kernels, multi-head self-attention matrices, Q-value gridworlds, recurrent unrolling, and dense MLP graphs in real time.
+* **Live Hyperparameter & Topology Tuning:** Adjust learning rates, optimizers, loss functions, layer depths, strides, attention heads, recurrent cell types, and RL discount factors while watching the canvas adapt immediately.
+* **Failure Mode Sandbox & Quick Scenarios:** Trigger textbook pathologies (Exploding/Vanishing Gradients, Overfitting, Mode Collapse, Discriminator Overpowering, Attention Collapse, Poor Exploration) via manual toggles or one-click auto-play scenario presets.
+* **Embedded AI Tutor:** Ask any ML/DL/math question—or troubleshoot your active training curve—inside a streaming side drawer grounded in your live simulation state.
 
 ---
 
@@ -67,44 +41,23 @@ Deep learning education is often split between two extremes:
 
 | What It **IS** | What It **IS NOT** |
 | :--- | :--- |
-| ✅ **An interactive visual mental model** for understanding neural network dynamics. | ❌ **A production training pipeline** for training multi-billion parameter models on clusters. |
-| ✅ **A live micro-step simulator** showing forward activation flow, loss computation, and backprop. | ❌ **A black-box dashboard** showing pre-recorded static GIFs. |
-| ✅ **A failure-mode sandbox** for testing Mode Collapse, Vanishing Gradients, and Overfitting. | ❌ **A benchmark competitor** for production frameworks like PyTorch or TensorRT. |
-| ✅ **A multi-architecture playground** covering GANs, Transformers, CNNs, RNNs, DQNs, and MLPs. | ❌ **A toy calculator**; calculations reflect genuine mathematical properties. |
+| ✅ **An interactive visual mental model** for building intuition on neural network dynamics. | ❌ **A distributed training cluster** for fitting multi-billion-parameter production models. |
+| ✅ **A live step-by-step simulator** showing forward passes, loss behavior, and backpropagation flow. | ❌ **A static slideshow** of pre-recorded animations. |
+| ✅ **A failure-mode diagnostic sandbox** for testing Mode Collapse, Vanishing/Exploding Gradients, and Overfitting. | ❌ **A replacement benchmark** for PyTorch, TensorFlow, or TensorRT runtime profiling. |
+| ✅ **A guided learning environment** combining visual canvases, KaTeX math docs, spotlight tours, and an AI Tutor. | ❌ **A pure toy UI**—visualizations reflect authentic mathematical properties and tensor shapes. |
 
 ---
 
-## Visual Tour & Architectural Screenshots
+## 3-Stage Studio Workflow
 
-### 01. Architecture Selection Hub
-Start by choosing from seven model families. Each card summarizes the architecture's domain, core mechanism, and suggested use cases before moving into setup.
+NeuralSight guides learners through a structured three-stage progression (accessible anytime from the sidebar stage indicator):
 
-![Architecture Selection Hub](assets/screenshots/architecture-hub.jpg)
-
-### 02. Problem Setup
-Define the task objective and target dataset with inline dataset previews. Hyperparameters, topology, and failure diagnostics are intentionally deferred to the Studio's live tuning controls.
-
-![Problem Setup](assets/screenshots/problem-setup.jpg)
-
-### 03. CNN Studio — Unified Convolution Pipeline
-A single-card pipeline walks through optical scanning, quantization into a 6×6 tensor, a live 3×3 sliding window, and the resulting 4×4 feature map — synchronized with the global playback transport.
-
-![CNN Unified Convolution Studio](assets/screenshots/cnn-studio.jpg)
-
-### 04. GAN Studio — Latent Walk & Nash Equilibrium
-The GAN workspace shows the Generator/Discriminator tug-of-war, live losses, and the 50/50 Nash Equilibrium bar. Switch to **Latent Walk** to morph smoothly between latent seeds.
-
-![GAN Studio with Latent Walk](assets/screenshots/gan-studio.jpg)
-
-### 05. Transformer Studio — Attention Heatmaps
-Inspect per-head attention matrices, Q/K/V projections, and a live mathematical breakdown of the softmax computation for the selected token pair.
-
-![Transformer Attention Studio](assets/screenshots/transformer-studio.jpg)
-
-### 06. Training Companion — Docs, TLDR & Glossary
-The adaptive companion drawer provides architecture-specific documentation, phase-by-phase training expectations, and a searchable glossary with KaTeX-rendered formulas.
-
-![Training Companion and Glossary](assets/screenshots/training-companion.jpg)
+1. **`01. Arch` — Architecture Selection Hub:**
+   Browse 7 neural network paradigms (`Standard NN`, `CNN`, `Transformer`, `RNN`, `GAN`, `DQN`, and `Custom Model`) with domain tags, core mechanisms, and quick access to the **Glossary**.
+2. **`02. Config` — Task, Dataset & Hyperparameter Setup:**
+   Choose **Train** or **Inference** mode, pick a task objective and dataset/environment (with an interactive **Dataset Preview** inspector), configure starting hyperparameters, or drop an `.onnx` / `.json` graph for **Custom Model** inspection.
+3. **`03. Studio` — Interactive Simulation Studio:**
+   Experiment on the live dot-grid canvas with the collapsible left tuning sidebar, top **Learn** menu (`Docs, TLDR & Glossary`, `Canvas Spotlight Tour`, `Quick-Start Guide`), **AI Tutor** drawer, **Code** export modal, bottom **Execution & Telemetry Dashboard (`MetricsHUD`)**, and micro-step playback controls.
 
 ---
 
@@ -113,240 +66,122 @@ The adaptive companion drawer provides architecture-specific documentation, phas
 ### 1. Generative Adversarial Networks (GAN)
 * **Mathematical Core:** $\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z)))]$
 * **Visual Components:**
-  * **Latent Noise Vector ($z$):** 8-dimensional Gaussian noise vectors with interactive values.
-  * **Generator $G(z)$:** Transposed convolution stages ($1\times1 \to 3\times3 \to 6\times6 \to 12\times12$ pixels).
-  * **Synthetic Output:** 12×12 pixel canvas with live per-pixel coordinates and activation values.
-  * **Discriminator $D(x)$:** Strided Conv2D layers ($12\times12 \to 6\times6 \to 3\times3$) with Sigmoid classification.
-  * **Adversarial Tug-of-War Bar:** Live game balance tracker showing Nash Equilibrium (50% / 50%).
-  * **Batch Diversity Grid:** 2×2 multi-seed grid ($z_1, z_2, z_3, z_4$) with entropy indicators.
-  * **Latent Walk:** Smooth interpolation between two latent seeds ($z_A \leftrightarrow z_B$) to explore how individual generator features morph.
+  * **Latent Noise Vector ($z$):** Interactive Gaussian latent vector with Inference-mode latent morphing.
+  * **Generator $G(z)$ & Discriminator $D(x)$:** Progressive upsampling vs. strided discrimination pipeline.
+  * **Adversarial Tug-of-War Balance Bar:** Live tracker around the 50/50 Nash Equilibrium ($D(x) \approx D(G(z)) \approx 0.50$).
+  * **Batch Diversity Grid:** 2×2 multi-seed sample grid revealing healthy diversity vs. Mode Collapse.
 
 ### 2. Convolutional Neural Networks (CNN)
 * **Mathematical Core:** $(I * K)(i, j) = \sum_m \sum_n I(i-m, j-n) K(m, n)$
 * **Visual Components:**
-  * **Unified Optical Scan & Convolution Pipeline:** A single card walks through raw optical scanning, quantization into a 6×6 tensor, a live 3×3 sliding window, and the resulting 4×4 feature map — synchronized with the global Play / Step / Reset transport.
-  * **Input Layer:** 2D pixel matrices representing input datasets (MNIST, CIFAR, Fashion).
-  * **Sliding Convolutional Kernels:** Animated filters highlighting local receptive fields and computing live dot products.
-  * **Feature Maps:** Intermediate activation channels detecting edges, contours, and high-level textures.
-  * **Max Pooling:** Spatial downsampling operations preserving peak activations.
-  * **Dense Classification Head:** Flattened feature vectors connected to softmax class probabilities.
+  * **Optical Input Sensor:** Pixel grid across MNIST Digits, CIFAR-10 Objects, or Chest X-Rays.
+  * **Sliding Kernel & Feature Maps:** Configurable Conv Depth (`1–3` layers), Stride (`1–3 px`), and Pooling (`Max` or `Average`).
+  * **Classification Output:** Flattened feature activations feeding class probability outputs.
 
 ### 3. Transformer (Multi-Head Self-Attention)
 * **Mathematical Core:** $\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
 * **Visual Components:**
-  * **Token Embeddings & Positional Encodings:** Continuous vector representations of input sequences.
-  * **Query, Key, Value Projections ($Q, K, V$):** Linear projections feeding the attention engine.
-  * **Interactive Attention Matrix:** Full $N \times N$ token attention heatmap showing token-to-token weights.
-  * **Connecting Attention Beams:** Visual rays linking contextual tokens based on cross-attention intensity.
+  * **Token Embeddings & Positional Encodings:** Sequence inputs across translation, sentiment, market candles, and more.
+  * **Multi-Head Switcher (`1`, `2`, or `4` Heads):** Inspect distinct syntactic, positional, or semantic attention subspaces.
+  * **Attention Matrix & Beams:** Interactive $N \times N$ heatmap and connecting weight beams.
 
 ### 4. Deep Q-Networks (DQN / Reinforcement Learning)
-* **Mathematical Core:** $Q(s, a) \leftarrow Q(s, a) + \alpha [r + \gamma \max_{a'} Q(s', a') - Q(s, a)]$
+* **Mathematical Core:** $Q(s, a) \leftarrow Q(s, a) + \alpha \big[r + \gamma \max_{a'} Q(s', a') - Q(s, a)\big]$
 * **Visual Components:**
-  * **Gridworld Environment:** Interactive 5×5 spatial grid containing the agent, obstacles, and goals.
-  * **State Vector:** Continuous coordinates $(x, y)$ fed into the Q-network.
-  * **Q-Value Output Heads:** Real-time numerical valuations for actions: **Up, Down, Left, Right**.
-  * **Exploration vs. Exploitation:** $\epsilon$-greedy action selection visualization.
+  * **Interactive Gridworld:** Live agent navigation with obstacles, penalties, and goal rewards.
+  * **Q-Value Action Heads & Policy Arrows:** Live **Up / Down / Left / Right** action valuations and greedy policy arrows.
+  * **RL Knobs:** Toggle **Exploration Schedule** (`Fast (Greedy)`, `Standard`, `High Exploration`) and **Discount Factor ($\gamma$)** (`0.50`, `0.90`, `0.99`).
 
-### 5. Recurrent Neural Networks (RNN / LSTM)
+### 5. Recurrent Neural Networks (RNN / LSTM / GRU)
 * **Mathematical Core:** $h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h)$
 * **Visual Components:**
-  * **Unrolled Time Steps:** Temporal visualization of sequence processing from step $t-1$ to $t+n$.
-  * **Hidden State Memory ($h_t$):** Visual memory loop carrying contextual information forward.
-  * **Vanishing Gradient Indicator:** Dynamic color fading highlighting gradient decay over long sequences.
+  * **Unrolled Temporal Timeline:** Configurable unroll horizon (`3`, `5`, or `8` steps).
+  * **Cell Type Selector:** Switch between `Vanilla RNN`, `LSTM`, and `GRU` to observe gating vs. gradient decay across early time steps.
 
-### 6. Standard Multilayer Perceptrons (MLP)
-* **Mathematical Core:** $a^{(l)} = \sigma(W^{(l)} a^{(l-1)} + b^{(l)})$
+### 6. Standard Neural Networks (MLP)
+* **Mathematical Core:** $a^{(l)} = \sigma\big(W^{(l)} a^{(l-1)} + b^{(l)}\big)$
 * **Visual Components:**
-  * **Fully Connected Layers:** Dense connection graphs between input, hidden, and output neurons.
-  * **Synaptic Weight Lines:** Color-coded connection lines (cyan for positive weights, rose for negative).
-  * **Activation Thresholds:** Interactive neuron nodes showing raw sum $z$ and post-activation $a$.
+  * **Configurable Dense Topology:** Adjust **Hidden Layers** (`1–3`) and **Neurons / Layer** (`4`, `8`, `16`).
+  * **Synaptic Weight Graph & Activations:** Live forward signals, weight polarity, and gradient flow.
 
 ### 7. Custom Model Architect
-* Build custom network topologies on the fly.
-* Add or remove layers, alter node counts, select custom activation functions, and evaluate the resulting parameter count and computational graph.
+* **Graph Inspector:** Upload `.onnx` (parsed client-side via `onnx-proto`) or `.json` model definitions to render interactive DAG node graphs with **React Flow** and **Dagre** auto-layout.
 
 ---
 
-## Interactive Controls & Navigation
+## Studio Interface, Controls & Telemetry
 
-### 3-Stage Guided Workflow
+### Top Studio Header
+* **Sidebar Toggle & Active Model Indicator:** Collapse/expand the left configuration drawer and view the active architecture title.
+* **`Learn` Dropdown:**
+  * **Docs, TLDR & Glossary:** Architecture-specific mathematical guides and an interactive ML/DL concept dictionary.
+  * **Canvas Spotlight Tour:** Guided step-by-step highlight overlay walking through key panels on the active canvas.
+  * **Quick-Start Guide:** Reopen the introductory onboarding tour anytime.
+* **`AI Tutor` Button:** Opens the slide-over NeuralSight AI Tutor drawer (maintains a separate conversation thread per architecture).
+* **`Code` Button:** Opens the native **PyTorch** and **TensorFlow / Keras** script generator.
 
-NeuralSight uses progressive disclosure to keep the interface focused at every step:
+### Left Inspector Sidebar
+1. **Stage Stepper & Mode Toggle:** Jump back to `01. Arch` or `02. Config`, or switch between **Train** and **Inference** modes.
+2. **Active Setup:** Displays the current Task Objective and Dataset/Environment, with **Preview** and **Edit setup** buttons.
+3. **Hyperparameters:**
+   * **Learning Rate:** `0.1`, `0.01`, `0.001`, `0.0001`
+   * **Optimizer:** `Adam`, `SGD`, `RMSprop`
+   * **Loss Function:** `Cross-Entropy`, `MSE`, `Huber`
+   * **Epochs / Episodes (`10–500`)** & **Batch Size (`8–256`)**
+4. **Model Topology (Dynamic per Architecture):** Adjusts structural knobs specific to the active model (ignored for GAN and Custom Model).
+5. **Inject Failure Mode:**
+   * **Quick Scenarios:** One-click presets (e.g., *Overfitting curve*, *Vanishing gradients*, *Mode collapse*, *Attention collapse*) that apply a curated hyperparameter patch, reset to step `0`, and **auto-play immediately**.
+   * **Manual Failure Modes:** Architecture-appropriate toggles (`None`, `Exploding Gradients`, `Vanishing Gradients`, `Overfitting`, `Mode Collapse`, `Discriminator Overpowering`, `Attention Collapse`, `Poor Exploration`) that keep your current hyperparameters intact and stay paused until you press Play.
 
-1. **01. Architecture Selection Hub:** Browse all seven model families in a responsive card grid, each with its domain tag, key mechanism, and suggested use cases. A quick-launch shortcut skips straight into the Studio.
-2. **02. Problem Setup:** Define the task objective and target dataset/distribution, preview dataset samples, and hand off to the Studio's live tuning controls.
-3. **03. Interactive Studio:** The full simulation workspace. A sidebar stage switcher (`01. Models · 02. Setup · 03. Studio`) keeps navigation authoritative, while the header always shows the active architecture acronym and full name.
-
-Shared modals — Dataset Preview, Training Companion, Quick-Start Guide, and Code Export — remain available across stages.
-
-### Top Navigation Bar
-
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ 🧠 NeuralSight │ 01. Architecture → 02. Setup → 03. Studio │ Code · Tour · Info │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
-
-* **Architecture Selector (Stage 1):** Instantly switches the simulation between GAN, CNN, Transformer, RNN, DQN, Standard NN, or Custom Model.
-* **Problem Setup & Dataset Preview (Stage 2):** Choose between canonical benchmark datasets (e.g., CelebA Faces, MNIST Digits, Fashion, Synthetic Gaussian Clusters). Clicking **Preview** opens the Dataset Inspector displaying sample distributions.
-* **Studio Header (Stage 3):** Displays the active model title and full name, with a sidebar toggle (`PanelLeftOpen`) for desktop and mobile layouts.
-* **Quick-Start Guide (`HelpCircle`):** Opens the guided Welcome Tour covering the core concepts of the current architecture.
-* **Canvas Tour (`Eye`):** Launches an interactive step-by-step spotlight tour that highlights key modules directly on the live canvas.
-* **Docs & Guide (`BookOpen`):** Opens the unified Training Companion with architecture documentation, training TLDR notes, and a searchable glossary.
-* **Code Export (`Code2`):** Generates copy-pasteable, production-ready implementation scripts in PyTorch, TensorFlow, or JAX.
-* **Always-on training:** There is no separate Inference toggle — every simulation runs a full forward/backward cycle with live metrics, failure-mode diagnostics, and weight updates.
-
----
-
-### Hyperparameter & Diagnostics Sidebar
-
-The collapsible Studio sidebar opens with the `01. Models · 02. Setup · 03. Studio` stage switcher and a one-click **`{Architecture} Glossary & TLDR`** launcher, followed by live tuning sections for the active model.
-
-#### 1. Core Training Dynamics
-
-| Control | Description | Effect on Simulation |
-| :--- | :--- | :--- |
-| **Learning Rate ($\eta$)** | Step size for gradient descent (e.g., 0.001 to 0.1). | Higher values cause rapid, oscillating convergence; low values cause slow, steady learning. |
-| **Epochs & Batch Size** | Number of passes over dataset and sample count per step. | Controls update frequency and gradient smoothness. |
-| **Optimizer** | Gradient algorithm: **Adam**, **SGD**, **RMSprop**. | Adam includes adaptive momentum; SGD exhibits raw stochastic oscillation. |
-| **Activation Function** | **ReLU**, **LeakyReLU**, **Sigmoid**, **Tanh**, **GELU**. | Governs non-linearity and susceptibility to vanishing or exploding gradients. |
-| **Failure Mode Sandbox** | Simulates real-world training bugs on demand: |
-| ↳ *Mode Collapse* | Generator collapses into outputting a single repetitive sample. | Visual output freezes; batch diversity drops to 0.0. |
-| ↳ *Vanishing Gradients* | Discriminator or downstream layers saturate; gradients vanish. | Generator weight updates freeze; images stay as static noise. |
-| ↳ *Exploding Gradients* | Gradient multiplications overflow numeric range. | Activations and weights produce `NaN` values. |
-| ↳ *Overfitting* | Model memorizes training set without generalizing. | Training loss drops to near-zero while validation loss spikes. |
-
-#### 2. Model Topology & Structural Knobs (Dynamic per Architecture)
-
-When switching between neural network architectures, the sidebar dynamically adapts with architecture-specific topological controls that directly alter the underlying mathematical models and visual layouts:
-
-| Architecture | Structural Control | Options | Real Mathematical & Visual Impact |
-| :--- | :--- | :--- | :--- |
-| **Transformer** | **Attention Heads** | `1`, `2`, `4` Heads | Governs the number of independent projection subspaces ($W^Q_i, W^K_i, W^V_i$). 1 head shows a unified attention map; 4 heads splits attention into 4 specialized linguistic roles (Syntactic, Sentiment, Positional, Coreference) with a live multi-head switcher. |
-| **CNN** | **Conv Depth** | `1`, `2`, `3` Layers | Rebuilds the forward feature extraction pipeline. Adding convolutional stages updates the 3D tensor hierarchy, receptive field depth, and intermediate channel representations. |
-| **CNN** | **Pooling Operation** | `Max`, `Average` | Changes the spatial downsampling math: **Max Pooling** selects the peak activation $\max(x_{ij})$ to preserve sharp edges; **Average Pooling** computes the mean $\frac{1}{|R|}\sum x_{ij}$ to produce smoothed regional features. |
-| **RNN** | **Cell Architecture** | `Vanilla RNN`, `LSTM`, `GRU` | Selects the gating equations for recurrent memory updates (simple tanh recurrent update vs. additive constant error carousels with input, forget, and output gates). |
-| **RNN** | **Unrolled Steps** | `3`, `5`, `8` Steps | Controls the Backpropagation Through Time (BPTT) timeline. Expanding to 8 steps clearly reveals exponential gradient decay ($\le 0.25^T$) in the vanishing gradient failure mode. |
-| **DQN (RL)** | **Exploration Schedule** | `Standard`, `Fast (Greedy)`, `High Exploration` | Controls the $\epsilon$-decay rate in $\epsilon$-greedy action selection ($P(\text{random}) = \epsilon$ vs. $P(\arg\max Q) = 1-\epsilon$). Fast decays in ~40 steps; High Exploration keeps $\epsilon \ge 0.20$ to avoid local minima. |
-| **DQN (RL)** | **Discount Factor ($\gamma$)** | `0.50`, `0.90`, `0.99` | Plugs directly into the **Bellman Optimality Target**: $y = r + \gamma \max_{a'} Q(s', a')$. High $\gamma=0.99$ propagates long-term state values across distant tiles; low $\gamma=0.50$ produces steep, myopic dropoffs. |
-| **Standard NN** | **Hidden Layers & Width** | `1-3` Layers, `4, 8, 16` Neurons | Dynamically adjusts dense weight matrices $W \in \mathbb{R}^{d_{l} \times d_{l-1}}$, drawing updated SVG synaptic connection lines and matrix products. |
+### Execution & Telemetry Dashboard (`MetricsHUD`) & Playback
+* **Collapsed Telemetry Bar:** Floating summary bar above the playback dock showing live Epoch/Phase status, active failure warning icon, latest metrics (`Loss` / `Acc` or GAN `L_G` / `L_D` / `D(G)`) with **green/rose directional trend arrows**, and an **Expand** button.
+* **Expanded Dashboard:** Reveals dual **Recharts** trend charts (Loss & Validation Loss vs. Accuracy / Adversarial Scores), overfitting/memorization alert banners, and a bottom **Collapse** bar positioned right above the playback controls.
+* **Playback Controls:** Play/Pause, Step Backward, Step Forward, Reset, and simulation speed (`0.25×` to `4×`).
 
 ---
 
-### Playback & Floating Metrics HUD
+## NeuralSight AI Tutor (Server-Side Gemini SSE)
 
-* **Play / Pause (`Space`):** Starts or pauses live continuous training loops.
-* **Step Forward (`Step`):** Advances exactly one micro-step (e.g., single forward pass, single backpropagation update).
-* **Back Step:** Rewinds one recorded micro-step to inspect the previous state.
-* **Reset:** Reinitializes all weights, biases, and latent vectors with fresh random seed distributions.
-* **Speed Scrubber:** Adjusts simulation speed between `0.25x` (slow-motion tensor analysis) and `4.0x` (rapid convergence).
-* **Floating Metrics HUD:** A compact corner card shows live `Loss`, `Accuracy`, `L_G`, `L_D`, and `D(G(z))` values. Expand it with one click to open the full interactive metrics chart without permanently docking vertical space.
-* **Step Status Pill:** Floating pill at the canvas base explaining the exact current operation (e.g., `EPOCH 2/10 • D_STEP • Discriminator evaluating fake batch`).
-  * *Minimize button:* Collapses the pill into a compact chip.
-  * *Hover transparency:* Hovering over the pill turns it 80% transparent to inspect graphics beneath.
+The AI Tutor is backed by an Express endpoint (`POST /api/chat` in `server.ts`) using the `@google/genai` SDK and Server-Sent Events (SSE) for real-time token streaming and KaTeX math rendering:
 
----
-
-### Training Companion & Glossary
-
-The **Docs & Guide** drawer adapts to the active architecture and provides three tabs:
-
-* **Architecture Docs:** Stage-by-stage documentation of the selected model's forward and backward computations.
-* **Training TLDR:** What to expect during training — early phase, convergence, and failure-mode watch-outs.
-* **Glossary:** A searchable dictionary spanning architecture-specific terms and universal training fundamentals (`Core Metrics`, `Optimization`, `Diagnostics`), including inline mathematical formulas.
-
-Launch it from the sidebar's **`{Architecture} Glossary & TLDR`** button, the Studio header **Docs & Guide** button, or the floating Metrics HUD.
+* **Unified Adaptive Routing:** Automatically infers question intent behind the scenes (`tutor`, `debugger`, `math`, or `quick`) without requiring manual persona switching.
+* **Live Simulation Grounding:** Automatically attaches a snapshot of your active architecture, mode, dataset, current step, hyperparameters, latest metrics, and recent loss/accuracy trajectory.
+* **Free-Tier Model Failover & Context Handover:** Routes across `gemini-4-hydrogen` and `gemini-3.1-flash-lite` with automatic retry/failover on transient `429`/`503`/network errors while preserving full conversation history.
 
 ---
 
 ## How to Read & Interpret Every Graphic
 
-### GAN: Scores, Losses & Nash Equilibrium
-
-The GAN dashboard visualizes an active zero-sum game between Generator $G$ and Discriminator $D$:
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  Generator Fools D (D(G(z)) → 1.0)  ★ Nash Eq (50/50) ★  D Catches Fakes (D(x) → 1.0) │
-│  ███████████████████████████████████|████████████████████████████████  │
-│  G: 48%                                                        D: 52%  │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-1. **$D(x_{\text{real}})$ (Real Score):** Probability the Discriminator assigns to a real training image. Target for $D$ is $1.0$ (100%).
-2. **$D(G(z)_{\text{fake}})$ (Fake Score):** Probability the Discriminator assigns to a synthetic image.
-   * Discriminator wants this at **0%** (reject all fakes).
-   * Generator wants this at **100%** (fool the discriminator).
-3. **The 50/50 Nash Equilibrium:**
-   * When training is optimal, the Generator's distribution matches the real dataset: $p_g = p_{\text{data}}$.
-   * At this balance point, the Discriminator can do no better than random guessing (like flipping a coin):
-     $$D(x) = D(G(z)) = 0.50 \quad (50\%)$$
-4. **Tug-of-War Balance Bar:**
-   * Amber center pin denotes the 50/50 equilibrium point.
-   * If violet bar expands right: Generator is winning (Discriminator is baffled).
-   * If emerald bar expands left: Discriminator is winning (catching fakes easily).
+* **GAN Equilibrium:** Healthy training oscillates near $D(x) \approx 0.50$ and $D(G(z)) \approx 0.50$, with $L_G$ and $L_D$ hovering near $\ln 2 \approx 0.693$. In **Mode Collapse**, the 2×2 batch grid repeats nearly identical outputs.
+* **CNN Feature Hierarchy:** Watch low-level edge detectors in early conv layers combine into higher-level shapes before spatial pooling downsamples the maps.
+* **Transformer Attention:** Each row of the attention matrix sums to `1.0` via Softmax; brighter cells highlight stronger token-to-token context routing. In **Attention Collapse**, weights flatten into a uniform `1/N` blur.
+* **Metrics Trend Arrows & Overfitting Alerts:** Green/rose directional arrows indicate step-over-step improvement vs. degradation. When Validation Loss diverges sharply from Training Loss, the HUD flags memorization.
 
 ---
 
-### GAN: Batch Diversity & Mode Collapse
+## Code Export (PyTorch & TensorFlow / Keras)
 
-Toggle the view above the synthetic sample between **Single Focus** and **Batch Grid (2×2)**:
+Click **`Code`** in the Studio header to generate runnable Python training scripts reflecting your current architecture and hyperparameters:
 
-* **Healthy Generative Training:** All 4 tiles (generated from separate latent vectors $z_1, z_2, z_3, z_4$) show distinct faces or digits with varying angles and features. Diversity metric registers $> 0.80$.
-* **Mode Collapse Failure:** All 4 tiles produce the identical face or number. The Generator has discovered a single loophole that tricks $D$ and stopped exploring the latent space.
-
----
-
-### CNN: Kernels, Stride & Feature Hierarchy
-
-1. **Input Grid (12×12):** Raw pixel intensities normalized between 0.0 and 1.0.
-2. **Kernel Filter Window (3×3 / 6×6):** Colored bounding box sliding across the image computing dot products.
-3. **Feature Map Channels:**
-   * Early layers detect low-level primitives: vertical edges, diagonal lines, corners.
-   * Deep layers aggregate primitives into semantic parts: loops, intersections, textures.
-4. **Max Pooling (2×2, Stride 2):** Takes the maximum value in each $2\times2$ neighborhood, halving the spatial resolution while granting translational invariance.
+* **PyTorch:** `torch.nn.Module` definition, loss criterion, optimizer (`Adam`, `SGD`, `RMSprop`), and training loop.
+* **TensorFlow / Keras:** `tf.keras` model setup compiled with matching optimizer, loss, and training parameters.
+* Copy directly to clipboard or download as `neuralsight_<architecture>.py`.
 
 ---
 
-### Transformer: Attention Matrices & Heatmaps
+## Visual Tour
 
-* **Rows & Columns:** Represent input sequence tokens (e.g., words in a sentence).
-* **Cell Brightness:** Indicates the normalized attention weight $\alpha_{ij} \in [0, 1]$. A bright intersection at Row "bank" and Column "river" indicates the model is using "river" to contextualize the polysemous word "bank".
-* **Softmax Distribution:** Every row sums to exactly 1.0.
-* **Attention Heads:** Switch between multiple heads to observe how Head 1 tracks syntactic dependencies (verb-subject) while Head 2 tracks coreference (pronoun-noun).
+### Generative Adversarial Network (GAN) Visualizer
+![GAN Architecture Visualizer](docs/screenshots/gan_visualizer_overview.jpg)
 
----
+### Multi-Architecture Deep Learning Suite
+![Multi-Architecture Showcase](docs/screenshots/multi_architecture_showcase.jpg)
 
-### DQN: State Grid, Q-Values & Policy Arrows
+### Hyperparameters, Diagnostics & Playback Engine
+![Controls and Diagnostics](docs/screenshots/controls_and_diagnostics.jpg)
 
-* **Agent Position ($s$):** Represented by the active agent icon on the 5×5 gridworld.
-* **Q-Value Heatmap Overlay:** Each neighboring cell displays its expected cumulative future reward $Q(s, a)$.
-* **Directional Arrows:** The brightest arrow points in the direction of $\arg\max_a Q(s, a)$ (the greedy optimal action).
-* **Reward Feedback ($r$):** Reaching target yields $+1.0$; hitting walls or traps triggers $-1.0$ penalty.
-
----
-
-### Live Metrics Dashboard & Overfitting Alerts
-
-* **Floating Metrics HUD:** Starts as a compact glassmorphism card in the bottom-right corner; click to expand the full chart and inspect loss/accuracy trajectories over time.
-* **Loss Curve ($\mathcal{L}$):**
-  * Standard Supervised Models: Monotonically decreasing curve toward zero.
-  * GAN Models: Oscillating curves where $\mathcal{L}_G$ and $\mathcal{L}_D$ fluctuate in dynamic balance around $\ln 2 \approx 0.693$.
-* **Memorization / Overfitting Alert:** When the gap between Training Loss and Validation Loss exceeds a critical threshold, a high-contrast warning banner appears on the chart:
-  ```
-  ⚠️ MEMORIZATION DETECTED
-  Train Loss: 0.0421  |  Val Loss: 0.8912
-  ```
-
----
-
-## Code Export (PyTorch / TensorFlow / JAX)
-
-Clicking the **Export Code** (`Code2`) button in the top navigation bar opens an interactive modal that translates your current architecture, layer configurations, and chosen hyperparameters into clean, runnable Python scripts:
-
-* **PyTorch:** Clean `torch.nn.Module` classes with `DataLoader`, `Adam` optimizer, and standard training loops.
-* **TensorFlow / Keras:** `tf.keras.Sequential` or Functional API pipelines ready for `model.fit()`.
-* **JAX / Flax:** Functional state architectures using `linen` and `optax`.
+### Inference Mode, Latent Manifold Morphing & Diversity Inspection
+![Latent Morph and Diversity](docs/screenshots/latent_morph_and_diversity.jpg)
 
 ---
 
@@ -355,43 +190,46 @@ Clicking the **Export Code** (`Code2`) button in the top navigation bar opens an
 ### Prerequisites
 * **Node.js:** v18.0.0 or higher
 * **npm:** v9.0.0 or higher
+* **Gemini API Key** *(optional for visualizations, required for the AI Tutor)*
 
-### Installation
+### Installation & Commands
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Deepakktripathy/neuralsight.git
-   cd neuralsight
-   ```
-
-2. **Install dependencies:**
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Start the local development server:**
+2. **Configure environment variables:**
+   Copy `.env.example` to `.env` and set your key:
+   ```bash
+   GEMINI_API_KEY="your-gemini-api-key"
+   ```
+
+3. **Start the full-stack development server (Express + Vite middleware on port 3000):**
    ```bash
    npm run dev
    ```
-   Open your browser and navigate to `http://localhost:3000`.
+   Open `http://localhost:3000` in your browser.
 
-4. **Build for production:**
+4. **Type-check and build for production:**
    ```bash
+   npm run lint
    npm run build
    ```
-   The static production bundle will be generated in `dist/`.
+
+5. **Run the production server:**
+   ```bash
+   npm run start
+   ```
 
 ---
 
 ## Technology Stack
 
-* **Framework:** [React 19](https://react.dev/) + [TypeScript 5.8](https://www.typescriptlang.org/)
-* **Build Tool:** [Vite 6](https://vitejs.dev/)
-* **Styling & UI:** [Tailwind CSS 4](https://tailwindcss.com/)
-* **Vector Icons:** [Lucide React](https://lucide.dev/)
-* **Animation & Transitions:** [Motion](https://motion.dev/)
-* **Charts & Analytics:** [Recharts](https://recharts.org/)
-* **Graph Layout:** [Dagre](https://github.com/dagrejs/dagre) + [React Flow](https://reactflow.dev/)
+* **Frontend:** [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite 6](https://vitejs.dev/)
+* **Backend & Streaming:** [Express 5](https://expressjs.com/) + [tsx](https://tsx.is/) + [`@google/genai`](https://www.npmjs.com/package/@google/genai)
+* **Styling & UI Primitives:** [Tailwind CSS v4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/) + [Lucide React](https://lucide.dev/) + [Motion](https://motion.dev/)
+* **Visualization & Math:** [Recharts](https://recharts.org/) + [React Flow](https://reactflow.dev/) + [Dagre](https://github.com/dagrejs/dagre) + [KaTeX](https://katex.org/) + [`onnx-proto`](https://www.npmjs.com/package/onnx-proto)
 
 ---
 

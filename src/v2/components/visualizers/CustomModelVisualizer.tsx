@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Upload, X, Settings2, Code, Database, Box, Search, 
-  Layers, Plus, Trash2, Cpu, RotateCcw, Copy, Check, Sliders, ChevronDown,
+  Layers, Plus, Trash2, Cpu, Check, Sliders, ChevronDown,
   ArrowLeft, ArrowRight, UploadCloud, Sparkles, AlertCircle
 } from 'lucide-react';
 import { 
@@ -145,15 +145,15 @@ const ModelNode = ({ data }: { data: { nodeData: NodeData; isSelected: boolean; 
   
   const bgColor = isInput || isOutput 
     ? 'bg-emerald-950/50' 
-    : (nodeData.type.includes('Conv') ? 'bg-indigo-950/50' : (nodeData.type === 'Dense' ? 'bg-violet-950/50' : 'bg-slate-900/90'));
+    : (nodeData.type.includes('Conv') ? 'bg-indigo-950/50' : (nodeData.type === 'Dense' ? 'bg-amber-950/40' : 'bg-slate-900/90'));
   
   const borderColor = isInput || isOutput 
     ? 'border-emerald-500/40' 
-    : (nodeData.type.includes('Conv') ? 'border-indigo-500/40' : (nodeData.type === 'Dense' ? 'border-violet-500/40' : 'border-slate-700/70'));
+    : (nodeData.type.includes('Conv') ? 'border-indigo-500/40' : (nodeData.type === 'Dense' ? 'border-amber-500/40' : 'border-slate-700/70'));
   
   const textColor = isInput || isOutput 
     ? 'text-emerald-400' 
-    : (nodeData.type.includes('Conv') ? 'text-indigo-400' : (nodeData.type === 'Dense' ? 'text-violet-400' : 'text-slate-300'));
+    : (nodeData.type.includes('Conv') ? 'text-indigo-400' : (nodeData.type === 'Dense' ? 'text-amber-400' : 'text-slate-300'));
 
   const detailBadge = useMemo(() => {
     if (nodeData.type === 'Dense') return `${nodeData.properties.units || 64} neurons`;
@@ -171,11 +171,11 @@ const ModelNode = ({ data }: { data: { nodeData: NodeData; isSelected: boolean; 
       
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1.5">
-          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${textColor}`}>
+          <span className={`text-[11px] font-mono font-bold uppercase tracking-wider ${textColor}`}>
             {nodeData.type}
           </span>
           {paramsCount !== undefined && paramsCount > 0 && (
-            <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               {paramsCount > 1000 ? `${(paramsCount / 1000).toFixed(1)}k` : paramsCount}p
             </span>
           )}
@@ -186,7 +186,7 @@ const ModelNode = ({ data }: { data: { nodeData: NodeData; isSelected: boolean; 
         </span>
 
         {detailBadge && (
-          <span className="text-[9.5px] font-mono text-slate-400 bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800 mt-0.5">
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800 mt-0.5">
             {detailBadge}
           </span>
         )}
@@ -632,7 +632,9 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
               <div className="flex-1">{uploadError}</div>
               <button 
+                type="button"
                 onClick={() => setUploadError(null)}
+                aria-label="Dismiss upload error"
                 className="text-slate-400 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
@@ -711,10 +713,10 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                           {key === 'mlp' ? 'Feedforward' : key === 'convnet' ? 'Vision' : 'Residual'}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[11px] font-mono text-slate-400">
                           {tmpl.graph.length} layers
                         </span>
                       </div>
@@ -790,7 +792,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
 
               {isPresetMenuOpen && (
                 <div className="absolute left-0 top-full mt-1.5 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">
                     Topology Templates
                   </div>
                   {Object.entries(PRESET_TEMPLATES).map(([key, t]) => (
@@ -804,7 +806,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                       }`}
                     >
                       <span className="font-semibold">{t.name}</span>
-                      <span className="text-[10px] text-slate-400 leading-tight mt-0.5">{t.description}</span>
+                      <span className="text-[11px] text-slate-400 leading-tight mt-0.5">{t.description}</span>
                     </button>
                   ))}
                 </div>
@@ -825,7 +827,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
 
               {isAddMenuOpen && (
                 <div className="absolute left-0 top-full mt-1.5 w-52 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">
                     Insert Layer After Active Node
                   </div>
                   {[
@@ -843,7 +845,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                       className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-between"
                     >
                       <span className="font-medium">{l.label}</span>
-                      <span className="text-[9px] text-slate-500">{l.desc}</span>
+                      <span className="text-[11px] text-slate-400">{l.desc}</span>
                     </button>
                   ))}
                 </div>
@@ -859,9 +861,11 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
               onChange={handleFileUpload} 
             />
             <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-700"
               title="Upload existing ONNX or JSON architecture"
+              aria-label="Upload ONNX or JSON architecture"
             >
               <Upload className="w-3.5 h-3.5" />
             </button>
@@ -873,11 +877,11 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
             {/* Live Parameter Evaluation Badge */}
             <div className="flex items-center gap-2 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 text-xs font-mono">
               <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              <span className="text-slate-400 text-[10.5px]">Parameters:</span>
+              <span className="text-slate-400 text-[11px]">Parameters:</span>
               <span className="text-emerald-400 font-bold">
                 {totalParams > 0 ? totalParams.toLocaleString() : 'Computed dynamically'}
               </span>
-              <span className="text-slate-500 text-[10px]">({activeGraph.length} nodes)</span>
+              <span className="text-slate-400 text-[11px]">({activeGraph.length} nodes)</span>
             </div>
 
             {/* Export Code / JSON */}
@@ -958,9 +962,11 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                   Layer Architect & Inspector
                 </h3>
                 <button 
+                  type="button"
                   onClick={() => setSelectedNodeId(null)}
-                  className="p-1 rounded-md hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="p-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
                   title="Close inspector"
+                  aria-label="Close layer inspector"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -974,7 +980,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                     <div className={`p-2.5 rounded-lg ${
                       selectedNodeData.type === 'Input' ? 'bg-emerald-500/10 text-emerald-400' :
                       selectedNodeData.type.includes('Conv') ? 'bg-indigo-500/10 text-indigo-400' : 
-                      selectedNodeData.type === 'Dense' ? 'bg-violet-500/10 text-violet-400' : 'bg-slate-800 text-slate-300'
+                      selectedNodeData.type === 'Dense' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-800 text-slate-300'
                     }`}>
                       <Box className="w-4 h-4" />
                     </div>
@@ -987,9 +993,11 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                   {/* Remove Layer Button */}
                   {selectedNodeData.type !== 'Input' && (
                     <button
+                      type="button"
                       onClick={() => handleRemoveLayer(selectedNodeData.id)}
                       className="p-1.5 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 transition-colors"
                       title="Delete layer and auto-bridge connections"
+                      aria-label="Delete selected layer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -998,7 +1006,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
 
                 {/* Interactive Hyperparameters / Properties Editor */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                     <Settings2 className="w-3 h-3" /> Configurable Layer Attributes
                   </h4>
 
@@ -1011,6 +1019,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                       </div>
                       <input 
                         type="range"
+                        aria-label="Neuron Units"
                         min={4}
                         max={512}
                         step={4}
@@ -1018,7 +1027,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                         onChange={e => handleUpdateProperty('units', Number(e.target.value))}
                         className="w-full accent-indigo-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
                       />
-                      <div className="flex justify-between text-[9px] font-mono text-slate-500">
+                      <div className="flex justify-between text-[11px] font-mono text-slate-400">
                         <span>4</span>
                         <span>128</span>
                         <span>256</span>
@@ -1040,7 +1049,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                             key={f}
                             type="button"
                             onClick={() => handleUpdateProperty('filters', f)}
-                            className={`py-1 text-[10px] font-mono rounded border transition-colors ${
+                            className={`py-1 text-[11px] font-mono rounded border transition-colors ${
                               (selectedNodeData.properties.filters || 32) === f
                                 ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300 font-bold'
                                 : 'border-slate-800 text-slate-400 hover:border-slate-700'
@@ -1083,6 +1092,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                       </div>
                       <input 
                         type="range"
+                        aria-label="Drop Probability"
                         min={0.05}
                         max={0.8}
                         step={0.05}
@@ -1110,13 +1120,13 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
 
                 {/* Graph Connections */}
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <Database className="w-3 h-3" /> Graph Connectivity
                   </h4>
                   
                   <div className="space-y-2 text-xs">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-medium block mb-1">INPUT EDGES:</span>
+                      <span className="text-[11px] text-slate-400 font-medium block mb-1">INPUT EDGES:</span>
                       {selectedNodeData.inputs.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {selectedNodeData.inputs.map(inId => {
@@ -1134,12 +1144,12 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                           })}
                         </div>
                       ) : (
-                        <span className="text-slate-500 italic text-[11px]">Root tensor / No incoming edges</span>
+                        <span className="text-slate-400 italic text-[11px]">Root tensor / No incoming edges</span>
                       )}
                     </div>
 
                     <div className="pt-2">
-                      <span className="text-[10px] text-slate-500 font-medium block mb-1">OUTPUT EDGES:</span>
+                      <span className="text-[11px] text-slate-400 font-medium block mb-1">OUTPUT EDGES:</span>
                       {selectedNodeData.outputs.length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {selectedNodeData.outputs.map(outId => {
@@ -1157,7 +1167,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
                           })}
                         </div>
                       ) : (
-                        <span className="text-slate-500 italic text-[11px]">Leaf node / Model prediction output</span>
+                        <span className="text-slate-400 italic text-[11px]">Leaf node / Model prediction output</span>
                       )}
                     </div>
                   </div>
@@ -1165,7 +1175,7 @@ export const CustomModelVisualizer: React.FC<CustomModelVisualizerProps> = ({ fi
 
                 {/* Quick Add Layer After Current Node */}
                 <div className="pt-2 border-t border-slate-800">
-                  <span className="text-[10px] text-slate-500 font-medium block mb-2">QUICK INSERT AFTER:</span>
+                  <span className="text-[11px] text-slate-400 font-medium block mb-2">QUICK INSERT AFTER:</span>
                   <div className="grid grid-cols-2 gap-1.5">
                     <button
                       onClick={() => handleAddLayer('Dense')}
