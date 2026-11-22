@@ -23,7 +23,6 @@ import {
   Play,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { FAILURE_MODES_BY_ARCH } from '../lib/failureModes';
 import { ARCHITECTURE_METADATA } from '../lib/architectureConfig';
 
 interface SidebarProps {
@@ -110,6 +109,11 @@ const SCENARIO_PRESETS_BY_ARCH: Partial<Record<Architecture, ScenarioPreset[]>> 
       patch: { failureMode: 'Overfitting', learningRate: 0.01 },
     },
     {
+      label: 'Vanishing gradients',
+      description: 'Deep 3-conv stack stalls early filter updates',
+      patch: { failureMode: 'Vanishing Gradients', convLayers: 3, layers: 5 },
+    },
+    {
       label: 'Exploding LR (0.1)',
       description: 'Aggressive step size destabilizes loss',
       patch: { failureMode: 'Exploding Gradients', learningRate: 0.1 },
@@ -125,6 +129,11 @@ const SCENARIO_PRESETS_BY_ARCH: Partial<Record<Architecture, ScenarioPreset[]>> 
       label: 'Vanishing gradients',
       description: 'Early hidden layers freeze near zero gradient',
       patch: { failureMode: 'Vanishing Gradients', layers: 5 },
+    },
+    {
+      label: 'Exploding LR (0.1)',
+      description: 'Large learning rate overflows weights to NaN',
+      patch: { failureMode: 'Exploding Gradients', learningRate: 0.1 },
     },
   ],
 };
@@ -838,83 +847,120 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           )}
 
-          {/* 4. Inject Failure Mode & Scenarios */}
+          {/* 4. Inject Failure Mode (Preset Demo Toggles) */}
           <div className="rounded-xl bg-slate-950/60 border border-slate-800/80 overflow-hidden">
             <button
               onClick={() => toggleSection('failure')}
               className="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-slate-800/40 transition-colors cursor-pointer"
             >
-              <span className="text-xs font-semibold text-rose-300 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5 text-rose-400" />
-                <span>Inject Failure Mode</span>
+              <span className="text-xs font-semibold text-rose-300 flex items-center gap-2 min-w-0">
+                <Activity className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span className="truncate">Inject Failure Mode</span>
+                {hyperparams.failureMode && hyperparams.failureMode !== 'None' && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"
+                    title={`Active: ${hyperparams.failureMode}`}
+                  />
+                )}
               </span>
               <ChevronDown
                 className={cn(
-                  "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
+                  "w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0",
                   openSection === 'failure' && "rotate-180"
                 )}
               />
             </button>
 
             {openSection === 'failure' && (
-              <div className="px-3.5 pb-3.5 pt-2 space-y-2.5 border-t border-slate-800/60">
-                <p className="text-[11px] text-slate-400 leading-snug">
-                  Trigger a training defect here and observe its effect in the live canvas & telemetry HUD.
-                </p>
+              <div className="px-3.5 pb-3.5 pt-2 space-y-2 border-t border-slate-800/60">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] text-slate-400 leading-snug">
+                    Toggle a demo preset to inject a defect and auto-play.
+                  </p>
+                  {hyperparams.failureMode && hyperparams.failureMode !== 'None' && (
+                    <button
+                      onClick={() => {
+                        setHyperparams({ ...hyperparams, failureMode: 'None' });
+                        resetSimulation();
+                      }}
+                      className="text-[11px] font-medium text-rose-300 hover:text-rose-200 underline underline-offset-2 shrink-0 cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
 
                 {scenarioPresets.length > 0 && onRunScenario && (
-                  <div className="space-y-1.5 pb-1 border-b border-slate-800/70">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-indigo-300 block">
-                      Quick Scenarios
-                    </span>
-                    {scenarioPresets.map((preset) => (
-                      <button
-                        key={preset.label}
-                        onClick={() => onRunScenario(preset.patch, true)}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-left flex items-center justify-between gap-2 transition-colors cursor-pointer"
-                        title={preset.description}
-                      >
-                        <div className="min-w-0">
-                          <div className="text-[11px] font-semibold text-indigo-200 truncate">
-                            {preset.label}
+                  <div className="space-y-1.5">
+                    {scenarioPresets.map((preset) => {
+                      const targetFailure = preset.patch.failureMode || 'None';
+                      const currentFailure = hyperparams.failureMode || 'None';
+                      const isFailurePreset = targetFailure !== 'None';
+                      const isActive = isFailurePreset
+                        ? currentFailure === targetFailure
+                        : currentFailure === 'None' &&
+                          Object.entries(preset.patch).every(
+                            ([k, v]) => (hyperparams as Record<string, unknown>)[k] === v
+                          );
+
+                      return (
+                        <button
+                          key={preset.label}
+                          onClick={() => {
+                            if (isActive && isFailurePreset) {
+                              setHyperparams({ ...hyperparams, failureMode: 'None' });
+                              resetSimulation();
+                            } else {
+                              onRunScenario(preset.patch, true);
+                            }
+                          }}
+                          aria-pressed={isActive}
+                          title={
+                            isActive && isFailurePreset
+                              ? 'Click to clear failure mode'
+                              : preset.description
+                          }
+                          className={cn(
+                            "w-full px-2.5 py-2 rounded-xl border text-left flex items-center justify-between gap-2 transition-all cursor-pointer",
+                            isActive && isFailurePreset
+                              ? "bg-rose-500/15 border-rose-500/50 text-rose-100 shadow-sm"
+                              : isActive
+                              ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-100 shadow-sm"
+                              : "bg-slate-900/90 hover:bg-indigo-500/10 border-slate-800 hover:border-indigo-500/40 text-slate-200"
+                          )}
+                        >
+                          <div className="min-w-0">
+                            <div
+                              className={cn(
+                                "text-[11px] font-semibold truncate",
+                                isActive && isFailurePreset
+                                  ? "text-rose-200"
+                                  : isActive
+                                  ? "text-indigo-200"
+                                  : "text-slate-200"
+                              )}
+                            >
+                              {preset.label}
+                            </div>
+                            <div className="text-[11px] text-slate-400 truncate">
+                              {preset.description}
+                            </div>
                           </div>
-                          <div className="text-[11px] text-slate-400 truncate">
-                            {preset.description}
-                          </div>
-                        </div>
-                        <Play className="w-3 h-3 text-indigo-300 shrink-0 fill-current" />
-                      </button>
-                    ))}
+                          {isActive && isFailurePreset ? (
+                            <X className="w-3.5 h-3.5 text-rose-300 shrink-0" />
+                          ) : (
+                            <Play
+                              className={cn(
+                                "w-3 h-3 shrink-0 fill-current",
+                                isActive ? "text-indigo-300" : "text-indigo-400"
+                              )}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
-
-                <div className="space-y-1.5">
-                  {(FAILURE_MODES_BY_ARCH[architecture] || []).map((fm) => {
-                    const active = (hyperparams.failureMode || 'None') === fm.name;
-                    return (
-                      <button
-                        key={fm.name}
-                        onClick={() => {
-                          setHyperparams({ ...hyperparams, failureMode: fm.name as any });
-                          resetSimulation();
-                        }}
-                        className={cn(
-                          "w-full p-2.5 rounded-xl text-left transition-all border flex justify-between items-center cursor-pointer",
-                          active
-                            ? "bg-rose-500/15 border-rose-500/50 text-rose-200 shadow-sm"
-                            : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
-                        )}
-                      >
-                        <div className="min-w-0 pr-2">
-                          <div className="text-xs font-semibold truncate">{fm.name}</div>
-                          <div className="text-[11px] text-slate-400 truncate">
-                            {fm.desc}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             )}
           </div>

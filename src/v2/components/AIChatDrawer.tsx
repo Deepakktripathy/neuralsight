@@ -18,6 +18,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   modelUsed?: string;
+  complexityTier?: 'fast' | 'balanced' | 'analytical' | 'deep';
   error?: string;
   failedPrompt?: string;
 }
@@ -356,11 +357,16 @@ export const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
             const parsed = JSON.parse(rawData) as {
               text?: string;
               model?: string;
+              complexity?: 'fast' | 'balanced' | 'analytical' | 'deep';
               message?: string;
             };
             if (currentEvent === 'meta' && parsed.model) {
               onMessagesChange((prev) =>
-                prev.map((m) => (m.id === assistantMsgId ? { ...m, modelUsed: parsed.model } : m))
+                prev.map((m) =>
+                  m.id === assistantMsgId
+                    ? { ...m, modelUsed: parsed.model, complexityTier: parsed.complexity }
+                    : m
+                )
               );
             } else if (currentEvent === 'delta' && parsed.text) {
               receivedText = true;
@@ -583,7 +589,14 @@ export const AIChatDrawer: React.FC<AIChatDrawerProps> = ({
 
                   {!msg.error && (msg.modelUsed || (isStreaming && isLast)) && (
                     <div className="flex items-center gap-2 px-1 text-[11px] font-mono text-slate-500">
-                      {msg.modelUsed && <span>{msg.modelUsed}</span>}
+                      {msg.modelUsed && (
+                        <span>
+                          {msg.modelUsed}
+                          {msg.complexityTier
+                            ? ` · ${msg.complexityTier.charAt(0).toUpperCase()}${msg.complexityTier.slice(1)}`
+                            : ''}
+                        </span>
+                      )}
                       {msg.modelUsed && isStreaming && isLast && <span aria-hidden="true">·</span>}
                       {isStreaming && isLast && <span className="text-indigo-400">Streaming</span>}
                     </div>

@@ -32,7 +32,7 @@ An interactive, browser-native deep learning simulator and visual mental-model s
 
 * **Interactive Architecture Microscopes:** Inspect forward activations, 2D sliding kernels, multi-head self-attention matrices, Q-value gridworlds, recurrent unrolling, and dense MLP graphs in real time.
 * **Live Hyperparameter & Topology Tuning:** Adjust learning rates, optimizers, loss functions, layer depths, strides, attention heads, recurrent cell types, and RL discount factors while watching the canvas adapt immediately.
-* **Failure Mode Sandbox & Quick Scenarios:** Trigger textbook pathologies (Exploding/Vanishing Gradients, Overfitting, Mode Collapse, Discriminator Overpowering, Attention Collapse, Poor Exploration) via manual toggles or one-click auto-play scenario presets.
+* **Failure Mode Preset Toggles:** Trigger textbook pathologies (Exploding/Vanishing Gradients, Overfitting, Mode Collapse, Discriminator Overpowering, Attention Collapse, Poor Exploration) via one-click auto-play preset toggles.
 * **Embedded AI Tutor:** Ask any ML/DL/math question—or troubleshoot your active training curve—inside a streaming side drawer grounded in your live simulation state.
 
 ---
@@ -129,9 +129,7 @@ NeuralSight guides learners through a structured three-stage progression (access
    * **Loss Function:** `Cross-Entropy`, `MSE`, `Huber`
    * **Epochs / Episodes (`10–500`)** & **Batch Size (`8–256`)**
 4. **Model Topology (Dynamic per Architecture):** Adjusts structural knobs specific to the active model (ignored for GAN and Custom Model).
-5. **Inject Failure Mode:**
-   * **Quick Scenarios:** One-click presets (e.g., *Overfitting curve*, *Vanishing gradients*, *Mode collapse*, *Attention collapse*) that apply a curated hyperparameter patch, reset to step `0`, and **auto-play immediately**.
-   * **Manual Failure Modes:** Architecture-appropriate toggles (`None`, `Exploding Gradients`, `Vanishing Gradients`, `Overfitting`, `Mode Collapse`, `Discriminator Overpowering`, `Attention Collapse`, `Poor Exploration`) that keep your current hyperparameters intact and stay paused until you press Play.
+5. **Inject Failure Mode:** Architecture-specific one-click preset toggles (e.g., *Overfitting curve*, *Vanishing gradients*, *Exploding LR (0.1)*, *Mode collapse*, *Attention collapse*, or healthy comparison baselines) that apply a curated hyperparameter patch, reset to step `0`, and auto-play immediately—click an active fault preset again (or **Clear**) to return to normal training.
 
 ### Execution & Telemetry Dashboard (`MetricsHUD`) & Playback
 * **Collapsed Telemetry Bar:** Floating summary bar above the playback dock showing live Epoch/Phase status, active failure warning icon, latest metrics (`Loss` / `Acc` or GAN `L_G` / `L_D` / `D(G)`) with **green/rose directional trend arrows**, and an **Expand** button.
@@ -144,9 +142,10 @@ NeuralSight guides learners through a structured three-stage progression (access
 
 The AI Tutor is backed by an Express endpoint (`POST /api/chat` in `server.ts`) using the `@google/genai` SDK and Server-Sent Events (SSE) for real-time token streaming and KaTeX math rendering:
 
-* **Unified Adaptive Routing:** Automatically infers question intent behind the scenes (`tutor`, `debugger`, `math`, or `quick`) without requiring manual persona switching.
-* **Live Simulation Grounding:** Automatically attaches a snapshot of your active architecture, mode, dataset, current step, hyperparameters, latest metrics, and recent loss/accuracy trajectory.
-* **Free-Tier Model Failover & Context Handover:** Routes across `gemini-4-hydrogen` and `gemini-3.1-flash-lite` with automatic retry/failover on transient `429`/`503`/network errors while preserving full conversation history.
+* **Complexity & Context-Aware Model Routing:** Scores query complexity, follow-up depth, and live simulation health across 4 tiers (`fast`, `balanced`, `analytical`, `deep`) to automatically pick between `gemini-3.1-flash-lite` (`MINIMAL`–`HIGH`) and `gemini-4-hydrogen` (`LOW`–`HIGH`).
+* **Context Compaction & Prefix Caching:** Places static tutor instructions in a stable prefix for implicit Gemini prefix caching and compacts older turns into a digest once threads grow long.
+* **Stateless Payload-Hash Cache & Cooldown Failover:** Caches only genuinely stateless conceptual prompts (`history.length === 0` and no live-run deixis, with telemetry stripped from the prompt) keyed by `sha256(PROMPT_VERSION | model | thinkingLevel | systemInstruction | message)`. Supports `POST /api/chat/cache/purge` with hit/miss/bypass counters, and places overloaded models (`429`/`503`) into a 45-second cooldown while failing over seamlessly with full conversation context.
+* **Offline Router Evaluation:** Benchmark routing accuracy, confusion matrix, stateless gating, and cache determinism against 150 labelled prompts via `npm run eval:router` (`scripts/eval-router.ts`).
 
 ---
 
@@ -211,13 +210,18 @@ Click **`Code`** in the Studio header to generate runnable Python training scrip
    ```
    Open `http://localhost:3000` in your browser.
 
-4. **Type-check and build for production:**
+4. **Evaluate the AI Tutor router (offline, zero API calls):**
+   ```bash
+   npm run eval:router
+   ```
+
+5. **Type-check and build for production:**
    ```bash
    npm run lint
    npm run build
    ```
 
-5. **Run the production server:**
+6. **Run the production server:**
    ```bash
    npm run start
    ```

@@ -32,33 +32,3 @@ export interface Hyperparameters {
   dqnDiscountFactor?: 0.50 | 0.90 | 0.99;
   mlpNeuronsPerLayer?: 4 | 8 | 16;
 }
-
-export interface SimulationState {
-  architecture: Architecture;
-  mode: Mode;
-  useCase: UseCase;
-  hyperparams: Hyperparameters;
-  isPlaying: boolean;
-  currentStep: number;
-  totalSteps: number;
-  speed: number; // ms per step
-  inputData: any;
-  metrics: {
-    loss: number[];
-    accuracy: number[];
-  };
-}
-
-export interface NodeState {
-  id: string;
-  activation: number;
-  layerIndex: number;
-}
-
-export interface EdgeState {
-  id: string;
-  source: string;
-  target: string;
-  weight: number;
-  gradient: number;
-}
