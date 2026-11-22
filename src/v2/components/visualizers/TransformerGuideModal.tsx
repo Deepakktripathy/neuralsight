@@ -9,6 +9,7 @@ import {
 } from '../ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { MathFormula } from '../MathFormula';
+
 import concept1Img from '../../../assets/images/transformer_concept1_guide_1788703214233.jpg';
 import concept2Img from '../../../assets/images/transformer_concept2_guide_1788703229127.jpg';
 

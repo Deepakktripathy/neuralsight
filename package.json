@@ -9,7 +9,8 @@
     "start": "tsx server.ts",
     "preview": "vite preview --port=3000 --host=0.0.0.0",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "eval:router": "tsx scripts/eval-router.ts"
   },
   "dependencies": {
     "@google/genai": "^3.3.0",
@@ -21,7 +22,6 @@
     "@types/express": "^5.0.6",
     "@types/katex": "^0.16.8",
     "@vitejs/plugin-react": "^5.0.4",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dagre": "^0.8.5",
     "dotenv": "^18.0.10",
